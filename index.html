@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>تسجيل الدخول - DT Edu</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -26,6 +26,11 @@
             font-family: 'Tajawal', 'Segoe UI', sans-serif;
         }
         
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
         body {
             min-height: 100vh;
             display: flex;
@@ -34,9 +39,9 @@
             background: linear-gradient(135deg, #1a2a6c, #4a6cf7, #00b894);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
-            overflow: hidden;
             position: relative;
             padding: 20px;
+            overflow-y: auto; /* Changed from hidden to allow scrolling */
         }
         
         @keyframes gradientBG {
@@ -47,7 +52,7 @@
         
         /* تأثيرات الخلفية المتحركة */
         .bg-animation {
-            position: absolute;
+            position: fixed; /* Changed from absolute to prevent scrolling issues */
             top: 0;
             left: 0;
             width: 100%;
@@ -119,6 +124,7 @@
             overflow: hidden;
             position: relative;
             animation: fadeIn 1s ease-out;
+            margin: 20px 0; /* Added margin for better spacing on mobile */
         }
         
         @keyframes fadeIn {
@@ -425,7 +431,7 @@
         }
         
         .language-toggle {
-            position: absolute;
+            position: fixed; /* Changed from absolute to stay in view */
             top: 20px;
             right: 20px;
             background: rgba(255, 255, 255, 0.2);
@@ -475,6 +481,15 @@
         }
         
         @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                align-items: flex-start; /* Changed from center for better mobile experience */
+            }
+            
+            .container {
+                margin: 10px 0;
+            }
+            
             .welcome-section h1 {
                 font-size: 24px;
             }
@@ -489,6 +504,61 @@
             
             .feature {
                 width: 130px;
+                padding: 10px;
+            }
+            
+            .language-toggle {
+                position: absolute; /* Back to absolute inside the container on mobile */
+                top: 10px;
+                right: 10px;
+            }
+        }
+        
+        /* Additional mobile optimizations */
+        @media (max-height: 700px) and (max-width: 968px) {
+            .container {
+                margin: 10px 0;
+            }
+            
+            .welcome-section {
+                padding: 20px 15px;
+            }
+            
+            .login-section {
+                padding: 20px 15px;
+            }
+            
+            .logo-wrapper {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 10px;
+            }
+            
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .logo-text {
+                font-size: 28px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 22px;
+                margin-bottom: 10px;
+            }
+            
+            .welcome-section p {
+                font-size: 16px;
+            }
+            
+            .features {
+                margin-top: 20px;
+                gap: 10px;
+            }
+            
+            .feature {
+                width: 120px;
                 padding: 10px;
             }
         }
