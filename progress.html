@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقدم الدراسي - DT Edu</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/progress-messages.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="rtl">
+    <div class="dashboard-container">
+        <!-- الشريط الجانبي -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#4a6cf7"/>
+                                    <stop offset="100%" stop-color="#00b894"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
+                            <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
+                            <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
+                            <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
+                            <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="logo-text">DT Edu</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name"></div>
+                    <div class="user-type" id="user-type"></div>
+                </div>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="dashboard.html">
+                        <i class="fas fa-home"></i>
+                        <span id="menu-dashboard">لوحة التحكم</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="schedule.html">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="menu-schedule">الجدول الدراسي</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="courses.html">
+                        <i class="fas fa-book"></i>
+                        <span id="menu-courses">المقررات الدراسية</span>
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a href="progress.html">
+                        <i class="fas fa-chart-bar"></i>
+                        <span id="menu-progress">التقدم الدراسي</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="messages.html">
+                        <i class="fas fa-comments"></i>
+                        <span id="menu-messages">الرسائل</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="settings.html">
+                        <i class="fas fa-cog"></i>
+                        <span id="menu-settings">الإعدادات</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="#" id="dark-mode-toggle-sidebar">
+                            <i class="fas fa-moon"></i>
+                            <span id="dark-mode-text">الوضع الداكن</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" id="logout-link">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span id="logout-text">تسجيل الخروج</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="header-title">التقدم الدراسي - نظام DT Edu</h1>
+                <div class="header-actions">
+                    <button id="dark-mode-toggle" class="dark-mode-toggle">
+                        <i class="fas fa-moon"></i>
+                        <span id="dark-mode-btn-text">الوضع الداكن</span>
+                    </button>
+                    <button id="back-btn" class="back-btn" onclick="goBack()">
+                        <i class="fas fa-arrow-right"></i>
+                        <span id="back-text">العودة</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- محتوى التقدم الدراسي -->
+            <div class="progress-content">
+                <!-- إحصائيات التقدم -->
+                <div class="progress-stats">
+                    <div class="progress-card">
+                        <div class="progress-icon" style="background: linear-gradient(135deg, #4a6cf7, #6c5ce7);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="progress-info">
+                            <div class="progress-value">87%</div>
+                            <div class="progress-label" id="overall-progress-label">التقدم الدراسي العام</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-card">
+                        <div class="progress-icon" style="background: linear-gradient(135deg, #00b894, #00a085);">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="progress-info">
+                            <div class="progress-value">92%</div>
+                            <div class="progress-label" id="average-grade-label">المعدل التراكمي</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-card">
+                        <div class="progress-icon" style="background: linear-gradient(135deg, #fd79a8, #e84393);">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="progress-info">
+                            <div class="progress-value">24/28</div>
+                            <div class="progress-label" id="completed-tasks-label">الواجبات المكتملة</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-card">
+                        <div class="progress-icon" style="background: linear-gradient(135deg, #fdcb6e, #e17055);">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <div class="progress-info">
+                            <div class="progress-value">15</div>
+                            <div class="progress-label" id="achievements-label">الإنجازات</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- مخططات التقدم -->
+                <div class="progress-charts">
+                    <div class="chart-container">
+                        <h3 class="chart-title" id="subjects-chart-title">التقدم في المواد الدراسية</h3>
+                        <div class="chart" id="subjects-chart">
+                            <div class="chart-bar" style="height: 85%">
+                                <span class="chart-value">85%</span>
+                                <span class="chart-label" id="math-label">رياضيات</span>
+                            </div>
+                            <div class="chart-bar" style="height: 70%">
+                                <span class="chart-value">70%</span>
+                                <span class="chart-label" id="science-label">علوم</span>
+                            </div>
+                            <div class="chart-bar" style="height: 95%">
+                                <span class="chart-value">95%</span>
+                                <span class="chart-label" id="arabic-label">عربية</span>
+                            </div>
+                            <div class="chart-bar" style="height: 60%">
+                                <span class="chart-value">60%</span>
+                                <span class="chart-label" id="english-label">إنجليزية</span>
+                            </div>
+                            <div class="chart-bar" style="height: 75%">
+                                <span class="chart-value">75%</span>
+                                <span class="chart-label" id="history-label">تاريخ</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3 class="chart-title" id="monthly-progress-title">التقدم الشهري</h3>
+                        <div class="chart" id="monthly-chart">
+                            <div class="chart-bar" style="height: 60%">
+                                <span class="chart-value">60%</span>
+                                <span class="chart-label" id="jan-label">يناير</span>
+                            </div>
+                            <div class="chart-bar" style="height: 65%">
+                                <span class="chart-value">65%</span>
+                                <span class="chart-label" id="feb-label">فبراير</span>
+                            </div>
+                            <div class="chart-bar" style="height: 72%">
+                                <span class="chart-value">72%</span>
+                                <span class="chart-label" id="mar-label">مارس</span>
+                            </div>
+                            <div class="chart-bar" style="height: 78%">
+                                <span class="chart-value">78%</span>
+                                <span class="chart-label" id="apr-label">أبريل</span>
+                            </div>
+                            <div class="chart-bar" style="height: 85%">
+                                <span class="chart-value">85%</span>
+                                <span class="chart-label" id="may-label">مايو</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- جدول التقدم التفصيلي -->
+                <div class="progress-table-container">
+                    <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;" id="detailed-progress-title">التقدم التفصيلي في المواد</h3>
+                    <table class="progress-table">
+                        <thead>
+                            <tr>
+                                <th id="subject-header">المادة</th>
+                                <th id="progress-header">التقدم</th>
+                                <th id="grade-header">التقييم</th>
+                                <th id="assignments-header">الواجبات</th>
+                                <th id="exams-header">الاختبارات</th>
+                                <th id="status-header">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="math-row">الرياضيات</td>
+                                <td>
+                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
+                                        <div style="background: linear-gradient(135deg, #4a6cf7, #6c5ce7); width: 85%; height: 100%; border-radius: 10px;"></div>
+                                    </div>
+                                    <small>85%</small>
+                                </td>
+                                <td><span class="grade-badge grade-excellent">94%</span></td>
+                                <td>18/20</td>
+                                <td>4/5</td>
+                                <td><span style="color: #00b894;">●</span> <span id="math-status">ممتاز</span></td>
+                            </tr>
+                            <tr>
+                                <td id="science-row">العلوم</td>
+                                <td>
+                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
+                                        <div style="background: linear-gradient(135deg, #00b894, #00a085); width: 70%; height: 100%; border-radius: 10px;"></div>
+                                    </div>
+                                    <small>70%</small>
+                                </td>
+                                <td><span class="grade-badge grade-very-good">88%</span></td>
+                                <td>15/18</td>
+                                <td>3/4</td>
+                                <td><span style="color: #74b9ff;">●</span> <span id="science-status">جيد جداً</span></td>
+                            </tr>
+                            <tr>
+                                <td id="arabic-row">اللغة العربية</td>
+                                <td>
+                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
+                                        <div style="background: linear-gradient(135deg, #fd79a8, #e84393); width: 95%; height: 100%; border-radius: 10px;"></div>
+                                    </div>
+                                    <small>95%</small>
+                                </td>
+                                <td><span class="grade-badge grade-excellent">96%</span></td>
+                                <td>20/20</td>
+                                <td>5/5</td>
+                                <td><span style="color: #00b894;">●</span> <span id="arabic-status">ممتاز</span></td>
+                            </tr>
+                            <tr>
+                                <td id="english-row">اللغة الإنجليزية</td>
+                                <td>
+                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
+                                        <div style="background: linear-gradient(135deg, #fdcb6e, #e17055); width: 60%; height: 100%; border-radius: 10px;"></div>
+                                    </div>
+                                    <small>60%</small>
+                                </td>
+                                <td><span class="grade-badge grade-good">82%</span></td>
+                                <td>12/15</td>
+                                <td>2/3</td>
+                                <td><span style="color: #fdcb6e;">●</span> <span id="english-status">جيد</span></td>
+                            </tr>
+                            <tr>
+                                <td id="history-row">التاريخ</td>
+                                <td>
+                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
+                                        <div style="background: linear-gradient(135deg, #a29bfe, #6c5ce7); width: 75%; height: 100%; border-radius: 10px;"></div>
+                                    </div>
+                                    <small>75%</small>
+                                </td>
+                                <td><span class="grade-badge grade-very-good">89%</span></td>
+                                <td>14/16</td>
+                                <td>3/4</td>
+                                <td><span style="color: #74b9ff;">●</span> <span id="history-status">جيد جداً</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/progress.js"></script>
+</body>
+</html>

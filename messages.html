@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرسائل - DT Edu</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/progress-messages.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="rtl">
+    <div class="dashboard-container">
+        <!-- الشريط الجانبي -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#4a6cf7"/>
+                                    <stop offset="100%" stop-color="#00b894"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
+                            <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
+                            <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
+                            <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
+                            <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="logo-text">DT Edu</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name"></div>
+                    <div class="user-type" id="user-type"></div>
+                </div>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="dashboard.html">
+                        <i class="fas fa-home"></i>
+                        <span id="menu-dashboard">لوحة التحكم</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="schedule.html">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="menu-schedule">الجدول الدراسي</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="courses.html">
+                        <i class="fas fa-book"></i>
+                        <span id="menu-courses">المقررات الدراسية</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="progress.html">
+                        <i class="fas fa-chart-bar"></i>
+                        <span id="menu-progress">التقدم الدراسي</span>
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a href="messages.html">
+                        <i class="fas fa-comments"></i>
+                        <span id="menu-messages">الرسائل</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="settings.html">
+                        <i class="fas fa-cog"></i>
+                        <span id="menu-settings">الإعدادات</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="#" id="dark-mode-toggle-sidebar">
+                            <i class="fas fa-moon"></i>
+                            <span id="dark-mode-text">الوضع الداكن</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" id="logout-link">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span id="logout-text">تسجيل الخروج</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="header-title">الرسائل - نظام DT Edu</h1>
+                <div class="header-actions">
+                    <button id="dark-mode-toggle" class="dark-mode-toggle">
+                        <i class="fas fa-moon"></i>
+                        <span id="dark-mode-btn-text">الوضع الداكن</span>
+                    </button>
+                    <button id="back-btn" class="back-btn" onclick="goBack()">
+                        <i class="fas fa-arrow-right"></i>
+                        <span id="back-text">العودة</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- محتوى الرسائل -->
+            <div class="messages-container">
+                <!-- قائمة المحادثات -->
+                <div class="conversations-list">
+                    <div class="conversations-header">
+                        <h3 style="color: var(--primary);" id="conversations-title">المحادثات</h3>
+                        <button class="new-message-btn" onclick="newMessage()">
+                            <i class="fas fa-plus"></i>
+                            <span id="new-message-text">رسالة جديدة</span>
+                        </button>
+                    </div>
+                    
+                    <div class="conversation-item active" onclick="selectConversation(1)">
+                        <div class="conversation-avatar">أ.أ</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name" id="teacher1-name">أ. أحمد محمد</div>
+                            <div class="conversation-preview" id="teacher1-preview">هل انتهيت من حل تمارين الواجب؟</div>
+                        </div>
+                        <div class="conversation-time" id="teacher1-time">10:30 ص</div>
+                        <div class="unread-badge">2</div>
+                    </div>
+                    
+                    <div class="conversation-item" onclick="selectConversation(2)">
+                        <div class="conversation-avatar">أ.ف</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name" id="teacher2-name">أ. فاطمة علي</div>
+                            <div class="conversation-preview" id="teacher2-preview">نتيجة اختبار العلوم جاهزة</div>
+                        </div>
+                        <div class="conversation-time" id="teacher2-time">أمس</div>
+                    </div>
+                    
+                    <div class="conversation-item" onclick="selectConversation(3)">
+                        <div class="conversation-avatar">م.ح</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name" id="principal-name">مدير المدرسة</div>
+                            <div class="conversation-preview" id="principal-preview">اجتماع أولياء الأمور يوم الخميس</div>
+                        </div>
+                        <div class="conversation-time" id="principal-time">١٥ مايو</div>
+                    </div>
+                    
+                    <div class="conversation-item" onclick="selectConversation(4)">
+                        <div class="conversation-avatar">ز.م</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name" id="friend1-name">زميل الدراسة</div>
+                            <div class="conversation-preview" id="friend1-preview">هل يمكنك مساعدتي في فهم هذا الدرس؟</div>
+                        </div>
+                        <div class="conversation-time" id="friend1-time">١٤ مايو</div>
+                    </div>
+                </div>
+                
+                <!-- نافذة المحادثة -->
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="conversation-avatar">أ.أ</div>
+                        <div>
+                            <div class="conversation-name" id="current-chat-name">أ. أحمد محمد</div>
+                            <div style="color: var(--text-light); font-size: 14px;" id="current-chat-status">مدرس الرياضيات - متصل الآن</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message received">
+                            <div id="message1">مرحباً محمد، هل انتهيت من حل تمارين الواجب؟</div>
+                            <div class="message-time">10:15 ص</div>
+                        </div>
+                        
+                        <div class="message sent">
+                            <div id="message2">نعم أستاذ، انتهيت من معظم التمارين ولكن لدي سؤال في التمرين رقم ٥</div>
+                            <div class="message-time">10:20 ص</div>
+                        </div>
+                        
+                        <div class="message received">
+                            <div id="message3">أهلاً وسهلاً، ما هو السؤال الذي تواجهك؟</div>
+                            <div class="message-time">10:25 ص</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <input type="text" class="message-input" id="message-input" placeholder="اكتب رسالتك هنا...">
+                        <button class="send-btn" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/messages.js"></script>
+</body>
+</html>
