@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DT-EDU Logo</title>
+    <style>
+        :root {
+            --primary-blue: #0b74ff;
+            --primary-teal: #00c2a8;
+            --dark-navy: #0a2540;
+            --white: #ffffff;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+        }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-symbol {
+            width: 80px;
+            height: 80px;
+            margin-right: 15px;
+        }
+        
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-primary {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark-navy);
+            letter-spacing: -0.5px;
+        }
+        
+        .logo-subtitle {
+            font-size: 14px;
+            color: var(--primary-blue);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        
+        .variations {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .variation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .dark-bg {
+            background: var(--dark-navy);
+        }
+        
+        .dark-bg .logo-primary {
+            color: var(--white);
+        }
+        
+        .dark-bg .logo-subtitle {
+            color: var(--primary-teal);
+        }
+        
+        .icon-only {
+            background: var(--primary-blue);
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .color-palette {
+            display: flex;
+            margin-top: 40px;
+            gap: 10px;
+        }
+        
+        .color-swatch {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .blue {
+            background: var(--primary-blue);
+        }
+        
+        .teal {
+            background: var(--primary-teal);
+        }
+        
+        .navy {
+            background: var(--dark-navy);
+        }
+        
+        h1 {
+            color: var(--dark-navy);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .description {
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>DT-EDU Logo Design</h1>
+    
+    <div class="description">
+        A modern, professional logo for an educational technology platform focusing on digital learning and innovation. 
+        The design combines the letters D and T in an abstract form that suggests growth and technology.
+    </div>
+    
+    <div class="logo-container">
+        <div class="logo">
+            <!-- SVG Logo Symbol -->
+            <svg class="logo-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- Main D shape with integrated T -->
+                <path d="M20,20 L20,80 C20,80 40,80 50,70 C60,60 60,40 50,30 C40,20 20,20 20,20 Z" 
+                      fill="url(#blueGradient)" stroke="none"/>
+                
+                <!-- T crossbar integrated as growth element -->
+                <path d="M20,40 L80,40 L80,50 L70,50 L70,70 L60,70 L60,50 L20,50 Z" 
+                      fill="url(#tealGradient)" stroke="none"/>
+                
+                <!-- Subtle circuit lines -->
+                <path d="M30,30 L45,30 M30,35 L45,35 M30,40 L45,40" 
+                      stroke="#0a2540" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M55,60 L70,60 M55,65 L70,65 M55,70 L70,70" 
+                      stroke="#0a2540" stroke-width="1.5" stroke-linecap="round"/>
+                
+                <defs>
+                    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#0b74ff" />
+                        <stop offset="100%" stop-color="#0066e3" />
+                    </linearGradient>
+                    <linearGradient id="tealGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00c2a8" />
+                        <stop offset="100%" stop-color="#00a890" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            
+            <div class="logo-text">
+                <div class="logo-primary">DT-EDU</div>
+                <div class="logo-subtitle">منصة تعليمية</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="variations">
+        <div class="variation">
+            <div class="logo">
+                <svg class="logo-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20,20 L20,80 C20,80 40,80 50,70 C60,60 60,40 50,30 C40,20 20,20 20,20 Z" 
+                          fill="var(--primary-blue)" stroke="none"/>
+                    <path d="M20,40 L80,40 L80,50 L70,50 L70,70 L60,70 L60,50 L20,50 Z" 
+                          fill="var(--primary-teal)" stroke="none"/>
+                </svg>
+                <div class="logo-text">
+                    <div class="logo-primary">DT-EDU</div>
+                    <div class="logo-subtitle">منصة تعليمية</div>
+                </div>
+            </div>
+            <p>Standard Version</p>
+        </div>
+        
+        <div class="variation dark-bg">
+            <div class="logo">
+                <svg class="logo-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20,20 L20,80 C20,80 40,80 50,70 C60,60 60,40 50,30 C40,20 20,20 20,20 Z" 
+                          fill="var(--white)" stroke="none"/>
+                    <path d="M20,40 L80,40 L80,50 L70,50 L70,70 L60,70 L60,50 L20,50 Z" 
+                          fill="var(--primary-teal)" stroke="none"/>
+                </svg>
+                <div class="logo-text">
+                    <div class="logo-primary">DT-EDU</div>
+                    <div class="logo-subtitle">منصة تعليمية</div>
+                </div>
+            </div>
+            <p style="color: white;">Dark Mode</p>
+        </div>
+        
+        <div class="variation">
+            <div class="icon-only">
+                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20,20 L20,80 C20,80 40,80 50,70 C60,60 60,40 50,30 C40,20 20,20 20,20 Z" 
+                          fill="white" stroke="none"/>
+                    <path d="M20,40 L80,40 L80,50 L70,50 L70,70 L60,70 L60,50 L20,50 Z" 
+                          fill="var(--primary-teal)" stroke="none"/>
+                </svg>
+            </div>
+            <p>App Icon</p>
+        </div>
+    </div>
+    
+    <div class="color-palette">
+        <div class="color-swatch blue">#0b74ff</div>
+        <div class="color-swatch teal">#00c2a8</div>
+        <div class="color-swatch navy">#0a2540</div>
+    </div>
+</body>
+</html>

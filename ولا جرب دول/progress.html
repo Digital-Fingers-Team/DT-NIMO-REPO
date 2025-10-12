@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقدم الدراسي - DT Edu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* متغيرات الألوان */
+        :root {
+            --primary: #4a6cf7;
+            --primary-light: #6c5ce7;
+            --secondary: #00b894;
+            --secondary-dark: #00a085;
+            --accent: #fd79a8;
+            --accent-dark: #e84393;
+            --warning: #fdcb6e;
+            --warning-dark: #e17055;
+            --info: #74b9ff;
+            --purple: #a29bfe;
+            --purple-dark: #6c5ce7;
+            
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7fafc;
+            --bg-tertiary: #edf2f7;
+            
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        /* الوضع الداكن */
+        .dark-mode {
+            --primary: #5b7cf7;
+            --primary-light: #7c6de7;
+            --secondary: #00c9a7;
+            --secondary-dark: #00b894;
+            --accent: #ff85b3;
+            --accent-dark: #fd79a8;
+            --warning: #ffd166;
+            --warning-dark: #fdcb6e;
+            --info: #82c9ff;
+            --purple: #b2abfe;
+            --purple-dark: #a29bfe;
+            
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #a0aec0;
+            
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-tertiary: #4a5568;
+            
+            --border-color: #4a5568;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* إعادة الضبط الأساسية */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* أنماط الأساس */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            direction: rtl;
+            overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        #app {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* مشهد Three.js الخلفي */
+        .three-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* حاوية لوحة التحكم */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* الشريط الجانبي */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar .logo-text,
+            .sidebar .user-info,
+            .sidebar .menu-item span {
+                display: none;
+            }
+            
+            .sidebar .sidebar-header {
+                justify-content: center;
+                padding: 20px 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sidebar {
+                position: fixed;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 900px) {
+            .sidebar-header {
+                padding: 20px 0;
+            }
+        }
+
+        .logo-container {
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(74, 108, 247, 0.1);
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: rotate(15deg);
+        }
+
+        .logo svg {
+            width: 50px;
+            height: 50px;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            text-align: center;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .user-type {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .sidebar-menu .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu .menu-item a {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .sidebar-menu .menu-item a:hover {
+            background-color: var(--bg-secondary);
+            color: var(--primary);
+        }
+
+        .sidebar-menu .menu-item a:hover i {
+            transform: scale(1.1);
+        }
+
+        .sidebar-menu .menu-item a.active {
+            background: linear-gradient(90deg, rgba(74, 108, 247, 0.1), transparent);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .sidebar-menu .menu-item a i {
+            margin-left: 15px;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        @media (max-width: 900px) {
+            .sidebar-menu .menu-item a i {
+                margin-left: 0;
+            }
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 15px 0;
+        }
+
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--bg-secondary);
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main-content {
+                padding: 10px;
+            }
+        }
+
+        /* رأس الصفحة */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--bg-primary);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* أزرار الرأس */
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+        }
+
+        .dark-mode-toggle, .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .dark-mode-toggle:hover, .back-btn:hover {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+            transform: translateY(-2px);
+        }
+
+        .dark-mode-toggle i, .back-btn i {
+            font-size: 1.1rem;
+        }
+
+        /* محتوى التقدم الدراسي */
+        .progress-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* إحصائيات التقدم */
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .progress-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .progress-card {
+            display: flex;
+            align-items: center;
+            padding: 25px;
+            background-color: var(--bg-primary);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .progress-card:hover {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+            transform: translateY(-5px);
+        }
+
+        .progress-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-left: 20px;
+        }
+
+        .progress-icon i {
+            color: white;
+            font-size: 1.8rem;
+        }
+
+        .progress-info {
+            flex: 1;
+        }
+
+        .progress-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .progress-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* مخططات التقدم */
+        .progress-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .progress-charts {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-container {
+            background-color: var(--bg-primary);
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .chart-container:hover {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        }
+
+        .chart-title {
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+
+        .chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 250px;
+            padding: 20px 0;
+        }
+
+        .chart-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            margin: 0 5px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .chart-bar:hover {
+            transform: scale(1.05);
+        }
+
+        .chart-bar:hover .chart-value {
+            opacity: 1;
+            transform: translateY(-10px);
+        }
+
+        .chart-bar .chart-value {
+            position: absolute;
+            top: -30px;
+            background-color: var(--bg-secondary);
+            padding: 5px 10px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .chart-bar .chart-label {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .chart-bar::before {
+            content: '';
+            width: 100%;
+            background: var(--gradient, linear-gradient(135deg, #4a6cf7, #6c5ce7));
+            border-radius: 5px 5px 0 0;
+            transition: var(--transition);
+        }
+
+        /* جدول التقدم التفصيلي */
+        .progress-table-container {
+            background-color: var(--bg-primary);
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .progress-table-container:hover {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        }
+
+        .progress-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .progress-table th, .progress-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .progress-table th {
+            background-color: var(--bg-secondary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .progress-table tr {
+            transition: var(--transition);
+        }
+
+        .progress-table tr:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .grade-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .grade-badge.grade-excellent {
+            background: rgba(0, 184, 148, 0.1);
+            color: #00b894;
+        }
+
+        .grade-badge.grade-very-good {
+            background: rgba(116, 185, 255, 0.1);
+            color: #74b9ff;
+        }
+
+        .grade-badge.grade-good {
+            background: rgba(253, 203, 110, 0.1);
+            color: #fdcb6e;
+        }
+
+        /* حركات المدخلات */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hover-lift {
+            transition: transform 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+
+        .hover-glow {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .hover-glow:hover {
+            box-shadow: 0 0 20px rgba(74, 108, 247, 0.3);
+        }
+
+        /* نافذة المعلومات العائمة */
+        .chart-tooltip {
+            position: fixed;
+            background: var(--bg-primary);
+            padding: 10px 15px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            pointer-events: none;
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-tooltip .tooltip-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .chart-tooltip .tooltip-value {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* شريط التقدم */
+        .progress-bar-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        .table-row {
+            transition: all 0.3s ease;
+        }
+
+        .table-row.highlighted {
+            background-color: rgba(74, 108, 247, 0.05) !important;
+            transform: scale(1.01);
+        }
+
+        .status-indicator {
+            margin-left: 5px;
+        }
+
+        /* تطبيق الوضع الداكن */
+        .dark-mode {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+
+        .dark-mode * {
+            color-scheme: dark;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- مشهد Three.js الخلفي -->
+        <canvas class="three-scene" ref="canvas"></canvas>
+        
+        <!-- حاوية لوحة التحكم -->
+        <div class="dashboard-container">
+            <!-- الشريط الجانبي -->
+            <div class="sidebar" :class="{ open: isSidebarOpen }">
+                <div class="sidebar-header">
+                    <div class="logo-container">
+                        <div class="logo hover-lift">
+                            <!-- SVG Logo -->
+                            <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#4a6cf7"/>
+                                        <stop offset="100%" stop-color="#00b894"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
+                                <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
+                                <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
+                                <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
+                                <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="logo-text">DT Edu</div>
+                    <div class="user-info">
+                        <div class="user-name">{{ userName }}</div>
+                        <div class="user-type">{{ userType }}</div>
+                    </div>
+                </div>
+                
+                <ul class="sidebar-menu">
+                    <li class="menu-item" v-for="item in menuItems" :key="item.id">
+                        <a 
+                            :href="item.link" 
+                            :class="{ active: item.id === activePage }"
+                            class="hover-lift"
+                        >
+                            <i :class="item.icon"></i>
+                            <span>{{ item.text }}</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="sidebar-footer">
+                    <ul class="sidebar-menu">
+                        <li class="menu-item">
+                            <a href="#" @click.prevent="toggleDarkMode" class="hover-lift">
+                                <i :class="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+                                <span>{{ isDarkMode ? 'الوضع المضيء' : 'الوضع الداكن' }}</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" id="logout-link" class="hover-lift">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>تسجيل الخروج</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- المحتوى الرئيسي -->
+            <div class="main-content">
+                <div class="header">
+                    <h1 id="header-title">التقدم الدراسي - نظام DT Edu</h1>
+                    <div class="header-actions">
+                        <button id="dark-mode-toggle" class="dark-mode-toggle" @click="toggleDarkMode">
+                            <i :class="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+                            <span id="dark-mode-btn-text">{{ isDarkMode ? 'الوضع المضيء' : 'الوضع الداكن' }}</span>
+                        </button>
+                        <button id="back-btn" class="back-btn" @click="goBack">
+                            <i class="fas fa-arrow-right"></i>
+                            <span id="back-text">العودة</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- محتوى التقدم الدراسي -->
+                <div class="progress-content">
+                    <!-- إحصائيات التقدم -->
+                    <div class="progress-stats">
+                        <div 
+                            v-for="stat in stats" 
+                            :key="stat.id"
+                            class="progress-card hover-lift scroll-reveal"
+                            :class="{ revealed: isRevealed }"
+                            @mouseenter="startPulse(stat.id)"
+                            @mouseleave="stopPulse(stat.id)"
+                            :ref="el => setCardRef(stat.id, el)"
+                        >
+                            <div class="progress-icon" :style="stat.iconStyle">
+                                <i :class="stat.icon" :class="{ pulse: pulsing[stat.id] }"></i>
+                            </div>
+                            <div class="progress-info">
+                                <div class="progress-value">{{ stat.value }}</div>
+                                <div class="progress-label">{{ stat.label }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- مخططات التقدم -->
+                    <div class="progress-charts">
+                        <div 
+                            class="chart-container hover-lift scroll-reveal"
+                            :class="{ revealed: isChartRevealed }"
+                            ref="chartContainer"
+                        >
+                            <h3 class="chart-title">التقدم في المواد الدراسية</h3>
+                            <div class="chart" id="subjects-chart">
+                                <div 
+                                    v-for="subject in subjects" 
+                                    :key="subject.name"
+                                    class="chart-bar hover-glow"
+                                    :style="{ height: subject.percentage + '%', '--gradient': subject.gradient }"
+                                    @mouseenter="setTooltip(subject)"
+                                    @mouseleave="clearTooltip"
+                                >
+                                    <span class="chart-value">{{ subject.percentage }}%</span>
+                                    <span class="chart-label">{{ subject.name }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div 
+                            class="chart-container hover-lift scroll-reveal"
+                            :class="{ revealed: isChartRevealed }"
+                        >
+                            <h3 class="chart-title">التقدم الشهري</h3>
+                            <div class="chart" id="monthly-chart">
+                                <div 
+                                    v-for="month in monthlyProgress" 
+                                    :key="month.name"
+                                    class="chart-bar hover-glow"
+                                    :style="{ height: month.percentage + '%', '--gradient': month.gradient }"
+                                    @mouseenter="setTooltip(month)"
+                                    @mouseleave="clearTooltip"
+                                >
+                                    <span class="chart-value">{{ month.percentage }}%</span>
+                                    <span class="chart-label">{{ month.name }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- نافذة المعلومات العائمة -->
+                        <div 
+                            v-if="tooltipData" 
+                            class="chart-tooltip"
+                            :style="tooltipStyle"
+                        >
+                            <div class="tooltip-title">{{ tooltipData.name }}</div>
+                            <div class="tooltip-value">{{ tooltipData.percentage }}%</div>
+                        </div>
+                    </div>
+                    
+                    <!-- جدول التقدم التفصيلي -->
+                    <div 
+                        class="progress-table-container hover-lift scroll-reveal"
+                        :class="{ revealed: isTableRevealed }"
+                        ref="tableContainer"
+                    >
+                        <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">
+                            التقدم التفصيلي في المواد
+                        </h3>
+                        <table class="progress-table">
+                            <thead>
+                                <tr>
+                                    <th>المادة</th>
+                                    <th>التقدم</th>
+                                    <th>التقييم</th>
+                                    <th>الواجبات</th>
+                                    <th>الاختبارات</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr 
+                                    v-for="subject in detailedProgress" 
+                                    :key="subject.name"
+                                    class="table-row"
+                                    @mouseenter="highlightRow(subject.name)"
+                                    @mouseleave="unhighlightRow"
+                                    :class="{ highlighted: highlightedRow === subject.name }"
+                                >
+                                    <td>{{ subject.name }}</td>
+                                    <td>
+                                        <div class="progress-bar-container">
+                                            <div 
+                                                class="progress-bar" 
+                                                :style="{ width: subject.progress + '%', background: subject.gradient }"
+                                            ></div>
+                                        </div>
+                                        <small>{{ subject.progress }}%</small>
+                                    </td>
+                                    <td>
+                                        <span 
+                                            class="grade-badge" 
+                                            :class="subject.gradeClass"
+                                        >
+                                            {{ subject.grade }}
+                                        </span>
+                                    </td>
+                                    <td>{{ subject.assignments }}</td>
+                                    <td>{{ subject.exams }}</td>
+                                    <td>
+                                        <span 
+                                            class="status-indicator" 
+                                            :style="{ color: subject.statusColor }"
+                                        >
+                                            ●
+                                        </span>
+                                        {{ subject.status }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, onUnmounted, watch } = Vue;
+        
+        createApp({
+            setup() {
+                // حالة التطبيق
+                const isDarkMode = ref(false);
+                const isSidebarOpen = ref(false);
+                const isRevealed = ref(false);
+                const isChartRevealed = ref(false);
+                const isTableRevealed = ref(false);
+                const pulsing = ref({});
+                const highlightedRow = ref(null);
+                const tooltipData = ref(null);
+                const tooltipStyle = ref({});
+                const cardRefs = ref({});
+                const chartContainer = ref(null);
+                const tableContainer = ref(null);
+                const canvas = ref(null);
+                
+                // بيانات المستخدم
+                const userName = ref('أحمد محمد');
+                const userType = ref('طالب');
+                const activePage = ref('progress');
+                
+                // قائمة الشريط الجانبي
+                const menuItems = ref([
+                    { id: 'dashboard', text: 'لوحة التحكم', icon: 'fas fa-home', link: 'dashboard.html' },
+                    { id: 'schedule', text: 'الجدول الدراسي', icon: 'fas fa-calendar-alt', link: 'schedule.html' },
+                    { id: 'courses', text: 'المقررات الدراسية', icon: 'fas fa-book', link: 'courses.html' },
+                    { id: 'progress', text: 'التقدم الدراسي', icon: 'fas fa-chart-bar', link: 'progress.html' },
+                    { id: 'messages', text: 'الرسائل', icon: 'fas fa-comments', link: 'messages.html' },
+                    { id: 'settings', text: 'الإعدادات', icon: 'fas fa-cog', link: 'settings.html' }
+                ]);
+                
+                // إحصائيات التقدم
+                const stats = ref([
+                    {
+                        id: 'overall',
+                        value: '87%',
+                        label: 'التقدم الدراسي العام',
+                        icon: 'fas fa-chart-line',
+                        iconStyle: 'background: linear-gradient(135deg, #4a6cf7, #6c5ce7);'
+                    },
+                    {
+                        id: 'average',
+                        value: '92%',
+                        label: 'المعدل التراكمي',
+                        icon: 'fas fa-trophy',
+                        iconStyle: 'background: linear-gradient(135deg, #00b894, #00a085);'
+                    },
+                    {
+                        id: 'tasks',
+                        value: '24/28',
+                        label: 'الواجبات المكتملة',
+                        icon: 'fas fa-tasks',
+                        iconStyle: 'background: linear-gradient(135deg, #fd79a8, #e84393);'
+                    },
+                    {
+                        id: 'achievements',
+                        value: '15',
+                        label: 'الإنجازات',
+                        icon: 'fas fa-award',
+                        iconStyle: 'background: linear-gradient(135deg, #fdcb6e, #e17055);'
+                    }
+                ]);
+                
+                // بيانات المخططات
+                const subjects = ref([
+                    { name: 'رياضيات', percentage: 85, gradient: 'linear-gradient(135deg, #4a6cf7, #6c5ce7)' },
+                    { name: 'علوم', percentage: 70, gradient: 'linear-gradient(135deg, #00b894, #00a085)' },
+                    { name: 'عربية', percentage: 95, gradient: 'linear-gradient(135deg, #fd79a8, #e84393)' },
+                    { name: 'إنجليزية', percentage: 60, gradient: 'linear-gradient(135deg, #fdcb6e, #e17055)' },
+                    { name: 'تاريخ', percentage: 75, gradient: 'linear-gradient(135deg, #a29bfe, #6c5ce7)' }
+                ]);
+                
+                const monthlyProgress = ref([
+                    { name: 'يناير', percentage: 60, gradient: 'linear-gradient(135deg, #4a6cf7, #6c5ce7)' },
+                    { name: 'فبراير', percentage: 65, gradient: 'linear-gradient(135deg, #00b894, #00a085)' },
+                    { name: 'مارس', percentage: 72, gradient: 'linear-gradient(135deg, #fd79a8, #e84393)' },
+                    { name: 'أبريل', percentage: 78, gradient: 'linear-gradient(135deg, #fdcb6e, #e17055)' },
+                    { name: 'مايو', percentage: 85, gradient: 'linear-gradient(135deg, #a29bfe, #6c5ce7)' }
+                ]);
+                
+                // جدول التقدم التفصيلي
+                const detailedProgress = ref([
+                    {
+                        name: 'الرياضيات',
+                        progress: 85,
+                        gradient: 'linear-gradient(135deg, #4a6cf7, #6c5ce7)',
+                        grade: '94%',
+                        gradeClass: 'grade-excellent',
+                        assignments: '18/20',
+                        exams: '4/5',
+                        status: 'ممتاز',
+                        statusColor: '#00b894'
+                    },
+                    {
+                        name: 'العلوم',
+                        progress: 70,
+                        gradient: 'linear-gradient(135deg, #00b894, #00a085)',
+                        grade: '88%',
+                        gradeClass: 'grade-very-good',
+                        assignments: '15/18',
+                        exams: '3/4',
+                        status: 'جيد جداً',
+                        statusColor: '#74b9ff'
+                    },
+                    {
+                        name: 'اللغة العربية',
+                        progress: 95,
+                        gradient: 'linear-gradient(135deg, #fd79a8, #e84393)',
+                        grade: '96%',
+                        gradeClass: 'grade-excellent',
+                        assignments: '20/20',
+                        exams: '5/5',
+                        status: 'ممتاز',
+                        statusColor: '#00b894'
+                    },
+                    {
+                        name: 'اللغة الإنجليزية',
+                        progress: 60,
+                        gradient: 'linear-gradient(135deg, #fdcb6e, #e17055)',
+                        grade: '82%',
+                        gradeClass: 'grade-good',
+                        assignments: '12/15',
+                        exams: '2/3',
+                        status: 'جيد',
+                        statusColor: '#fdcb6e'
+                    },
+                    {
+                        name: 'التاريخ',
+                        progress: 75,
+                        gradient: 'linear-gradient(135deg, #a29bfe, #6c5ce7)',
+                        grade: '89%',
+                        gradeClass: 'grade-very-good',
+                        assignments: '14/16',
+                        exams: '3/4',
+                        status: 'جيد جداً',
+                        statusColor: '#74b9ff'
+                    }
+                ]);
+                
+                // دوال التحكم
+                const toggleDarkMode = () => {
+                    isDarkMode.value = !isDarkMode.value;
+                    localStorage.setItem('darkMode', isDarkMode.value);
+                };
+                
+                const goBack = () => {
+                    window.history.back();
+                };
+                
+                const startPulse = (id) => {
+                    pulsing.value[id] = true;
+                };
+                
+                const stopPulse = (id) => {
+                    pulsing.value[id] = false;
+                };
+                
+                const setCardRef = (id, el) => {
+                    if (el) {
+                        cardRefs.value[id] = el;
+                    }
+                };
+                
+                const setTooltip = (data) => {
+                    tooltipData.value = data;
+                };
+                
+                const clearTooltip = () => {
+                    tooltipData.value = null;
+                };
+                
+                const updateTooltipPosition = (event) => {
+                    if (tooltipData.value) {
+                        tooltipStyle.value = {
+                            left: event.clientX + 10 + 'px',
+                            top: event.clientY - 50 + 'px'
+                        };
+                    }
+                };
+                
+                const highlightRow = (name) => {
+                    highlightedRow.value = name;
+                };
+                
+                const unhighlightRow = () => {
+                    highlightedRow.value = null;
+                };
+                
+                // Three.js Scene
+                let scene, camera, renderer, particleSystem;
+                let mouseX = 0, mouseY = 0;
+                let windowHalfX = window.innerWidth / 2;
+                let windowHalfY = window.innerHeight / 2;
+                
+                const initThreeScene = () => {
+                    // إنشاء المشهد
+                    scene = new THREE.Scene();
+                    
+                    // إنشاء الكاميرا
+                    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+                    camera.position.z = 50;
+                    
+                    // إنشاء العارض
+                    renderer = new THREE.WebGLRenderer({ 
+                        canvas: canvas.value, 
+                        alpha: true,
+                        antialias: true 
+                    });
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                    
+                    // إنشاء الجسيمات
+                    createParticles();
+                    
+                    // إضافة الإضاءة
+                    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                    scene.add(ambientLight);
+                    
+                    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                    directionalLight.position.set(1, 1, 1);
+                    scene.add(directionalLight);
+                    
+                    // إضافة المستجيب للأحداث
+                    document.addEventListener('mousemove', onMouseMove, false);
+                    window.addEventListener('resize', onWindowResize, false);
+                    
+                    // بدء التحريك
+                    animate();
+                };
+                
+                const createParticles = () => {
+                    const particlesGeometry = new THREE.BufferGeometry();
+                    const particlesCount = 1000;
+                    
+                    const posArray = new Float32Array(particlesCount * 3);
+                    const colorArray = new Float32Array(particlesCount * 3);
+                    
+                    // ألوان مختلفة حسب الوضع
+                    const colors = isDarkMode.value 
+                        ? [0x4a6cf7, 0x00b894, 0xfd79a8, 0xfdcb6e, 0xa29bfe]
+                        : [0x6c5ce7, 0x00a085, 0xe84393, 0xe17055, 0x6c5ce7];
+                    
+                    for (let i = 0; i < particlesCount * 3; i++) {
+                        // المواضع العشوائية
+                        posArray[i] = (Math.random() - 0.5) * 100;
+                        
+                        // الألوان العشوائية
+                        const colorIndex = Math.floor(Math.random() * colors.length);
+                        const color = new THREE.Color(colors[colorIndex]);
+                        colorArray[i * 3] = color.r;
+                        colorArray[i * 3 + 1] = color.g;
+                        colorArray[i * 3 + 2] = color.b;
+                    }
+                    
+                    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                    particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+                    
+                    const particlesMaterial = new THREE.PointsMaterial({
+                        size: 0.5,
+                        vertexColors: true,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    
+                    particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+                    scene.add(particleSystem);
+                };
+                
+                const onMouseMove = (event) => {
+                    mouseX = (event.clientX - windowHalfX) * 0.001;
+                    mouseY = (event.clientY - windowHalfY) * 0.001;
+                };
+                
+                const onWindowResize = () => {
+                    windowHalfX = window.innerWidth / 2;
+                    windowHalfY = window.innerHeight / 2;
+                    
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                };
+                
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    
+                    if (particleSystem) {
+                        particleSystem.rotation.x += 0.001;
+                        particleSystem.rotation.y += 0.002;
+                        
+                        // تأثير الماوس على الجسيمات
+                        particleSystem.rotation.x += mouseY * 0.5;
+                        particleSystem.rotation.y += mouseX * 0.5;
+                    }
+                    
+                    renderer.render(scene, camera);
+                };
+                
+                const updateColors = () => {
+                    if (particleSystem) {
+                        scene.remove(particleSystem);
+                        createParticles();
+                    }
+                };
+                
+                // معالجة التمرير للكشف عن العناصر
+                const handleScroll = () => {
+                    // كشف إحصائيات التقدم
+                    if (!isRevealed.value) {
+                        Object.values(cardRefs.value).forEach(card => {
+                            if (card) {
+                                const rect = card.getBoundingClientRect();
+                                if (rect.top < window.innerHeight * 0.9) {
+                                    isRevealed.value = true;
+                                }
+                            }
+                        });
+                    }
+                    
+                    // كشف المخططات
+                    if (!isChartRevealed.value && chartContainer.value) {
+                        const rect = chartContainer.value.getBoundingClientRect();
+                        if (rect.top < window.innerHeight * 0.8) {
+                            isChartRevealed.value = true;
+                        }
+                    }
+                    
+                    // كشف الجدول
+                    if (!isTableRevealed.value && tableContainer.value) {
+                        const rect = tableContainer.value.getBoundingClientRect();
+                        if (rect.top < window.innerHeight * 0.8) {
+                            isTableRevealed.value = true;
+                        }
+                    }
+                };
+                
+                // تهيئة التطبيق
+                onMounted(() => {
+                    // تحميل إعدادات الوضع الداكن من localStorage
+                    const savedDarkMode = localStorage.getItem('darkMode');
+                    if (savedDarkMode) {
+                        isDarkMode.value = JSON.parse(savedDarkMode);
+                    }
+                    
+                    // تهيئة Three.js
+                    initThreeScene();
+                    
+                    // إضافة مستمعي الأحداث
+                    window.addEventListener('scroll', handleScroll);
+                    window.addEventListener('mousemove', updateTooltipPosition);
+                    
+                    // تشغيل الكشف عن العناصر بعد التحميل
+                    setTimeout(() => {
+                        isRevealed.value = true;
+                        isChartRevealed.value = true;
+                        isTableRevealed.value = true;
+                    }, 300);
+                });
+                
+                onUnmounted(() => {
+                    // تنظيف مستمعي الأحداث
+                    window.removeEventListener('scroll', handleScroll);
+                    window.removeEventListener('mousemove', updateTooltipPosition);
+                    document.removeEventListener('mousemove', onMouseMove);
+                    window.removeEventListener('resize', onWindowResize);
+                    
+                    // تنظيف Three.js
+                    if (renderer) {
+                        renderer.dispose();
+                    }
+                });
+                
+                // مراقبة تغيير الوضع الداكن
+                watch(isDarkMode, () => {
+                    updateColors();
+                });
+                
+                return {
+                    // الحالة
+                    isDarkMode,
+                    isSidebarOpen,
+                    isRevealed,
+                    isChartRevealed,
+                    isTableRevealed,
+                    pulsing,
+                    highlightedRow,
+                    tooltipData,
+                    tooltipStyle,
+                    
+                    // المراجع
+                    cardRefs,
+                    chartContainer,
+                    tableContainer,
+                    canvas,
+                    
+                    // البيانات
+                    userName,
+                    userType,
+                    activePage,
+                    menuItems,
+                    stats,
+                    subjects,
+                    monthlyProgress,
+                    detailedProgress,
+                    
+                    // الدوال
+                    toggleDarkMode,
+                    goBack,
+                    startPulse,
+                    stopPulse,
+                    setCardRef,
+                    setTooltip,
+                    clearTooltip,
+                    highlightRow,
+                    unhighlightRow
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
