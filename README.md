@@ -92,12 +92,12 @@ cd ..
 3. Update Firebase configuration in `public/firebase.js`:
 ```javascript
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "your-sender-id",
-  appId: "your-app-id"
+  apiKey: "your-api-key-from-firebase-console",
+  authDomain: "dt-edu-f94cb.firebaseapp.com",
+  projectId: "dt-edu-f94cb",
+  storageBucket: "dt-edu-f94cb.firebasestorage.app",
+  messagingSenderId: "your-sender-id-from-firebase-console",
+  appId: "your-app-id-from-firebase-console"
 };
 ```
 
