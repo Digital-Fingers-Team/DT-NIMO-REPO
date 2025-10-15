@@ -2,8 +2,8 @@
 
 // 1️⃣ Import Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, doc, setDoc, onSnapshot, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // 2️⃣ Firebase Config
@@ -24,4 +24,29 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 // 4️⃣ Export for use in other files
-export { auth, db, storage, signInWithEmailAndPassword, onAuthStateChanged, signOut, collection, addDoc, getDocs, query, where, ref, uploadBytes, getDownloadURL };
+export {
+  auth,
+  db,
+  storage,
+  // auth
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  signInAnonymously,
+  // firestore
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  doc,
+  setDoc,
+  onSnapshot,
+  orderBy,
+  limit,
+  serverTimestamp,
+  // storage
+  ref,
+  uploadBytes,
+  getDownloadURL
+};
