@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستندات - DT Edu</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/documents.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="rtl">
+    <div class="dashboard-container">
+        <!-- الشريط الجانبي -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#4a6cf7"/>
+                                    <stop offset="100%" stop-color="#00b894"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
+                            <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
+                            <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
+                            <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
+                            <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="logo-text">DT Edu</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name"></div>
+                    <div class="user-type" id="user-type"></div>
+                </div>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="dashboard.html">
+                        <i class="fas fa-home"></i>
+                        <span id="menu-dashboard">لوحة التحكم</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="schedule.html">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="menu-schedule">الجدول الدراسي</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="courses.html">
+                        <i class="fas fa-book"></i>
+                        <span id="menu-courses">المقررات الدراسية</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="progress.html">
+                        <i class="fas fa-chart-bar"></i>
+                        <span id="menu-progress">التقدم الدراسي</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="messages.html">
+                        <i class="fas fa-comments"></i>
+                        <span id="menu-messages">الرسائل</span>
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a href="documents.html">
+                        <i class="fas fa-folder-open"></i>
+                        <span id="menu-documents">المستندات</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="settings.html">
+                        <i class="fas fa-cog"></i>
+                        <span id="menu-settings">الإعدادات</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="#" id="dark-mode-toggle-sidebar">
+                            <i class="fas fa-moon"></i>
+                            <span id="dark-mode-text">الوضع الداكن</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" id="logout-link">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span id="logout-text">تسجيل الخروج</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="header-title">إدارة المستندات - نظام DT Edu</h1>
+                <div class="header-actions">
+                    <button class="mobile-menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <button id="dark-mode-toggle" class="dark-mode-toggle">
+                        <i class="fas fa-moon"></i>
+                        <span id="dark-mode-btn-text">الوضع الداكن</span>
+                    </button>
+                    <button id="back-btn" class="back-btn" onclick="goBack()">
+                        <i class="fas fa-arrow-right"></i>
+                        <span id="back-text">العودة</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- محتوى المستندات -->
+            <div class="content-section">
+                <!-- شريط الأدوات -->
+                <div class="documents-toolbar">
+                    <div class="toolbar-left">
+                        <button class="btn btn-primary" onclick="showUploadModal()">
+                            <i class="fas fa-upload"></i>
+                            <span>رفع مستند</span>
+                        </button>
+                        <button class="btn btn-outline" onclick="createFolder()">
+                            <i class="fas fa-folder-plus"></i>
+                            <span>مجلد جديد</span>
+                        </button>
+                    </div>
+                    <div class="toolbar-right">
+                        <div class="search-box">
+                            <input type="text" id="document-search" placeholder="البحث في المستندات...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="filter-dropdown">
+                            <select id="document-filter">
+                                <option value="all">جميع المستندات</option>
+                                <option value="curriculum">المناهج</option>
+                                <option value="schedule">الجداول</option>
+                                <option value="results">النتائج</option>
+                                <option value="reports">التقارير</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="view-btn" data-view="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- إحصائيات المستندات -->
+                <div class="documents-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="total-documents">0</div>
+                            <div class="stat-label">إجمالي المستندات</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="total-folders">0</div>
+                            <div class="stat-label">المجلدات</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="storage-used">0 MB</div>
+                            <div class="stat-label">المساحة المستخدمة</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="total-downloads">0</div>
+                            <div class="stat-label">مرات التحميل</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- قائمة المستندات -->
+                <div class="documents-container">
+                    <div class="documents-grid" id="documents-grid">
+                        <!-- المستندات ستتم إضافتها ديناميكياً -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة رفع المستندات -->
+    <div class="modal" id="upload-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>رفع مستند جديد</h3>
+                <button class="modal-close" onclick="hideUploadModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="upload-form">
+                    <div class="file-upload-area" id="file-upload-area">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">
+                            <p>اسحب الملفات هنا أو انقر للاختيار</p>
+                            <small>الحد الأقصى: 10 MB | الأنواع المدعومة: PDF, DOC, XLS, PPT, صور</small>
+                        </div>
+                        <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="document-title" class="form-label">عنوان المستند</label>
+                        <input type="text" id="document-title" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="document-category" class="form-label">التصنيف</label>
+                        <select id="document-category" class="form-select" required>
+                            <option value="">اختر التصنيف</option>
+                            <option value="curriculum">المناهج</option>
+                            <option value="schedule">الجداول</option>
+                            <option value="results">النتائج</option>
+                            <option value="reports">التقارير</option>
+                            <option value="other">أخرى</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="document-description" class="form-label">الوصف</label>
+                        <textarea id="document-description" class="form-textarea" rows="3" placeholder="وصف مختصر للمستند..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="document-public">
+                            <span class="checkmark"></span>
+                            متاح لجميع المستخدمين
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="hideUploadModal()">إلغاء</button>
+                <button type="submit" class="btn btn-primary" form="upload-form">رفع المستند</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة عرض المستند -->
+    <div class="modal" id="document-viewer-modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="viewer-title">عرض المستند</h3>
+                <button class="modal-close" onclick="hideDocumentViewer()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="document-viewer" id="document-viewer">
+                    <!-- محتوى المستند سيتم عرضه هنا -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/documents.js"></script>
+</body>
+</html>

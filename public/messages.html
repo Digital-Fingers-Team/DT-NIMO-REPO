@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الرسائل - DT Edu</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/progress-messages.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/messages.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="rtl">
@@ -121,42 +122,8 @@
                             <span id="new-message-text">رسالة جديدة</span>
                         </button>
                     </div>
-                    
-                    <div class="conversation-item active" onclick="selectConversation(1)">
-                        <div class="conversation-avatar">أ.أ</div>
-                        <div class="conversation-info">
-                            <div class="conversation-name" id="teacher1-name">أ. أحمد محمد</div>
-                            <div class="conversation-preview" id="teacher1-preview">هل انتهيت من حل تمارين الواجب؟</div>
-                        </div>
-                        <div class="conversation-time" id="teacher1-time">10:30 ص</div>
-                        <div class="unread-badge">2</div>
-                    </div>
-                    
-                    <div class="conversation-item" onclick="selectConversation(2)">
-                        <div class="conversation-avatar">أ.ف</div>
-                        <div class="conversation-info">
-                            <div class="conversation-name" id="teacher2-name">أ. فاطمة علي</div>
-                            <div class="conversation-preview" id="teacher2-preview">نتيجة اختبار العلوم جاهزة</div>
-                        </div>
-                        <div class="conversation-time" id="teacher2-time">أمس</div>
-                    </div>
-                    
-                    <div class="conversation-item" onclick="selectConversation(3)">
-                        <div class="conversation-avatar">م.ح</div>
-                        <div class="conversation-info">
-                            <div class="conversation-name" id="principal-name">مدير المدرسة</div>
-                            <div class="conversation-preview" id="principal-preview">اجتماع أولياء الأمور يوم الخميس</div>
-                        </div>
-                        <div class="conversation-time" id="principal-time">١٥ مايو</div>
-                    </div>
-                    
-                    <div class="conversation-item" onclick="selectConversation(4)">
-                        <div class="conversation-avatar">ز.م</div>
-                        <div class="conversation-info">
-                            <div class="conversation-name" id="friend1-name">زميل الدراسة</div>
-                            <div class="conversation-preview" id="friend1-preview">هل يمكنك مساعدتي في فهم هذا الدرس؟</div>
-                        </div>
-                        <div class="conversation-time" id="friend1-time">١٤ مايو</div>
+                    <div class="conversations-scroll">
+                        <!-- Conversations will be loaded dynamically -->
                     </div>
                 </div>
                 
@@ -171,27 +138,22 @@
                     </div>
                     
                     <div class="chat-messages" id="chat-messages">
-                        <div class="message received">
-                            <div id="message1">مرحباً محمد، هل انتهيت من حل تمارين الواجب؟</div>
-                            <div class="message-time">10:15 ص</div>
-                        </div>
-                        
-                        <div class="message sent">
-                            <div id="message2">نعم أستاذ، انتهيت من معظم التمارين ولكن لدي سؤال في التمرين رقم ٥</div>
-                            <div class="message-time">10:20 ص</div>
-                        </div>
-                        
-                        <div class="message received">
-                            <div id="message3">أهلاً وسهلاً، ما هو السؤال الذي تواجهك؟</div>
-                            <div class="message-time">10:25 ص</div>
-                        </div>
+                        <!-- Messages will be loaded dynamically -->
                     </div>
                     
                     <div class="chat-input">
                         <input type="text" class="message-input" id="message-input" placeholder="اكتب رسالتك هنا...">
-                        <button class="send-btn" onclick="sendMessage()">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+                        <div class="chat-actions">
+                            <button class="emoji-btn" title="إضافة رموز تعبيرية">
+                                <i class="fas fa-smile"></i>
+                            </button>
+                            <button class="attachment-btn" title="إرفاق ملف">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button class="send-btn" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -199,6 +161,6 @@
     </div>
 
     <script src="js/main.js"></script>
-    <script src="js/messages.js"></script>
+    <script src="js/messaging.js"></script>
 </body>
 </html>

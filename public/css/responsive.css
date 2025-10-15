@@ -1,0 +1,622 @@
+/* Enhanced Responsive Design for DT Edu */
+
+/* Mobile-first approach */
+@media (max-width: 480px) {
+    /* Typography */
+    html {
+        font-size: 14px;
+    }
+    
+    /* Layout adjustments */
+    .dashboard-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1001;
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-right: 0;
+        width: 100%;
+        min-height: 100vh;
+    }
+    
+    /* Header mobile */
+    .header {
+        padding: var(--spacing);
+        flex-direction: column;
+        gap: var(--spacing);
+        position: relative;
+    }
+    
+    .header h1 {
+        font-size: 1.1rem;
+        text-align: center;
+    }
+    
+    .header-actions {
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .mobile-menu-toggle {
+        display: flex;
+        order: -1;
+    }
+    
+    /* Content sections */
+    .content-section {
+        padding: var(--spacing);
+    }
+    
+    /* Cards */
+    .card {
+        padding: var(--spacing);
+        margin-bottom: var(--spacing);
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: stretch;
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Forms */
+    .form-input,
+    .form-textarea,
+    .form-select {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 0.8rem;
+    }
+    
+    /* Grids */
+    .grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing);
+    }
+    
+    /* Messages mobile */
+    .messages-container {
+        height: calc(100vh - 60px);
+        flex-direction: column;
+    }
+    
+    .conversations-list {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 10;
+    }
+    
+    .conversations-list.active {
+        transform: translateX(0);
+    }
+    
+    .chat-container {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .chat-header {
+        padding: var(--spacing);
+        position: relative;
+    }
+    
+    .chat-header::before {
+        content: '\f060';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: var(--spacing);
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: var(--primary);
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+    
+    .message-content {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .chat-input {
+        padding: var(--spacing-sm);
+        gap: var(--spacing-sm);
+    }
+    
+    .message-input {
+        font-size: 16px; /* Prevent zoom */
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .send-btn,
+    .attachment-btn,
+    .emoji-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+    
+    /* Documents mobile */
+    .documents-toolbar {
+        flex-direction: column;
+        gap: var(--spacing);
+        padding: var(--spacing);
+    }
+    
+    .toolbar-left,
+    .toolbar-right {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .search-box {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .documents-stats {
+        grid-template-columns: 1fr;
+        gap: var(--spacing);
+    }
+    
+    .stat-card {
+        padding: var(--spacing);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .stat-number {
+        font-size: 1.4rem;
+    }
+    
+    .documents-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing);
+    }
+    
+    .document-card {
+        padding: var(--spacing);
+    }
+    
+    .document-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .document-actions .btn {
+        width: 100%;
+    }
+    
+    /* Modal mobile */
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+        margin: 2.5vh auto;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: var(--spacing);
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+    
+    /* File upload mobile */
+    .file-upload-area {
+        padding: var(--spacing-lg);
+    }
+    
+    .upload-icon {
+        font-size: 2.5rem;
+    }
+    
+    .upload-text p {
+        font-size: 1rem;
+    }
+    
+    .upload-text small {
+        font-size: 0.8rem;
+    }
+    
+    /* Dashboard mobile */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .activity-item,
+    .message-item,
+    .schedule-item,
+    .assignment-item {
+        padding: var(--spacing-sm);
+    }
+    
+    .activity-icon,
+    .message-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    /* Notifications mobile */
+    .notifications-container {
+        top: var(--spacing);
+        left: var(--spacing);
+        right: var(--spacing);
+        max-width: none;
+    }
+    
+    .notification {
+        padding: var(--spacing-sm);
+        font-size: 0.9rem;
+    }
+}
+
+/* Tablet styles */
+@media (min-width: 481px) and (max-width: 768px) {
+    .sidebar {
+        width: 250px;
+    }
+    
+    .main-content {
+        margin-right: 0;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 1001;
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .mobile-menu-toggle {
+        display: flex;
+    }
+    
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .documents-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .documents-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .messages-container {
+        height: calc(100vh - 80px);
+    }
+    
+    .conversations-list {
+        width: 300px;
+    }
+}
+
+/* Large tablet and small desktop */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        width: 240px;
+    }
+    
+    .main-content {
+        margin-right: 240px;
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .documents-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Large desktop */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .sidebar {
+        width: 300px;
+    }
+    
+    .main-content {
+        margin-right: 300px;
+    }
+    
+    .documents-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .conversations-list {
+        width: 380px;
+    }
+}
+
+/* Extra large screens */
+@media (min-width: 1600px) {
+    .documents-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .sidebar {
+        width: 200px;
+    }
+    
+    .sidebar-header {
+        padding: var(--spacing);
+    }
+    
+    .logo-text {
+        font-size: 1.2rem;
+    }
+    
+    .user-info {
+        font-size: 0.8rem;
+    }
+    
+    .menu-item a {
+        padding: 0.5rem var(--spacing);
+        font-size: 0.9rem;
+    }
+    
+    .header {
+        padding: var(--spacing-sm) var(--spacing);
+    }
+    
+    .header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .messages-container {
+        height: calc(100vh - 50px);
+    }
+    
+    .chat-messages {
+        padding: var(--spacing-sm);
+    }
+    
+    .message-content {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo svg,
+    .document-icon,
+    .activity-icon,
+    .stat-icon {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    :root {
+        --border: #000;
+        --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn {
+        border: 2px solid currentColor;
+    }
+    
+    .card {
+        border: 1px solid var(--border);
+    }
+}
+
+/* Dark mode preferences */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --light: #1a1a1a;
+        --dark: #f8f9fa;
+        --text: #e0e0e0;
+        --text-light: #b0b0b0;
+        --text-lighter: #888;
+        --border: #333;
+        --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Print styles */
+@media print {
+    .sidebar,
+    .header-actions,
+    .mobile-menu-toggle,
+    .chat-input,
+    .documents-toolbar,
+    .modal {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-right: 0;
+        width: 100%;
+    }
+    
+    .card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .btn {
+        display: none;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .menu-item a,
+    .conversation-item,
+    .document-card,
+    .message-item {
+        min-height: 44px; /* Minimum touch target size */
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .form-input,
+    .form-textarea,
+    .form-select {
+        min-height: 44px;
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    /* Remove hover effects on touch devices */
+    .card:hover,
+    .btn:hover,
+    .menu-item a:hover,
+    .conversation-item:hover,
+    .document-card:hover {
+        transform: none;
+        box-shadow: var(--shadow);
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-transparency: reduce) {
+    .modal,
+    .sidebar,
+    .notification {
+        backdrop-filter: none;
+    }
+    
+    .modal {
+        background: rgba(0, 0, 0, 0.8);
+    }
+}
+
+/* Focus styles for keyboard navigation */
+@media (hover: hover) and (pointer: fine) {
+    .btn:focus,
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus,
+    .menu-item a:focus {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
+/* Custom scrollbar for webkit browsers */
+@media (min-width: 769px) {
+    .chat-messages::-webkit-scrollbar,
+    .conversations-scroll::-webkit-scrollbar,
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .chat-messages::-webkit-scrollbar-track,
+    .conversations-scroll::-webkit-scrollbar-track,
+    .modal-body::-webkit-scrollbar-track {
+        background: var(--light);
+    }
+    
+    .chat-messages::-webkit-scrollbar-thumb,
+    .conversations-scroll::-webkit-scrollbar-thumb,
+    .modal-body::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+    }
+    
+    .chat-messages::-webkit-scrollbar-thumb:hover,
+    .conversations-scroll::-webkit-scrollbar-thumb:hover,
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: var(--text-light);
+    }
+}

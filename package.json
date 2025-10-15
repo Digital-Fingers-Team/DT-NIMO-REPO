@@ -1,0 +1,50 @@
+{
+  "name": "dt-edu-app",
+  "version": "1.0.0",
+  "description": "Dynamic Educational Web Application with Real-time Messaging and Document Management",
+  "main": "public/index.html",
+  "scripts": {
+    "start": "firebase serve",
+    "build": "echo 'No build process needed for static files'",
+    "deploy": "firebase deploy",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:functions": "firebase deploy --only functions",
+    "serve": "firebase serve",
+    "emulators": "firebase emulators:start",
+    "lint": "eslint public/js/**/*.js",
+    "test": "echo 'No tests specified yet'"
+  },
+  "keywords": [
+    "education",
+    "firebase",
+    "real-time",
+    "messaging",
+    "documents",
+    "responsive",
+    "arabic",
+    "school",
+    "management"
+  ],
+  "author": "DT Edu Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/dt-edu-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/dt-edu-app/issues"
+  },
+  "homepage": "https://dt-edu-app.web.app",
+  "devDependencies": {
+    "eslint": "^8.50.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}

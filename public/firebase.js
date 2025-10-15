@@ -24,4 +24,32 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 // 4️⃣ Export for use in other files
-export { auth, db, storage, signInWithEmailAndPassword, onAuthStateChanged, signOut, collection, addDoc, getDocs, query, where, ref, uploadBytes, getDownloadURL };
+export { 
+    auth, 
+    db, 
+    storage, 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged, 
+    signOut, 
+    collection, 
+    addDoc, 
+    getDocs, 
+    query, 
+    where, 
+    ref, 
+    uploadBytes, 
+    getDownloadURL,
+    // Additional exports for real-time features
+    onSnapshot: (query, callback) => {
+        // Real-time listener for Firestore
+        return query.onSnapshot ? query.onSnapshot(callback) : null;
+    },
+    serverTimestamp: () => {
+        // Server timestamp for Firestore
+        return new Date();
+    },
+    orderBy: (field, direction = 'asc') => {
+        // Order by for queries
+        return { field, direction };
+    }
+};
