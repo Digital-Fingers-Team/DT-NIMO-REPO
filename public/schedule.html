@@ -18,6 +18,7 @@
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
             --sidebar-width: 260px;
+            --sidebar-collapsed: 70px;
         }
         
         .dark-mode {
@@ -56,6 +57,29 @@
             direction: ltr;
         }
         
+        /* زر القائمة للشاشات الصغيرة */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 10px;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1001;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .dark-mode .menu-toggle {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+        
         /* التصميم الرئيسي */
         .dashboard-container {
             display: flex;
@@ -69,11 +93,15 @@
             color: white;
             padding: 20px 0;
             box-shadow: var(--shadow);
-            z-index: 100;
+            z-index: 1000;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             transition: var(--transition);
+        }
+        
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
         }
         
         .sidebar-header {
@@ -83,6 +111,12 @@
             padding: 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             margin-bottom: 20px;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+        
+        .sidebar.collapsed .sidebar-header {
+            padding: 15px 10px;
         }
         
         .logo-container {
@@ -101,11 +135,23 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .logo {
+            width: 50px;
+            height: 50px;
         }
         
         .logo svg {
             width: 50px;
             height: 50px;
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .logo svg {
+            width: 30px;
+            height: 30px;
         }
         
         .logo-text {
@@ -115,11 +161,24 @@
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            visibility: hidden;
         }
         
         .user-info {
             text-align: center;
             margin-top: 10px;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+        
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            visibility: hidden;
         }
         
         .user-name {
@@ -155,6 +214,12 @@
             color: white;
             text-decoration: none;
             transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .sidebar.collapsed .menu-item a {
+            padding: 15px;
+            justify-content: center;
         }
         
         .menu-item a:hover, .menu-item.active a {
@@ -167,10 +232,23 @@
             font-size: 18px;
             width: 24px;
             text-align: center;
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .menu-item i {
+            margin-left: 0;
+            font-size: 20px;
         }
         
         .menu-item span {
             flex: 1;
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .menu-item span {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
         }
         
         .sidebar-footer {
@@ -183,12 +261,42 @@
             padding: 10px 15px;
         }
         
+        .sidebar.collapsed .sidebar-footer .menu-item a {
+            justify-content: center;
+        }
+        
+        .toggle-sidebar {
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 1001;
+        }
+        
+        .toggle-sidebar:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
         /* المحتوى الرئيسي */
         .main-content {
             flex: 1;
             margin-right: var(--sidebar-width);
             padding: 20px;
             transition: var(--transition);
+        }
+        
+        .sidebar.collapsed ~ .main-content {
+            margin-right: var(--sidebar-collapsed);
         }
         
         .header {
@@ -201,6 +309,8 @@
             justify-content: space-between;
             align-items: center;
             transition: var(--transition);
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         body.dark-mode .header {
@@ -212,12 +322,15 @@
             color: var(--primary);
             font-size: 28px;
             font-weight: 700;
+            flex: 1;
+            min-width: 300px;
         }
         
         .header-actions {
             display: flex;
             gap: 15px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .dark-mode-toggle, .back-btn, .week-nav {
@@ -230,6 +343,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
         
         .dark-mode-toggle {
@@ -270,6 +384,8 @@
             box-shadow: var(--shadow);
             padding: 20px;
             transition: var(--transition);
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         body.dark-mode .schedule-controls {
@@ -287,6 +403,7 @@
             display: flex;
             gap: 15px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .filter-select {
@@ -499,34 +616,203 @@
             font-size: 14px;
         }
         
-        /* التصميم المتجاوب */
+        /* عرض الجدول على الأجهزة المحمولة */
+        .mobile-schedule {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .mobile-day {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        body.dark-mode .mobile-day {
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .mobile-day-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        .mobile-classes {
+            padding: 15px;
+        }
+        
+        .mobile-class {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        body.dark-mode .mobile-class {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .mobile-class:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-class-time {
+            font-weight: 700;
+            min-width: 100px;
+        }
+        
+        .mobile-class-info {
+            flex: 1;
+            text-align: right;
+            padding-left: 15px;
+        }
+        
+        .mobile-class-name {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .mobile-class-details {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .mobile-class-room {
+            background: rgba(74, 108, 247, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        
+        /* تحسينات الاستجابة المضافة */
+        
+        /* تحسينات الشريط الجانبي للاستجابة */
         @media (max-width: 992px) {
-            .sidebar {
-                width: 80px;
+            .dashboard-container {
+                flex-direction: column;
             }
             
-            .sidebar-header .logo-text,
-            .user-info,
-            .menu-item span {
-                display: none;
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                top: 0;
+                right: 0;
+                z-index: 1000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
             }
             
             .main-content {
-                margin-right: 80px;
+                margin-right: 0;
+                width: 100%;
+                padding-top: 60px; /* مساحة للزر الهوامبرغر */
             }
             
-            .menu-item a {
-                justify-content: center;
+            .menu-toggle {
+                display: block;
+            }
+            
+            .sidebar-header {
                 padding: 15px;
             }
             
-            .menu-item i {
-                margin-left: 0;
-                font-size: 20px;
+            .sidebar-menu {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
             }
             
-            .sidebar-footer .menu-item span {
+            .sidebar.active .sidebar-menu {
+                max-height: 500px;
+            }
+            
+            .sidebar-footer {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+            
+            .sidebar.active .sidebar-footer {
+                max-height: 200px;
+            }
+            
+            .toggle-sidebar {
                 display: none;
+            }
+            
+            .sidebar.collapsed {
+                width: 100%;
+            }
+        }
+        
+        /* تحسينات ملخص الجدول */
+        @media (max-width: 768px) {
+            .schedule-summary {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .summary-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .summary-icon {
+                margin-bottom: 10px;
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .schedule-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* تحسينات الجدول */
+        @media (max-width: 992px) {
+            .schedule-container {
+                overflow-x: auto;
+            }
+            
+            .schedule-table {
+                min-width: 700px;
+            }
+        }
+        
+        /* تحسينات الرأس */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .header-actions button {
+                flex: 1;
+                max-width: 48%;
             }
             
             .schedule-controls {
@@ -541,53 +827,109 @@
             }
         }
         
-        @media (max-width: 768px) {
-            .header {
+        @media (max-width: 480px) {
+            .header-actions {
                 flex-direction: column;
-                gap: 15px;
-                text-align: center;
+                gap: 10px;
             }
             
-            .header-actions {
+            .header-actions button {
+                max-width: 100%;
+            }
+            
+            .filter-options {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .week-nav {
+                width: 100%;
                 justify-content: center;
             }
             
-            .schedule-summary {
-                grid-template-columns: 1fr;
-            }
-            
-            .class-info {
-                font-size: 12px;
-            }
-            
-            .subject-name {
-                font-size: 13px;
+            .current-week {
+                text-align: center;
+                width: 100%;
             }
         }
         
-        @media (max-width: 576px) {
+        /* تحسينات عامة */
+        @media (max-width: 768px) {
             .main-content {
                 padding: 15px;
             }
             
-            .sidebar {
-                width: 70px;
+            .header, .schedule-controls, .schedule-container {
+                padding: 15px;
             }
             
+            h1, h3 {
+                text-align: center;
+            }
+            
+            .schedule-table {
+                display: none;
+            }
+            
+            .mobile-schedule {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 480px) {
             .main-content {
-                margin-right: 70px;
+                padding: 10px;
             }
             
-            .schedule-table th, .schedule-table td {
-                padding: 8px 5px;
+            .summary-card {
+                padding: 15px;
+            }
+            
+            .summary-icon {
+                width: 40px;
+                height: 40px;
+                margin-left: 10px;
+                font-size: 16px;
+            }
+            
+            .summary-value {
+                font-size: 20px;
+            }
+            
+            .summary-label {
+                font-size: 12px;
+            }
+            
+            .mobile-class {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .mobile-class-time {
+                min-width: auto;
+            }
+            
+            .mobile-class-info {
+                text-align: right;
+                padding-left: 0;
+                width: 100%;
             }
         }
     </style>
 </head>
 <body class="rtl">
+    <!-- زر القائمة للشاشات الصغيرة -->
+    <button id="menu-toggle" class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
     <div class="dashboard-container">
         <!-- الشريط الجانبي -->
         <div class="sidebar">
+            <button class="toggle-sidebar" id="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="sidebar-header">
                 <div class="logo-container">
                     <div class="logo">
@@ -656,7 +998,7 @@
             <div class="sidebar-footer">
                 <ul class="sidebar-menu">
                     <li class="menu-item">
-                        <a href="#" id="dark-mode-toggle">
+                        <a href="#" id="dark-mode-toggle-sidebar">
                             <i class="fas fa-moon"></i>
                             <span id="dark-mode-text">الوضع الداكن</span>
                         </a>
@@ -753,7 +1095,7 @@
                 </div>
             </div>
             
-            <!-- جدول الحصص -->
+            <!-- جدول الحصص للشاشات الكبيرة -->
             <div class="schedule-container">
                 <table class="schedule-table">
                     <thead>
@@ -1055,6 +1397,118 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- جدول الحصص للأجهزة المحمولة -->
+            <div class="mobile-schedule">
+                <!-- يوم الأحد -->
+                <div class="mobile-day">
+                    <div class="mobile-day-header">الأحد</div>
+                    <div class="mobile-classes">
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">8:00 - 8:45</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name math">رياضيات</div>
+                                <div class="mobile-class-details">أ. أحمد محمد</div>
+                                <div class="mobile-class-room">قاعة ٢٠١</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">8:45 - 9:30</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name science">علوم</div>
+                                <div class="mobile-class-details">أ. فاطمة علي</div>
+                                <div class="mobile-class-room">مختبر ١٠١</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">9:30 - 10:15</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name break">فسحة</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">10:15 - 11:00</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name english">لغة إنجليزية</div>
+                                <div class="mobile-class-details">أ. سارة عبدالله</div>
+                                <div class="mobile-class-room">قاعة ٤٠٣</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">11:00 - 11:45</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name geography">جغرافيا</div>
+                                <div class="mobile-class-details">أ. نورة الكواري</div>
+                                <div class="mobile-class-room">قاعة ٢٠٤</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">11:45 - 12:30</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name arabic">لغة عربية</div>
+                                <div class="mobile-class-details">أ. خالد إبراهيم</div>
+                                <div class="mobile-class-room">قاعة ٣٠٢</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- يوم الإثنين -->
+                <div class="mobile-day">
+                    <div class="mobile-day-header">الإثنين</div>
+                    <div class="mobile-classes">
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">8:00 - 8:45</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name science">علوم</div>
+                                <div class="mobile-class-details">أ. فاطمة علي</div>
+                                <div class="mobile-class-room">مختبر ١٠١</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">8:45 - 9:30</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name arabic">لغة عربية</div>
+                                <div class="mobile-class-details">أ. خالد إبراهيم</div>
+                                <div class="mobile-class-room">قاعة ٣٠٢</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">9:30 - 10:15</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name break">فسحة</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">10:15 - 11:00</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name math">رياضيات</div>
+                                <div class="mobile-class-details">أ. أحمد محمد</div>
+                                <div class="mobile-class-room">قاعة ٢٠١</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">11:00 - 11:45</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name english">لغة إنجليزية</div>
+                                <div class="mobile-class-details">أ. سارة عبدالله</div>
+                                <div class="mobile-class-room">قاعة ٤٠٣</div>
+                            </div>
+                        </div>
+                        <div class="mobile-class">
+                            <div class="mobile-class-time">11:45 - 12:30</div>
+                            <div class="mobile-class-info">
+                                <div class="mobile-class-name geography">جغرافيا</div>
+                                <div class="mobile-class-details">أ. نورة الكواري</div>
+                                <div class="mobile-class-room">قاعة ٢٠٤</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- باقي الأيام بنفس النمط -->
+                <!-- يمكن إضافة باقي الأيام بنفس الطريقة -->
+            </div>
         </div>
     </div>
 
@@ -1090,8 +1544,13 @@
         
         document.getElementById('user-type').textContent = userTypeMap[currentUser.type][currentLanguage];
         
+        // إعداد زر تبديل الشريط الجانبي
+        document.getElementById('toggle-sidebar').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        });
+        
         // إعداد زر الوضع الداكن
-        document.querySelectorAll('#dark-mode-toggle').forEach(btn => {
+        document.querySelectorAll('#dark-mode-toggle, #dark-mode-toggle-sidebar').forEach(btn => {
             btn.addEventListener('click', function() {
                 // تبديل الوضع الداكن
                 darkMode = !darkMode;
@@ -1246,6 +1705,29 @@
                         el.textContent = el.textContent.replace('أ.', 'Mr.');
                     }
                 });
+                
+                // تحديث جدول المحمول
+                document.querySelectorAll('.mobile-class-name').forEach(el => {
+                    const subjectMap = {
+                        'رياضيات': 'Mathematics',
+                        'علوم': 'Science',
+                        'لغة عربية': 'Arabic',
+                        'لغة إنجليزية': 'English',
+                        'تاريخ': 'History',
+                        'جغرافيا': 'Geography',
+                        'فسحة': 'Break'
+                    };
+                    
+                    if (subjectMap[el.textContent]) {
+                        el.textContent = subjectMap[el.textContent];
+                    }
+                });
+                
+                document.querySelectorAll('.mobile-class-details').forEach(el => {
+                    if (el.textContent.includes('أ.')) {
+                        el.textContent = el.textContent.replace('أ.', 'Mr.');
+                    }
+                });
             }
         }
         
@@ -1259,7 +1741,7 @@
             document.getElementById('dark-mode-btn-text').textContent = darkModeText;
             
             // تحديث الأيقونة
-            const icons = document.querySelectorAll('#dark-mode-toggle i');
+            const icons = document.querySelectorAll('#dark-mode-toggle i, #dark-mode-toggle-sidebar i');
             icons.forEach(icon => {
                 icon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
             });
@@ -1283,6 +1765,50 @@
                 
                 alert(message);
             });
+        });
+        
+        // إضافة تفاعل للنقر على الحصص في الجدول المحمول
+        document.querySelectorAll('.mobile-class').forEach(slot => {
+            slot.addEventListener('click', function() {
+                const subject = this.querySelector('.mobile-class-name').textContent;
+                const teacher = this.querySelector('.mobile-class-details')?.textContent || '';
+                const room = this.querySelector('.mobile-class-room')?.textContent || '';
+                
+                let message = `${subject}`;
+                if (teacher && !teacher.includes('فسحة')) message += `\nالمعلم: ${teacher}`;
+                if (room) message += `\nالقاعة: ${room}`;
+                
+                alert(message);
+            });
+        });
+        
+        // إضافة وظيفة القائمة للشاشات الصغيرة
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+                
+                // إغلاق القائمة عند النقر على رابط
+                const menuLinks = document.querySelectorAll('.sidebar-menu a');
+                menuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 992) {
+                            sidebar.classList.remove('active');
+                        }
+                    });
+                });
+                
+                // إغلاق القائمة عند النقر خارجها
+                document.addEventListener('click', function(event) {
+                    if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            }
         });
     </script>
 </body>

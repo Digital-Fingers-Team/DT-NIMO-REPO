@@ -6,8 +6,14 @@
     <title>لوحة تحكم المعلم - DT Edu</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    
     <style>
-       :root {
+        :root {
             --primary: #4a6cf7;
             --primary-dark: #3a56d4;
             --secondary: #6c5ce7;
@@ -55,6 +61,29 @@
         
         body.ltr {
             direction: ltr;
+        }
+        
+        /* زر القائمة للشاشات الصغيرة */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 10px;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1001;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .dark-mode .menu-toggle {
+            background: #2d3748;
+            color: #e2e8f0;
         }
         
         /* التصميم الرئيسي */
@@ -764,7 +793,7 @@
             background-color: var(--light);
         }
         
-        /* التصميم المتجاوب */
+        /* التصميم المتجاوب - تحسينات جديدة */
         @media (max-width: 1200px) {
             .dashboard-grid {
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -772,38 +801,65 @@
         }
         
         @media (max-width: 992px) {
-            .sidebar {
-                width: 80px;
+            .dashboard-container {
+                flex-direction: column;
             }
             
-            .sidebar-header .logo-text,
-            .user-info,
-            .menu-item span {
-                display: none;
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                top: 0;
+                right: 0;
+                z-index: 1000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
             }
             
             .main-content {
-                margin-right: 80px;
+                margin-right: 0;
+                width: 100%;
+                padding-top: 60px; /* مساحة للزر الهوامبرغر */
             }
             
-            .menu-item a {
-                justify-content: center;
+            .menu-toggle {
+                display: block;
+            }
+            
+            .sidebar-header {
                 padding: 15px;
             }
             
-            .menu-item i {
-                margin-left: 0;
-                font-size: 20px;
+            .sidebar-menu {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
             }
             
-            .sidebar-footer .menu-item span {
-                display: none;
+            .sidebar.active .sidebar-menu {
+                max-height: 500px;
+            }
+            
+            .sidebar-footer {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+            
+            .sidebar.active .sidebar-footer {
+                max-height: 200px;
             }
         }
         
         @media (max-width: 768px) {
             .stats-cards {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
             }
             
             .dashboard-grid {
@@ -817,7 +873,13 @@
             }
             
             .header-actions {
-                justify-content: center;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .header-actions button {
+                flex: 1;
+                max-width: 48%;
             }
             
             .content-item {
@@ -834,9 +896,33 @@
             .content-actions {
                 align-self: flex-end;
             }
+            
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .stat-icon {
+                margin-bottom: 10px;
+                margin-left: 0;
+            }
         }
         
-        @media (max-width: 576px) {
+        @media (max-width: 480px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .header-actions button {
+                max-width: 100%;
+            }
+            
             .main-content {
                 padding: 15px;
             }
@@ -845,14 +931,6 @@
                 padding: 20px;
                 width: 95%;
             }
-            
-            .sidebar {
-                width: 70px;
-            }
-            
-            .main-content {
-                margin-right: 70px;
-            }
         }
     </style>
 </head>
@@ -860,86 +938,7 @@
     <div class="dashboard-container">
         <!-- الشريط الجانبي -->
         <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-container">
-                    <div class="logo">
-                        <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#4a6cf7"/>
-                                    <stop offset="100%" stop-color="#00b894"/>
-                                </linearGradient>
-                            </defs>
-                            <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
-                            <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
-                            <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
-                            <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
-                            <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="logo-text">DT Edu</div>
-                <div class="user-info">
-                    <div class="user-name" id="user-name">أحمد المعلم</div>
-                    <div class="user-type" id="user-type">مدرس</div>
-                </div>
-            </div>
-            
-            <ul class="sidebar-menu">
-                <li class="menu-item active">
-                    <a href="dashboard.html">
-                        <i class="fas fa-home"></i>
-                        <span id="menu-dashboard">لوحة التحكم</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="schedule.html">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span id="menu-schedule">الجدول الدراسي</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="courses.html">
-                        <i class="fas fa-book"></i>
-                        <span id="menu-courses">المقررات الدراسية</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="progress.html">
-                        <i class="fas fa-chart-bar"></i>
-                        <span id="menu-progress">التقدم الدراسي</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="messages.html">
-                        <i class="fas fa-comments"></i>
-                        <span id="menu-messages">الرسائل</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span id="menu-settings">الإعدادات</span>
-                    </a>
-                </li>
-            </ul>
-            
-            <div class="sidebar-footer">
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="#" id="sidebar-dark-mode-toggle">
-                            <i class="fas fa-moon"></i>
-                            <span id="dark-mode-text">الوضع الداكن</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" id="logout-link">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span id="logout-text">تسجيل الخروج</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <!-- ... (keep your existing sidebar HTML) ... -->
         </div>
         
         <!-- المحتوى الرئيسي -->
@@ -1370,8 +1369,20 @@
     </div>
 
     <script>
-        // API base URL - change this to your server URL
-        const API_BASE_URL = 'http://localhost:3000/api';
+        // Firebase configuration - Replace with your actual Firebase config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
         // بيانات المثال
         const students = [
@@ -1635,7 +1646,7 @@
             document.getElementById('hw-file-name').textContent = fileName;
         });
         
-        // إعداد نموذج رفع التحضير
+        // إعداد نموذج رفع التحضير مع Firebase
         document.getElementById('prep-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1649,42 +1660,44 @@
                 return;
             }
             
-            const formData = new FormData();
-            formData.append('subject', subject);
-            formData.append('date', date);
-            formData.append('title', title);
-            formData.append('file', file);
-            
             try {
                 showStatus('prep-upload-status', 'جاري رفع الملف...', 'loading');
                 
-                const response = await fetch(`${API_BASE_URL}/preparations`, {
-                    method: 'POST',
-                    body: formData
+                // Upload file to Firebase Storage
+                const storageRef = storage.ref();
+                const fileRef = storageRef.child(`preparations/${Date.now()}_${file.name}`);
+                const snapshot = await fileRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                
+                // Save preparation data to Firestore
+                await db.collection('preparations').add({
+                    subject: subject,
+                    date: date,
+                    title: title,
+                    fileUrl: downloadURL,
+                    fileName: file.name,
+                    fileType: file.type,
+                    uploadDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    teacherId: getCurrentUser().id || 'teacher_arabic',
+                    teacherName: getCurrentUser().name || 'أحمد العربي'
                 });
                 
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showStatus('prep-upload-status', 'تم رفع ملف التحضير بنجاح!', 'success');
-                    // تحديث الإحصائيات
-                    updateStats();
-                    // إعادة تعيين النموذج
-                    setTimeout(() => {
-                        this.reset();
-                        document.getElementById('file-name').textContent = '';
-                        closeModal('prep-modal');
-                    }, 1500);
-                } else {
-                    showStatus('prep-upload-status', `خطأ في الرفع: ${result.error}`, 'error');
-                }
+                showStatus('prep-upload-status', 'تم رفع ملف التحضير بنجاح!', 'success');
+                // تحديث الإحصائيات
+                updateStats();
+                // إعادة تعيين النموذج
+                setTimeout(() => {
+                    this.reset();
+                    document.getElementById('file-name').textContent = '';
+                    closeModal('prep-modal');
+                }, 1500);
             } catch (error) {
-                showStatus('prep-upload-status', 'خطأ في الاتصال بالخادم', 'error');
+                showStatus('prep-upload-status', 'خطأ في الرفع: ' + error.message, 'error');
                 console.error('Error uploading preparation:', error);
             }
         });
         
-        // إعداد نموذج رفع الواجب
+        // إعداد نموذج رفع الواجب مع Firebase
         document.getElementById('homework-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1699,40 +1712,48 @@
                 return;
             }
             
-            const formData = new FormData();
-            formData.append('title', title);
-            formData.append('subject', subject);
-            formData.append('description', description);
-            formData.append('dueDate', dueDate);
-            if (file) {
-                formData.append('file', file);
-            }
-            
             try {
                 showStatus('hw-upload-status', 'جاري رفع الواجب...', 'loading');
                 
-                const response = await fetch(`${API_BASE_URL}/homeworks`, {
-                    method: 'POST',
-                    body: formData
+                let downloadURL = null;
+                let fileName = null;
+                let fileType = null;
+                
+                if (file) {
+                    // Upload file to Firebase Storage
+                    const storageRef = storage.ref();
+                    const fileRef = storageRef.child(`homeworks/${Date.now()}_${file.name}`);
+                    const snapshot = await fileRef.put(file);
+                    downloadURL = await snapshot.ref.getDownloadURL();
+                    fileName = file.name;
+                    fileType = file.type;
+                }
+                
+                // Save homework data to Firestore
+                await db.collection('homeworks').add({
+                    title: title,
+                    subject: subject,
+                    description: description,
+                    dueDate: dueDate,
+                    fileUrl: downloadURL,
+                    fileName: fileName,
+                    fileType: fileType,
+                    uploadDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    teacherId: getCurrentUser().id || 'teacher_arabic',
+                    teacherName: getCurrentUser().name || 'أحمد العربي'
                 });
                 
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showStatus('hw-upload-status', 'تم رفع الواجب بنجاح!', 'success');
-                    // تحديث الإحصائيات
-                    updateStats();
-                    // إعادة تعيين النموذج
-                    setTimeout(() => {
-                        this.reset();
-                        document.getElementById('hw-file-name').textContent = '';
-                        closeModal('homework-modal');
-                    }, 1500);
-                } else {
-                    showStatus('hw-upload-status', `خطأ في الرفع: ${result.error}`, 'error');
-                }
+                showStatus('hw-upload-status', 'تم رفع الواجب بنجاح!', 'success');
+                // تحديث الإحصائيات
+                updateStats();
+                // إعادة تعيين النموذج
+                setTimeout(() => {
+                    this.reset();
+                    document.getElementById('hw-file-name').textContent = '';
+                    closeModal('homework-modal');
+                }, 1500);
             } catch (error) {
-                showStatus('hw-upload-status', 'خطأ في الاتصال بالخادم', 'error');
+                showStatus('hw-upload-status', 'خطأ في الرفع: ' + error.message, 'error');
                 console.error('Error uploading homework:', error);
             }
         });
@@ -1782,7 +1803,7 @@
             }
         }
         
-        // حفظ بيانات الحضور
+        // حفظ بيانات الحضور في Firebase
         async function saveAttendance() {
             const date = document.getElementById('attendance-date').value;
             const classValue = document.getElementById('attendance-class').value;
@@ -1811,7 +1832,10 @@
                     studentName: student.name,
                     status: status,
                     date: date,
-                    class: classValue
+                    class: classValue,
+                    teacherId: getCurrentUser().id || 'teacher_arabic',
+                    teacherName: getCurrentUser().name || 'أحمد العربي',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
             });
             
@@ -1821,31 +1845,28 @@
             }
             
             try {
-                const response = await fetch(`${API_BASE_URL}/attendance`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(attendanceData)
+                // Save each attendance record to Firestore
+                const batch = db.batch();
+                const attendanceRef = db.collection('attendance');
+                
+                attendanceData.forEach(record => {
+                    const docRef = attendanceRef.doc();
+                    batch.set(docRef, record);
                 });
                 
-                const result = await response.json();
+                await batch.commit();
                 
-                if (response.ok) {
-                    alert('تم حفظ بيانات الحضور بنجاح!');
-                    closeModal('attendance-modal');
-                    // تحديث الإحصائيات
-                    updateStats();
-                } else {
-                    alert(`خطأ في الحفظ: ${result.error}`);
-                }
+                alert('تم حفظ بيانات الحضور بنجاح!');
+                closeModal('attendance-modal');
+                // تحديث الإحصائيات
+                updateStats();
             } catch (error) {
-                alert('خطأ في الاتصال بالخادم');
+                alert('خطأ في حفظ البيانات: ' + error.message);
                 console.error('Error saving attendance:', error);
             }
         }
         
-        // تحميل قائمة الأرشيف
+        // تحميل قائمة الأرشيف من Firebase
         async function loadArchiveList() {
             const filterValue = document.getElementById('archive-filter').value;
             const archiveList = document.getElementById('archive-list');
@@ -1853,56 +1874,99 @@
             try {
                 archiveList.innerHTML = '<li>جاري تحميل البيانات...</li>';
                 
-                const response = await fetch(`${API_BASE_URL}/files?type=${filterValue}`);
-                const files = await response.json();
+                let query;
                 
-                archiveList.innerHTML = '';
-                
-                if (files.length === 0) {
-                    archiveList.innerHTML = '<li>لا توجد ملفات</li>';
-                    return;
+                if (filterValue === 'all') {
+                    // Get all files (preparations and homeworks)
+                    const prepSnapshot = await db.collection('preparations')
+                        .orderBy('uploadDate', 'desc')
+                        .get();
+                    const hwSnapshot = await db.collection('homeworks')
+                        .orderBy('uploadDate', 'desc')
+                        .get();
+                    
+                    const files = [];
+                    prepSnapshot.forEach(doc => {
+                        files.push({ id: doc.id, type: 'preparation', ...doc.data() });
+                    });
+                    hwSnapshot.forEach(doc => {
+                        files.push({ id: doc.id, type: 'homework', ...doc.data() });
+                    });
+                    
+                    // Sort by upload date
+                    files.sort((a, b) => b.uploadDate - a.uploadDate);
+                    displayArchiveFiles(files);
+                    
+                } else if (filterValue === 'preparations') {
+                    query = db.collection('preparations').orderBy('uploadDate', 'desc');
+                    const snapshot = await query.get();
+                    const files = snapshot.docs.map(doc => ({ id: doc.id, type: 'preparation', ...doc.data() }));
+                    displayArchiveFiles(files);
+                    
+                } else if (filterValue === 'homeworks') {
+                    query = db.collection('homeworks').orderBy('uploadDate', 'desc');
+                    const snapshot = await query.get();
+                    const files = snapshot.docs.map(doc => ({ id: doc.id, type: 'homework', ...doc.data() }));
+                    displayArchiveFiles(files);
+                    
+                } else if (filterValue === 'lessons') {
+                    // You can add lessons collection if needed
+                    archiveList.innerHTML = '<li>لا توجد دروس مرفوعة بعد</li>';
                 }
                 
-                files.forEach(file => {
-                    const item = document.createElement('li');
-                    item.className = 'content-item';
-                    
-                    const typeText = {
-                        'preparation': 'تحضير',
-                        'homework': 'واجب',
-                        'lesson': 'درس'
-                    };
-                    
-                    const subjectText = {
-                        'arabic': 'اللغة العربية',
-                        'math': 'الرياضيات',
-                        'science': 'العلوم',
-                        'english': 'الإنجليزية',
-                        'history': 'التاريخ',
-                        'philosophy': 'الفلسفة',
-                        'social': 'الاخصائي الاجتماعي'
-                    };
-                    
-                    item.innerHTML = `
-                        <div class="content-name">${file.title}</div>
-                        <div class="content-meta">
-                            <span>النوع: ${typeText[file.type] || file.type}</span>
-                            <span>المادة: ${subjectText[file.subject] || file.subject}</span>
-                            <span>التاريخ: ${new Date(file.date).toLocaleDateString('ar-EG')}</span>
-                            ${file.dueDate ? `<span>موعد التسليم: ${new Date(file.dueDate).toLocaleDateString('ar-EG')}</span>` : ''}
-                        </div>
-                        <div class="content-actions">
-                            <button class="content-btn" onclick="viewFile('${file.fileUrl}')">عرض</button>
-                            <button class="content-btn" onclick="downloadFile('${file.fileUrl}', '${file.title}')">تحميل</button>
-                            <button class="content-btn" onclick="deleteFile('${file.id}', '${file.type}')">حذف</button>
-                        </div>
-                    `;
-                    archiveList.appendChild(item);
-                });
             } catch (error) {
                 archiveList.innerHTML = '<li>خطأ في تحميل البيانات</li>';
                 console.error('Error loading archive:', error);
             }
+        }
+        
+        // Display archive files in the list
+        function displayArchiveFiles(files) {
+            const archiveList = document.getElementById('archive-list');
+            archiveList.innerHTML = '';
+            
+            if (files.length === 0) {
+                archiveList.innerHTML = '<li>لا توجد ملفات</li>';
+                return;
+            }
+            
+            files.forEach(file => {
+                const item = document.createElement('li');
+                item.className = 'content-item';
+                
+                const typeText = {
+                    'preparation': 'تحضير',
+                    'homework': 'واجب'
+                };
+                
+                const subjectText = {
+                    'arabic': 'اللغة العربية',
+                    'math': 'الرياضيات',
+                    'science': 'العلوم',
+                    'english': 'الإنجليزية',
+                    'history': 'التاريخ',
+                    'philosophy': 'الفلسفة',
+                    'social': 'الاخصائي الاجتماعي'
+                };
+                
+                const uploadDate = file.uploadDate ? new Date(file.uploadDate.toDate()).toLocaleDateString('ar-EG') : 'غير محدد';
+                
+                item.innerHTML = `
+                    <div class="content-name">${file.title}</div>
+                    <div class="content-meta">
+                        <span>النوع: ${typeText[file.type] || file.type}</span>
+                        <span>المادة: ${subjectText[file.subject] || file.subject}</span>
+                        <span>التاريخ: ${uploadDate}</span>
+                        ${file.dueDate ? `<span>موعد التسليم: ${new Date(file.dueDate).toLocaleDateString('ar-EG')}</span>` : ''}
+                    </div>
+                    <div class="content-actions">
+                        ${file.fileUrl ? `<button class="content-btn" onclick="viewFile('${file.fileUrl}')">عرض</button>` : ''}
+                        ${file.fileUrl ? `<button class="content-btn" onclick="downloadFile('${file.fileUrl}', '${file.title}')">تحميل</button>` : ''}
+                        <button class="content-btn" onclick="deleteFile('${file.id}', '${file.type}')">حذف</button>
+                    </div>
+                `;
+                archiveList.appendChild(item);
+            });
         }
         
         // عرض الملف
@@ -1918,27 +1982,46 @@
             link.click();
         }
         
-        // حذف الملف
+        // حذف الملف من Firebase
         async function deleteFile(fileId, fileType) {
             if (!confirm('هل أنت متأكد من حذف هذا الملف؟')) {
                 return;
             }
             
             try {
-                const response = await fetch(`${API_BASE_URL}/files/${fileId}?type=${fileType}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    alert('تم حذف الملف بنجاح');
-                    loadArchiveList();
-                    updateStats();
+                let collectionName;
+                if (fileType === 'preparation') {
+                    collectionName = 'preparations';
+                } else if (fileType === 'homework') {
+                    collectionName = 'homeworks';
                 } else {
-                    const result = await response.json();
-                    alert(`خطأ في الحذف: ${result.error}`);
+                    alert('نوع الملف غير معروف');
+                    return;
                 }
+                
+                // Get file data to delete from storage if exists
+                const doc = await db.collection(collectionName).doc(fileId).get();
+                if (!doc.exists) {
+                    alert('الملف غير موجود');
+                    return;
+                }
+                
+                const fileData = doc.data();
+                
+                // Delete file from storage if exists
+                if (fileData.fileUrl) {
+                    const fileRef = storage.refFromURL(fileData.fileUrl);
+                    await fileRef.delete();
+                }
+                
+                // Delete document from Firestore
+                await db.collection(collectionName).doc(fileId).delete();
+                
+                alert('تم حذف الملف بنجاح');
+                loadArchiveList();
+                updateStats();
             } catch (error) {
-                alert('خطأ في الاتصال بالخادم');
+                alert('خطأ في حذف الملف: ' + error.message);
                 console.error('Error deleting file:', error);
             }
         }
@@ -2017,7 +2100,10 @@
             const messageData = {
                 recipient: recipient,
                 subject: subject,
-                content: content
+                content: content,
+                senderId: getCurrentUser().id || 'teacher_arabic',
+                senderName: getCurrentUser().name || 'أحمد العربي',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
             
             if (recipient === 'specific' && specificRecipient) {
@@ -2025,47 +2111,71 @@
             }
             
             try {
-                const response = await fetch(`${API_BASE_URL}/messages`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(messageData)
-                });
+                await db.collection('messages').add(messageData);
                 
-                const result = await response.json();
+                alert('تم إرسال الرسالة بنجاح!');
+                closeModal('messaging-modal');
                 
-                if (response.ok) {
-                    alert('تم إرسال الرسالة بنجاح!');
-                    closeModal('messaging-modal');
-                    
-                    // إعادة تعيين النموذج
-                    document.getElementById('message-subject').value = '';
-                    document.getElementById('message-content').value = '';
-                } else {
-                    alert(`خطأ في الإرسال: ${result.error}`);
-                }
+                // إعادة تعيين النموذج
+                document.getElementById('message-subject').value = '';
+                document.getElementById('message-content').value = '';
             } catch (error) {
-                alert('خطأ في الاتصال بالخادم');
+                alert('خطأ في إرسال الرسالة: ' + error.message);
                 console.error('Error sending message:', error);
             }
         }
         
-        // تحديث الإحصائيات
+        // تحديث الإحصائيات من Firebase
         async function updateStats() {
             try {
-                const response = await fetch(`${API_BASE_URL}/stats`);
-                const stats = await response.json();
+                // Get preparation files count
+                const prepSnapshot = await db.collection('preparations')
+                    .where('teacherId', '==', (getCurrentUser().id || 'teacher_arabic'))
+                    .get();
+                const prepFilesCount = prepSnapshot.size;
                 
-                if (response.ok) {
-                    document.getElementById('attendance-rate').textContent = `${stats.attendanceRate}%`;
-                    document.getElementById('homework-count').textContent = `${stats.homeworkCount}/${stats.totalHomeworks}`;
-                    document.getElementById('progress-rate').textContent = `${stats.progressRate}%`;
-                    document.getElementById('prep-files-count').textContent = stats.prepFilesCount;
-                }
+                // Get homeworks count
+                const hwSnapshot = await db.collection('homeworks')
+                    .where('teacherId', '==', (getCurrentUser().id || 'teacher_arabic'))
+                    .get();
+                const homeworkCount = hwSnapshot.size;
+                
+                // Get attendance rate (example calculation)
+                const today = new Date();
+                const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                
+                const attendanceSnapshot = await db.collection('attendance')
+                    .where('teacherId', '==', (getCurrentUser().id || 'teacher_arabic'))
+                    .where('date', '>=', oneWeekAgo.toISOString().split('T')[0])
+                    .get();
+                
+                let presentCount = 0;
+                let totalCount = 0;
+                
+                attendanceSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.status === 'present' || data.status === 'late') {
+                        presentCount++;
+                    }
+                    totalCount++;
+                });
+                
+                const attendanceRate = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0;
+                
+                // Update UI
+                document.getElementById('attendance-rate').textContent = `${attendanceRate}%`;
+                document.getElementById('homework-count').textContent = `${homeworkCount}`;
+                document.getElementById('prep-files-count').textContent = prepFilesCount;
+                
             } catch (error) {
                 console.error('Error updating stats:', error);
             }
+        }
+        
+        // الحصول على بيانات المستخدم الحالي
+        function getCurrentUser() {
+            const userData = localStorage.getItem('currentUser');
+            return userData ? JSON.parse(userData) : { id: 'teacher_arabic', name: 'أحمد العربي' };
         }
         
         // عرض حالة الرفع
@@ -2090,5 +2200,107 @@
             updateStats();
         });
     </script>
+    <script type="module">
+  import { auth, db, storage, onAuthStateChanged, signOut, collection, addDoc, getDocs, query, where, ref, uploadBytes, getDownloadURL } from "./firebase.js";
+
+  // نحصل على teacherId من رابط الصفحة
+  const urlParams = new URLSearchParams(window.location.search);
+  const teacherId = urlParams.get("teacherId");
+
+if (!teacherId) {
+  console.warn("⚠️ لم يتم العثور على teacherId — سيتم تعيين معرف افتراضي مؤقت.");
+}
+
+
+  // تأمين الجلسة (لو المستخدم مش داخل بحسابه)
+  onAuthStateChanged(auth, (user) => {
+    if (!user || user.uid !== teacherId) {
+      alert("يجب تسجيل الدخول أولًا");
+      window.location.href = "index.html";
+    }
+  });
+
+  // تسجيل الخروج
+  document.getElementById("header-logout-btn").addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
+
+  // ----------------------------
+  // رفع ملفات التحضير (prep files)
+  // ----------------------------
+  const prepForm = document.getElementById("prep-form");
+  const prepStatus = document.getElementById("prep-upload-status");
+
+  prepForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById("prep-file");
+    const file = fileInput.files[0];
+    if (!file) return alert("يرجى اختيار ملف!");
+
+    const subject = document.getElementById("prep-subject").value;
+    const title = document.getElementById("prep-title").value;
+    const date = document.getElementById("prep-date").value;
+
+    try {
+      // رفع الملف إلى Storage
+      const storageRef = ref(storage, `teachers/${teacherId}/preparations/${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+
+      // حفظ البيانات في Firestore
+      await addDoc(collection(db, "preparations"), {
+        teacherId,
+        subject,
+        title,
+        date,
+        fileName: file.name,
+        fileURL: url,
+        uploadedAt: new Date()
+      });
+
+      prepStatus.innerHTML = `<p style="color:green">✅ تم رفع الملف بنجاح!</p>`;
+      fileInput.value = "";
+    } catch (err) {
+      prepStatus.innerHTML = `<p style="color:red">❌ خطأ أثناء الرفع: ${err.message}</p>`;
+    }
+  });
+
+  // ----------------------------
+  // عرض الملفات المرفوعة
+  // ----------------------------
+  async function loadPrepFiles() {
+    const q = query(collection(db, "preparations"), where("teacherId", "==", teacherId));
+    const snapshot = await getDocs(q);
+    const list = document.getElementById("archive-list");
+    list.innerHTML = "";
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      list.innerHTML += `
+        <li class="content-item">
+          <div class="content-name">${data.title}</div>
+          <div class="content-meta">
+            <span>${data.subject}</span>
+            <span>${data.date}</span>
+          </div>
+          <div class="content-actions">
+            <a href="${data.fileURL}" target="_blank" class="content-btn">عرض الملف</a>
+          </div>
+        </li>
+      `;
+    });
+  }
+
+  // تحميل الملفات عند فتح صفحة الأرشيف
+  window.openArchiveModal = () => {
+    document.getElementById("archive-modal").style.display = "flex";
+    loadPrepFiles();
+  };
+
+  window.closeModal = (id) => {
+    document.getElementById(id).style.display = "none";
+  };
+</script>
+
 </body>
 </html>

@@ -18,6 +18,7 @@
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
             --sidebar-width: 260px;
+            --sidebar-collapsed: 70px;
         }
         
         .dark-mode {
@@ -69,11 +70,15 @@
             color: white;
             padding: 20px 0;
             box-shadow: var(--shadow);
-            z-index: 100;
+            z-index: 1000;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             transition: var(--transition);
+        }
+        
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
         }
         
         .sidebar-header {
@@ -83,6 +88,12 @@
             padding: 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             margin-bottom: 20px;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+        
+        .sidebar.collapsed .sidebar-header {
+            padding: 15px 10px;
         }
         
         .logo-container {
@@ -101,11 +112,23 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .logo {
+            width: 50px;
+            height: 50px;
         }
         
         .logo svg {
             width: 50px;
             height: 50px;
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .logo svg {
+            width: 30px;
+            height: 30px;
         }
         
         .logo-text {
@@ -115,11 +138,24 @@
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            visibility: hidden;
         }
         
         .user-info {
             text-align: center;
             margin-top: 10px;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+        
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            visibility: hidden;
         }
         
         .user-name {
@@ -155,6 +191,12 @@
             color: white;
             text-decoration: none;
             transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .sidebar.collapsed .menu-item a {
+            padding: 15px;
+            justify-content: center;
         }
         
         .menu-item a:hover, .menu-item.active a {
@@ -167,10 +209,23 @@
             font-size: 18px;
             width: 24px;
             text-align: center;
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .menu-item i {
+            margin-left: 0;
+            font-size: 20px;
         }
         
         .menu-item span {
             flex: 1;
+            transition: var(--transition);
+        }
+        
+        .sidebar.collapsed .menu-item span {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
         }
         
         .sidebar-footer {
@@ -183,12 +238,42 @@
             padding: 10px 15px;
         }
         
+        .sidebar.collapsed .sidebar-footer .menu-item a {
+            justify-content: center;
+        }
+        
+        .toggle-sidebar {
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 1001;
+        }
+        
+        .toggle-sidebar:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
         /* المحتوى الرئيسي */
         .main-content {
             flex: 1;
             margin-right: var(--sidebar-width);
             padding: 20px;
             transition: var(--transition);
+        }
+        
+        .sidebar.collapsed ~ .main-content {
+            margin-right: var(--sidebar-collapsed);
         }
         
         .header {
@@ -201,6 +286,8 @@
             justify-content: space-between;
             align-items: center;
             transition: var(--transition);
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         body.dark-mode .header {
@@ -212,12 +299,15 @@
             color: var(--primary);
             font-size: 28px;
             font-weight: 700;
+            flex: 1;
+            min-width: 300px;
         }
         
         .header-actions {
             display: flex;
             gap: 15px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .dark-mode-toggle, .back-btn, .filter-btn {
@@ -230,6 +320,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
         
         .dark-mode-toggle {
@@ -270,6 +361,8 @@
             box-shadow: var(--shadow);
             padding: 20px;
             transition: var(--transition);
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         body.dark-mode .courses-controls {
@@ -318,6 +411,7 @@
             display: flex;
             gap: 15px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .filter-select {
@@ -582,10 +676,129 @@
             font-size: 14px;
         }
         
+        /* عرض المقررات على الأجهزة المحمولة */
+        .mobile-courses {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .mobile-course {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        body.dark-mode .mobile-course {
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .mobile-course-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .mobile-course-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-size: 18px;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .mobile-course-title {
+            flex: 1;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .mobile-course-content {
+            padding: 15px;
+        }
+        
+        .mobile-course-teacher {
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .mobile-course-progress {
+            margin-bottom: 15px;
+        }
+        
+        .mobile-progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: var(--text-light);
+        }
+        
+        .mobile-course-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        
+        body.dark-mode .mobile-course-stats {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .mobile-course-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .mobile-course-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+        
         /* التصميم المتجاوب */
+        @media (max-width: 1200px) {
+            .header h1 {
+                font-size: 24px;
+                min-width: 250px;
+            }
+            
+            .header-actions {
+                gap: 10px;
+            }
+            
+            .dark-mode-toggle, .back-btn, .filter-btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+        
         @media (max-width: 992px) {
             .sidebar {
-                width: 80px;
+                width: var(--sidebar-collapsed);
             }
             
             .sidebar-header .logo-text,
@@ -595,7 +808,7 @@
             }
             
             .main-content {
-                margin-right: 80px;
+                margin-right: var(--sidebar-collapsed);
             }
             
             .menu-item a {
@@ -626,6 +839,10 @@
                 width: 100%;
                 justify-content: space-between;
             }
+            
+            .toggle-sidebar {
+                display: none;
+            }
         }
         
         @media (max-width: 768px) {
@@ -635,12 +852,21 @@
                 text-align: center;
             }
             
+            .header h1 {
+                min-width: auto;
+                text-align: center;
+            }
+            
             .header-actions {
                 justify-content: center;
             }
             
             .courses-grid {
-                grid-template-columns: 1fr;
+                display: none;
+            }
+            
+            .mobile-courses {
+                display: flex;
             }
             
             .courses-stats {
@@ -655,18 +881,80 @@
         @media (max-width: 576px) {
             .main-content {
                 padding: 15px;
+                margin-right: var(--sidebar-collapsed);
             }
             
             .sidebar {
-                width: 70px;
-            }
-            
-            .main-content {
-                margin-right: 70px;
+                width: var(--sidebar-collapsed);
             }
             
             .courses-stats {
                 grid-template-columns: 1fr;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .dark-mode-toggle, .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .filter-options {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .mobile-course-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .mobile-course-actions {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 10px;
+            }
+            
+            .header, .courses-controls {
+                padding: 15px;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                margin-left: 10px;
+                font-size: 16px;
+            }
+            
+            .stat-value {
+                font-size: 20px;
+            }
+            
+            .stat-label {
+                font-size: 12px;
+            }
+            
+            .mobile-course-header {
+                padding: 12px;
+            }
+            
+            .mobile-course-content {
+                padding: 12px;
             }
         }
     </style>
@@ -675,6 +963,9 @@
     <div class="dashboard-container">
         <!-- الشريط الجانبي -->
         <div class="sidebar">
+            <button class="toggle-sidebar" id="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="sidebar-header">
                 <div class="logo-container">
                     <div class="logo">
@@ -840,7 +1131,7 @@
                 </div>
             </div>
             
-            <!-- شبكة المقررات -->
+            <!-- شبكة المقررات للشاشات الكبيرة -->
             <div class="courses-grid">
                 <!-- مادة الرياضيات -->
                 <div class="course-card">
@@ -1242,6 +1533,58 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- عرض المقررات للأجهزة المحمولة -->
+            <div class="mobile-courses">
+                <!-- مادة الرياضيات -->
+                <div class="mobile-course">
+                    <div class="mobile-course-header">
+                        <div class="mobile-course-icon math">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="mobile-course-title">الرياضيات</div>
+                    </div>
+                    <div class="mobile-course-content">
+                        <div class="mobile-course-teacher">أ. أحمد محمد</div>
+                        <div class="mobile-course-progress">
+                            <div class="mobile-progress-text">
+                                <span>85% مكتمل</span>
+                                <span>12/14 وحدة</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill math" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="mobile-course-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">94%</div>
+                                <div class="stat-label">التقييم</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">18</div>
+                                <div class="stat-label">الواجبات</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">4</div>
+                                <div class="stat-label">الاختبارات</div>
+                            </div>
+                        </div>
+                        <div class="mobile-course-actions">
+                            <button class="mobile-course-btn btn-primary" onclick="openCourse('math')">
+                                <i class="fas fa-play"></i>
+                                <span>متابعة الدراسة</span>
+                            </button>
+                            <button class="mobile-course-btn btn-secondary" onclick="viewCourseDetails('math')">
+                                <i class="fas fa-info-circle"></i>
+                                <span>تفاصيل</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- باقي المقررات بنفس النمط -->
+                <!-- يمكن إضافة باقي المقررات بنفس الطريقة -->
+            </div>
         </div>
     </div>
 
@@ -1276,6 +1619,11 @@
         };
         
         document.getElementById('user-type').textContent = userTypeMap[currentUser.type][currentLanguage];
+        
+        // إعداد زر تبديل الشريط الجانبي
+        document.getElementById('toggle-sidebar').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        });
         
         // إعداد زر الوضع الداكن
         document.querySelectorAll('#dark-mode-toggle').forEach(btn => {
@@ -1314,6 +1662,7 @@
         document.getElementById('course-search').addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
             const courseCards = document.querySelectorAll('.course-card');
+            const mobileCourses = document.querySelectorAll('.mobile-course');
             
             courseCards.forEach(card => {
                 const title = card.querySelector('.course-title').textContent.toLowerCase();
@@ -1323,6 +1672,17 @@
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
+                }
+            });
+            
+            mobileCourses.forEach(course => {
+                const title = course.querySelector('.mobile-course-title').textContent.toLowerCase();
+                const teacher = course.querySelector('.mobile-course-teacher').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || teacher.includes(searchTerm)) {
+                    course.style.display = 'block';
+                } else {
+                    course.style.display = 'none';
                 }
             });
         });

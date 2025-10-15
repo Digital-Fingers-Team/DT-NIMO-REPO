@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "dt-edu-1d5ad"
-  }
+    "default": "dt-edu-f94cb"
+  },
+  "targets": {},
+  "etags": {}
 }

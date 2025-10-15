@@ -7,8 +7,203 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/progress-messages.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* تحسينات الاستجابة المضافة */
+        
+        /* هامبرغر القائمة للشاشات الصغيرة */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 10px;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1001;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* تحسينات الشريط الجانبي للاستجابة */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                top: 0;
+                right: 0;
+                z-index: 1000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 0;
+                width: 100%;
+                padding-top: 60px; /* مساحة للزر الهوامبرغر */
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            .sidebar-header {
+                padding: 15px;
+            }
+            
+            .sidebar-menu {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+            
+            .sidebar.active .sidebar-menu {
+                max-height: 500px;
+            }
+            
+            .sidebar-footer {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+            
+            .sidebar.active .sidebar-footer {
+                max-height: 200px;
+            }
+        }
+        
+        /* تحسينات بطاقات التقدم */
+        @media (max-width: 768px) {
+            .progress-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .progress-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .progress-icon {
+                margin-bottom: 10px;
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .progress-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* تحسينات المخططات */
+        @media (max-width: 768px) {
+            .progress-charts {
+                flex-direction: column;
+            }
+            
+            .chart-container {
+                width: 100%;
+                margin-bottom: 30px;
+            }
+            
+            .chart {
+                flex-direction: row;
+                height: 200px;
+                align-items: flex-end;
+            }
+            
+            .chart-bar {
+                width: 100%;
+                height: auto !important;
+                flex-direction: column-reverse;
+                margin: 0 5px;
+            }
+            
+            .chart-value {
+                margin-bottom: 5px;
+            }
+        }
+        
+        /* تحسينات الجدول */
+        @media (max-width: 992px) {
+            .progress-table-container {
+                overflow-x: auto;
+            }
+            
+            .progress-table {
+                min-width: 700px;
+            }
+        }
+        
+        /* تحسينات الرأس */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .header-actions button {
+                flex: 1;
+                max-width: 48%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .header-actions button {
+                max-width: 100%;
+            }
+        }
+        
+        /* تحسينات عامة */
+        @media (max-width: 768px) {
+            .progress-content {
+                padding: 15px;
+            }
+            
+            h1, h3 {
+                text-align: center;
+            }
+        }
+        
+        /* تحسينات للوضع الداكن */
+        .dark-mode .menu-toggle {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+    </style>
 </head>
 <body class="rtl">
+    <!-- زر القائمة للشاشات الصغيرة -->
+    <button id="menu-toggle" class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
     <div class="dashboard-container">
         <!-- الشريط الجانبي -->
         <div class="sidebar">
@@ -299,5 +494,35 @@
 
     <script src="js/main.js"></script>
     <script src="js/progress.js"></script>
+    <script>
+        // إضافة وظيفة القائمة للشاشات الصغيرة
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+                
+                // إغلاق القائمة عند النقر على رابط
+                const menuLinks = document.querySelectorAll('.sidebar-menu a');
+                menuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 992) {
+                            sidebar.classList.remove('active');
+                        }
+                    });
+                });
+                
+                // إغلاق القائمة عند النقر خارجها
+                document.addEventListener('click', function(event) {
+                    if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

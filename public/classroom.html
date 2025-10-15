@@ -32,6 +32,248 @@
             background-color: #f0f0f0;
         }
         
+        /* تحسينات الاستجابة للشاشات الصغيرة */
+        @media (max-width: 1024px) {
+            .kpi-panel {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+                width: 90%;
+                left: 5%;
+                transform: none;
+                top: 5px;
+            }
+            
+            .kpi-item {
+                padding: 0 5px;
+                min-width: 45%;
+            }
+            
+            .ai-panel, .digital-twin-panel, .sensor-data {
+                width: 280px;
+            }
+            
+            .status-indicator {
+                left: 300px;
+            }
+            
+            body.ltr .status-indicator {
+                right: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .kpi-panel {
+                position: relative;
+                top: 0;
+                left: 0;
+                transform: none;
+                width: 100%;
+                border-radius: 0;
+                padding: 5px;
+                background-color: rgba(0, 0, 0, 0.9);
+            }
+            
+            .kpi-item {
+                min-width: 45%;
+                margin-bottom: 5px;
+            }
+            
+            .ai-toggle, .twin-toggle, .language-toggle, .back-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            .ai-panel, .digital-twin-panel, .sensor-data {
+                width: 95%;
+                left: 2.5%;
+                right: 2.5%;
+            }
+            
+            body.ltr .ai-panel, 
+            body.ltr .digital-twin-panel, 
+            body.ltr .sensor-data {
+                left: 2.5%;
+                right: 2.5%;
+            }
+            
+            .status-indicator {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin: 5px auto;
+                width: 90%;
+                text-align: center;
+                justify-content: center;
+            }
+            
+            body.ltr .status-indicator {
+                right: auto;
+            }
+            
+            #info, .controls-info {
+                max-width: 90%;
+                font-size: 12px;
+                padding: 8px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+            
+            .digital-twin-controls {
+                flex-direction: column;
+            }
+            
+            .twin-control-btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .time-controls {
+                width: 95%;
+                left: 2.5%;
+                right: 2.5%;
+            }
+            
+            body.ltr .time-controls {
+                left: 2.5%;
+                right: 2.5%;
+            }
+            
+            .time-control-btn {
+                width: 30%;
+                margin: 2px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .kpi-panel {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .kpi-item {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .ai-toggle, .twin-toggle, .language-toggle, .back-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+                position: relative;
+                margin-bottom: 5px;
+            }
+            
+            #ai-toggle {
+                top: 5px;
+                left: 5px;
+            }
+            
+            body.ltr #ai-toggle {
+                left: auto;
+                right: 5px;
+            }
+            
+            #twin-toggle {
+                top: 45px;
+                left: 5px;
+            }
+            
+            body.ltr #twin-toggle {
+                left: auto;
+                right: 5px;
+            }
+            
+            #language-toggle {
+                top: 85px;
+                left: 5px;
+            }
+            
+            body.ltr #language-toggle {
+                left: auto;
+                right: 5px;
+            }
+            
+            #back-btn {
+                top: 125px;
+                left: 5px;
+            }
+            
+            body.ltr #back-btn {
+                left: auto;
+                right: 5px;
+            }
+            
+            .ai-panel, .digital-twin-panel, .sensor-data {
+                top: 160px;
+            }
+            
+            .time-controls {
+                top: 160px;
+            }
+            
+            .book-label {
+                font-size: 8px;
+                padding: 1px 3px;
+            }
+            
+            .modal-content {
+                padding: 10px;
+            }
+            
+            .close-btn {
+                top: 5px;
+                left: 5px;
+                font-size: 20px;
+            }
+            
+            body.ltr .close-btn {
+                left: auto;
+                right: 5px;
+            }
+            
+            h2 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+            
+            .info-row {
+                margin-bottom: 8px;
+            }
+        }
+        
+        /* تحسينات للشاشات الكبيرة جداً */
+        @media (min-width: 1600px) {
+            .ai-panel, .digital-twin-panel, .sensor-data {
+                width: 350px;
+            }
+            
+            .kpi-panel {
+                gap: 25px;
+            }
+            
+            .kpi-item {
+                padding: 0 15px;
+            }
+        }
+        
+        /* تحسينات عامة للاستجابة */
+        .ai-panel, .digital-twin-panel, .sensor-data, .time-controls {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .book-label {
+            max-width: 120px;
+            word-wrap: break-word;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        /* بقية الأنماط الأصلية */
         #info {
             position: absolute;
             top: 10px;
