@@ -8,13 +8,13 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstati
 
 // 2️⃣ Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyCPLU5MPZbNqUEBauKPWn8ui4eZUSzZf8s",
-  authDomain: "dt-edu-1d5ad.firebaseapp.com",
-  projectId: "dt-edu-1d5ad",
-  storageBucket: "dt-edu-1d5ad.firebasestorage.app",
-  messagingSenderId: "116202003139",
-  appId: "1:116202003139:web:9b6378faf2adf1e942a076",
-  measurementId: "G-Q3TSMV8QL1"
+  apiKey: "your-api-key-here",
+  authDomain: "dt-edu-f94cb.firebaseapp.com",
+  projectId: "dt-edu-f94cb",
+  storageBucket: "dt-edu-f94cb.firebasestorage.app",
+  messagingSenderId: "your-sender-id",
+  appId: "your-app-id",
+  measurementId: "your-measurement-id"
 };
 
 // 3️⃣ Initialize Firebase
@@ -24,4 +24,32 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 // 4️⃣ Export for use in other files
-export { auth, db, storage, signInWithEmailAndPassword, onAuthStateChanged, signOut, collection, addDoc, getDocs, query, where, ref, uploadBytes, getDownloadURL };
+export { 
+    auth, 
+    db, 
+    storage, 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged, 
+    signOut, 
+    collection, 
+    addDoc, 
+    getDocs, 
+    query, 
+    where, 
+    ref, 
+    uploadBytes, 
+    getDownloadURL,
+    // Additional exports for real-time features
+    onSnapshot: (query, callback) => {
+        // Real-time listener for Firestore
+        return query.onSnapshot ? query.onSnapshot(callback) : null;
+    },
+    serverTimestamp: () => {
+        // Server timestamp for Firestore
+        return new Date();
+    },
+    orderBy: (field, direction = 'asc') => {
+        // Order by for queries
+        return { field, direction };
+    }
+};
