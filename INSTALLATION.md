@@ -1,4 +1,4 @@
-# DT Edu - Installation & Deployment Guide
+# DT Edu F94CB - Installation & Deployment Guide
  
 ## 🎉 What's Included
 
@@ -24,8 +24,8 @@ Your **DT Edu Web Application** is now ready! This is a complete, modern educati
 
 ### Step 1: Extract the Files
 ```bash
-unzip dt-edu-web-app.zip
-cd dt-edu-web-app
+unzip dt-edu-f94cb-web-app.zip
+cd dt-edu-f94cb
 ```
 
 ### Step 2: Set Up Firebase
@@ -88,7 +88,7 @@ const firebaseConfig = {
 ## 📁 Project Structure
 
 ```
-dt-edu-web-app/
+dt-edu-f94cb/
 ├── 📄 README.md              # Comprehensive documentation
 ├── 📄 INSTALLATION.md        # This file
 ├── 🔧 firebase.json          # Firebase configuration

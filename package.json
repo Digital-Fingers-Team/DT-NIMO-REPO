@@ -1,5 +1,5 @@
 {
-  "name": "dt-edu-app",
+  "name": "dt-edu-f94cb",
   "version": "1.0.0",
   "description": "Dynamic Educational Web Application with Real-time Messaging and Document Management",
   "main": "public/index.html",
@@ -29,10 +29,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/dt-edu-app.git"
+    "url": "https://github.com/your-username/dt-edu-f94cb.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/dt-edu-app/issues"
+    "url": "https://github.com/your-username/dt-edu-f94cb/issues"
   },
   "homepage": "https://dt-edu-f94cb.web.app",
   "devDependencies": {

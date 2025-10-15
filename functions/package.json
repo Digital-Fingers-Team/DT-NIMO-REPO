@@ -1,5 +1,5 @@
 {
-  "name": "functions",
+  "name": "dt-edu-f94cb-functions",
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "lint": "echo 'Skipping lint check...'",

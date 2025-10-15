@@ -1,4 +1,4 @@
-# DT Edu - Dynamic Educational Web Application
+# DT Edu F94CB - Dynamic Educational Web Application
 
 A modern, responsive educational platform with real-time messaging, document management, and comprehensive dashboard features.
 
@@ -69,7 +69,7 @@ The application is fully responsive and optimized for:
 ### 1. Clone the Repository
 ```bash
 git clone <repository-url>
-cd dt-edu-app
+cd dt-edu-f94cb
 ```
 
 ### 2. Install Dependencies
@@ -142,7 +142,7 @@ firebase deploy
 ## 🏗 Project Structure
 
 ```
-dt-edu-app/
+dt-edu-f94cb/
 ├── public/
 │   ├── css/
 │   │   ├── main.css           # Main styles

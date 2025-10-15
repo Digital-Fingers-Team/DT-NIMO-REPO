@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# DT Edu Deployment Script
-echo "🚀 Starting DT Edu deployment..."
+# DT Edu F94CB Deployment Script
+echo "🚀 Starting DT Edu F94CB deployment..."
 
 # Check if Firebase CLI is installed
 if ! command -v firebase &> /dev/null; then
@@ -52,7 +52,7 @@ firebase deploy --only hosting
 
 echo "✅ Deployment completed successfully!"
 echo ""
-echo "🎉 Your DT Edu application is now live!"
+echo "🎉 Your DT Edu F94CB application is now live!"
 echo "📱 Access your app at: https://dt-edu-f94cb.web.app"
 echo ""
 echo "📊 Firebase Console: https://console.firebase.google.com/project/dt-edu-f94cb"
