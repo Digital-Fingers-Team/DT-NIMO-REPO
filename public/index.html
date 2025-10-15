@@ -1206,26 +1206,27 @@
         }).mount('#app');
     </script>
     <script type="module">
-  import { auth, signInWithEmailAndPassword } from "./firebase.js";
+      import { auth, signInWithEmailAndPassword, onAuthStateChanged } from "./firebase.js";
+      const form = document.getElementById("login-form");
 
-  const form = document.getElementById("login-form");
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          window.location.href = 'dashboard.html';
+        }
+      });
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // بعد تسجيل الدخول بنجاح، نحوله لصفحة الداشبورد الخاصة به
-      window.location.href = `dashboard.html?teacherId=${user.uid}`;
-    } catch (error) {
-      alert("خطأ في تسجيل الدخول: " + error.message);
-    }
-  });
-</script>
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          window.location.href = 'dashboard.html';
+        } catch (error) {
+          alert("خطأ في تسجيل الدخول: " + error.message);
+        }
+      });
+    </script>
 
 </body>
 </html>

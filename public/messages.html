@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الرسائل - DT Edu</title>
-    <link rel="stylesheet" href="styles/main.css">
+    
     <link rel="stylesheet" href="styles/progress-messages.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -198,7 +198,116 @@
         </div>
     </div>
 
-    <script src="js/main.js"></script>
-    <script src="js/messages.js"></script>
+    <script type="module">
+      import {
+        auth,
+        db,
+        onAuthStateChanged,
+        collection,
+        query,
+        where,
+        orderBy,
+        onSnapshot,
+        addDoc,
+        doc,
+        getDoc,
+        serverTimestamp
+      } from './firebase.js';
+
+      let currentChatId = null;
+      let unsubscribeMessages = null;
+
+      function renderMessage(msg, uid) {
+        const chatMessages = document.getElementById('chat-messages');
+        const wrapper = document.createElement('div');
+        const type = msg.senderId === uid ? 'sent' : 'received';
+        wrapper.className = `message ${type}`;
+        const time = msg.createdAt?.toDate ? msg.createdAt.toDate() : new Date();
+        const hh = time.getHours().toString().padStart(2, '0');
+        const mm = time.getMinutes().toString().padStart(2, '0');
+        wrapper.innerHTML = `<div>${msg.text || ''}</div><div class="message-time">${hh}:${mm}</div>`;
+        chatMessages.appendChild(wrapper);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      async function openChat(chatId, uid) {
+        currentChatId = chatId;
+        const chatRef = doc(db, 'chats', chatId);
+        const chatSnap = await getDoc(chatRef);
+        const chat = chatSnap.data();
+        document.getElementById('current-chat-name').textContent = chat?.title || 'Chat';
+        document.getElementById('current-chat-status').textContent = '';
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.innerHTML = '';
+        if (unsubscribeMessages) unsubscribeMessages();
+        const msgsQ = query(collection(chatRef, 'messages'), orderBy('createdAt', 'asc'));
+        unsubscribeMessages = onSnapshot(msgsQ, (snap) => {
+          chatMessages.innerHTML = '';
+          snap.forEach(d => renderMessage(d.data(), uid));
+        });
+      }
+
+      async function send(uid) {
+        if (!currentChatId) return;
+        const input = document.getElementById('message-input');
+        const text = input.value.trim();
+        if (!text) return;
+        const chatRef = doc(db, 'chats', currentChatId);
+        await addDoc(collection(chatRef, 'messages'), {
+          senderId: uid,
+          text,
+          createdAt: serverTimestamp()
+        });
+        input.value = '';
+      }
+
+      function initUI(uid) {
+        // Hook send button
+        document.querySelector('.send-btn').addEventListener('click', () => send(uid));
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') send(uid);
+        });
+        // New message button: create a personal chat
+        window.newMessage = async function() {
+          const title = prompt('اكتب عنوان المحادثة الجديدة');
+          if (!title) return;
+          const chatRef = await addDoc(collection(db, 'chats'), {
+            title,
+            members: [uid],
+            updatedAt: serverTimestamp()
+          });
+          openChat(chatRef.id, uid);
+        }
+        // Conversations sidebar: show chats where user is a member
+        const listEl = document.querySelector('.conversations-list');
+        const chatsQ = query(collection(db, 'chats'), where('members', 'array-contains', uid), orderBy('updatedAt', 'desc'));
+        onSnapshot(chatsQ, (snap) => {
+          // Keep header (first child), rebuild rest
+          const header = listEl.querySelector('.conversations-header');
+          listEl.innerHTML = '';
+          listEl.appendChild(header);
+          let firstChat = null;
+          snap.forEach(docSnap => {
+            const chat = docSnap.data();
+            if (!firstChat) firstChat = docSnap.id;
+            const item = document.createElement('div');
+            item.className = 'conversation-item';
+            const title = chat.title || 'Private Chat';
+            item.innerHTML = `<div class="conversation-avatar">•</div><div class="conversation-info"><div class="conversation-name">${title}</div><div class="conversation-preview"></div></div><div class="conversation-time"></div>`;
+            item.addEventListener('click', () => openChat(docSnap.id, uid));
+            listEl.appendChild(item);
+          });
+          if (firstChat) openChat(firstChat, uid);
+        });
+      }
+
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          window.location.href = 'index.html';
+          return;
+        }
+        initUI(user.uid);
+      });
+    </script>
 </body>
 </html>
