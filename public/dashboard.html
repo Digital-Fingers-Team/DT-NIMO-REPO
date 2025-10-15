@@ -7,10 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Add Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    <!-- Firebase handled via module imports in body -->
     
     <style>
         :root {
@@ -1369,20 +1366,6 @@
     </div>
 
     <script>
-        // Firebase configuration - Replace with your actual Firebase config
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
 
         // بيانات المثال
         const students = [
@@ -1646,117 +1629,9 @@
             document.getElementById('hw-file-name').textContent = fileName;
         });
         
-        // إعداد نموذج رفع التحضير مع Firebase
-        document.getElementById('prep-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const subject = document.getElementById('prep-subject').value;
-            const date = document.getElementById('prep-date').value;
-            const title = document.getElementById('prep-title').value;
-            const file = document.getElementById('prep-file').files[0];
-            
-            if (!subject || !date || !title || !file) {
-                showStatus('prep-upload-status', 'يرجى ملء جميع الحقول المطلوبة', 'error');
-                return;
-            }
-            
-            try {
-                showStatus('prep-upload-status', 'جاري رفع الملف...', 'loading');
-                
-                // Upload file to Firebase Storage
-                const storageRef = storage.ref();
-                const fileRef = storageRef.child(`preparations/${Date.now()}_${file.name}`);
-                const snapshot = await fileRef.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
-                
-                // Save preparation data to Firestore
-                await db.collection('preparations').add({
-                    subject: subject,
-                    date: date,
-                    title: title,
-                    fileUrl: downloadURL,
-                    fileName: file.name,
-                    fileType: file.type,
-                    uploadDate: firebase.firestore.FieldValue.serverTimestamp(),
-                    teacherId: getCurrentUser().id || 'teacher_arabic',
-                    teacherName: getCurrentUser().name || 'أحمد العربي'
-                });
-                
-                showStatus('prep-upload-status', 'تم رفع ملف التحضير بنجاح!', 'success');
-                // تحديث الإحصائيات
-                updateStats();
-                // إعادة تعيين النموذج
-                setTimeout(() => {
-                    this.reset();
-                    document.getElementById('file-name').textContent = '';
-                    closeModal('prep-modal');
-                }, 1500);
-            } catch (error) {
-                showStatus('prep-upload-status', 'خطأ في الرفع: ' + error.message, 'error');
-                console.error('Error uploading preparation:', error);
-            }
-        });
+        // Firebase interactions moved to module script at end
         
-        // إعداد نموذج رفع الواجب مع Firebase
-        document.getElementById('homework-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const title = document.getElementById('hw-title').value;
-            const subject = document.getElementById('hw-subject').value;
-            const description = document.getElementById('hw-description').value;
-            const dueDate = document.getElementById('hw-due-date').value;
-            const file = document.getElementById('hw-file').files[0];
-            
-            if (!title || !subject || !description || !dueDate) {
-                showStatus('hw-upload-status', 'يرجى ملء جميع الحقول المطلوبة', 'error');
-                return;
-            }
-            
-            try {
-                showStatus('hw-upload-status', 'جاري رفع الواجب...', 'loading');
-                
-                let downloadURL = null;
-                let fileName = null;
-                let fileType = null;
-                
-                if (file) {
-                    // Upload file to Firebase Storage
-                    const storageRef = storage.ref();
-                    const fileRef = storageRef.child(`homeworks/${Date.now()}_${file.name}`);
-                    const snapshot = await fileRef.put(file);
-                    downloadURL = await snapshot.ref.getDownloadURL();
-                    fileName = file.name;
-                    fileType = file.type;
-                }
-                
-                // Save homework data to Firestore
-                await db.collection('homeworks').add({
-                    title: title,
-                    subject: subject,
-                    description: description,
-                    dueDate: dueDate,
-                    fileUrl: downloadURL,
-                    fileName: fileName,
-                    fileType: fileType,
-                    uploadDate: firebase.firestore.FieldValue.serverTimestamp(),
-                    teacherId: getCurrentUser().id || 'teacher_arabic',
-                    teacherName: getCurrentUser().name || 'أحمد العربي'
-                });
-                
-                showStatus('hw-upload-status', 'تم رفع الواجب بنجاح!', 'success');
-                // تحديث الإحصائيات
-                updateStats();
-                // إعادة تعيين النموذج
-                setTimeout(() => {
-                    this.reset();
-                    document.getElementById('hw-file-name').textContent = '';
-                    closeModal('homework-modal');
-                }, 1500);
-            } catch (error) {
-                showStatus('hw-upload-status', 'خطأ في الرفع: ' + error.message, 'error');
-                console.error('Error uploading homework:', error);
-            }
-        });
+        // Firebase interactions moved to module script at end
         
         // تحميل قائمة الحضور
         function loadAttendanceList() {

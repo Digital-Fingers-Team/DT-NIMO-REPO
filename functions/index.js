@@ -29,6 +29,43 @@ async function uploadBufferToBucket(buffer, originalName, mimetype) {
   return `https://storage.googleapis.com/${bucket.name}/${filename}`;
 }
 
+// Helper: ensure auth via Firebase ID token in Authorization: Bearer
+async function getUserFromAuthHeader(req) {
+  const header = req.headers.authorization || '';
+  const match = header.match(/^Bearer (.*)$/i);
+  if (!match) return null;
+  try {
+    const decoded = await admin.auth().verifyIdToken(match[1]);
+    return decoded;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function getUserRoles(uid) {
+  try {
+    const snap = await db.collection('roles').doc(uid).get();
+    if (!snap.exists) return [];
+    const data = snap.data();
+    return Array.isArray(data.roles) ? data.roles : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function requireRole(roles) {
+  return async (req, res, next) => {
+    const user = await getUserFromAuthHeader(req);
+    if (!user) return res.status(401).json({ error: 'unauthenticated' });
+    const userRolesArr = await getUserRoles(user.uid);
+    const ok = roles.some(r => userRolesArr.includes(r));
+    if (!ok) return res.status(403).json({ error: 'forbidden' });
+    req.user = user;
+    req.userRoles = userRolesArr;
+    next();
+  };
+}
+
 // health
 app.get('/api/status', (req, res) => res.json({ ok: true, now: Date.now() }));
 
@@ -46,7 +83,7 @@ app.get('/api/stats', async (req, res) => {
 });
 
 // upload preparation
-app.post('/api/preparations', upload.single('file'), async (req, res) => {
+app.post('/api/preparations', requireRole(['teacher','principal','specialist']), upload.single('file'), async (req, res) => {
   try {
     const { subject, date, title } = req.body;
     if (!req.file) return res.status(400).json({ error: 'لم يتم رفع أي ملف' });
@@ -68,7 +105,7 @@ app.post('/api/preparations', upload.single('file'), async (req, res) => {
 });
 
 // upload homework
-app.post('/api/homeworks', upload.single('file'), async (req, res) => {
+app.post('/api/homeworks', requireRole(['teacher','principal','specialist']), upload.single('file'), async (req, res) => {
   try {
     const { title, subject, description, dueDate } = req.body;
     let fileUrl = null, fileName = null;
@@ -93,7 +130,7 @@ app.post('/api/homeworks', upload.single('file'), async (req, res) => {
 });
 
 // save attendance (expects array)
-app.post('/api/attendance', async (req, res) => {
+app.post('/api/attendance', requireRole(['teacher','principal','specialist']), async (req, res) => {
   try {
     const attendanceData = req.body;
     if (!Array.isArray(attendanceData)) return res.status(400).json({ error: 'بيانات الحضور غير صالحة' });
@@ -120,7 +157,7 @@ app.get('/api/files', async (req, res) => {
 });
 
 // delete file by id
-app.delete('/api/files/:id', async (req, res) => {
+app.delete('/api/files/:id', requireRole(['teacher','principal','specialist']), async (req, res) => {
   try {
     const id = req.params.id;
     const docRef = db.collection('files').doc(id);
@@ -139,10 +176,34 @@ app.delete('/api/files/:id', async (req, res) => {
 // send message
 app.post('/api/messages', async (req, res) => {
   try {
+    const user = await getUserFromAuthHeader(req);
+    if (!user) return res.status(401).json({ error: 'unauthenticated' });
     const { recipient, subject, content, specificRecipient } = req.body;
-    const doc = { recipient: recipient || null, subject: subject || null, content: content || null, specificRecipient: !!specificRecipient, ts: admin.firestore.FieldValue.serverTimestamp() };
+    const doc = { from: user.uid, recipient: recipient || null, subject: subject || null, content: content || null, specificRecipient: !!specificRecipient, ts: admin.firestore.FieldValue.serverTimestamp() };
     const ref = await db.collection('messages').add(doc);
     res.status(201).json({ id: ref.id, message: doc });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Ensure user profile exists (called by client after login)
+app.post('/api/profile/init', async (req, res) => {
+  try {
+    const user = await getUserFromAuthHeader(req);
+    if (!user) return res.status(401).json({ error: 'unauthenticated' });
+    const { displayName, role } = req.body || {};
+    const rolesDoc = db.collection('roles').doc(user.uid);
+    const current = await rolesDoc.get();
+    if (!current.exists) {
+      await rolesDoc.set({ roles: role && typeof role === 'string' ? [role] : [] });
+    }
+    await db.collection('profiles').doc(user.uid).set({
+      uid: user.uid,
+      displayName: displayName || user.name || user.email || 'User',
+      email: user.email || null,
+      photoURL: user.picture || null,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

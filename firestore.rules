@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+
+    // Helper to read roles array from roles/{uid}
+    function userRoles() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.roles
+        : [];
+    }
+
+    function hasAnyRole(required) {
+      return isSignedIn() && required.hasAny(userRoles());
+    }
+
+    match /roles/{userId} {
+      // Allow users to read their own role document
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      // Prevent clients from writing roles directly
+      allow write: if false;
+    }
+
+    // Chat model: chats/{chatId} with { members: [uid], title?, updatedAt }
+    match /chats/{chatId} {
+      allow read: if isSignedIn() && (request.auth.uid in resource.data.members);
+      // Create a chat where creator is a member and at least 2 members
+      allow create: if isSignedIn()
+        && request.resource.data.members is list
+        && request.resource.data.members.size() >= 2
+        && (request.auth.uid in request.resource.data.members);
+      // Update/delete only by members
+      allow update, delete: if isSignedIn() && (request.auth.uid in resource.data.members);
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn()
+          && (request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members);
+        allow create: if isSignedIn()
+          && (request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members)
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.createdAt is timestamp;
+        allow update, delete: if false;
+      }
+    }
+
+    // Public user profiles
+    match /profiles/{userId} {
+      allow read: if isSignedIn();
+      // Users can create/update only their own profile
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // Files uploaded metadata (listed by functions)
+    match /files/{fileId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && hasAnyRole(['teacher', 'principal', 'specialist']);
+      allow update, delete: if false;
+    }
+
+    // Attendance data can be created by staff roles
+    match /attendance/{docId} {
+      allow read: if hasAnyRole(['teacher', 'principal', 'specialist']);
+      allow create: if hasAnyRole(['teacher', 'principal', 'specialist']);
+      allow update, delete: if false;
+    }
+
+    // Broadcast messages (announcements)
+    match /messages/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+  }
+}

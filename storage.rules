@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() { return request.auth != null; }
+    function userRoles() {
+      return isSignedIn() && exists(/databases/(default)/documents/roles/$(request.auth.uid))
+        ? get(/databases/(default)/documents/roles/$(request.auth.uid)).data.roles
+        : [];
+    }
+    function hasAnyRole(required) { return isSignedIn() && required.hasAny(userRoles()); }
+
+    match /uploads/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if hasAnyRole(['teacher', 'principal', 'specialist']);
+    }
+  }
+}
