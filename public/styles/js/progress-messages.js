@@ -1,7 +1,8 @@
-// التحقق من تسجيل الدخول
+// التحقق من تسجيل الدخول (النسخة السابقة اعتمدت localStorage)
+// عند دمج Firebase لاحقاً يمكن استبدال هذا بالتحقق من onAuthStateChanged
 const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 if (!currentUser) {
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
 }
 
 // استعادة اللغة المحفوظة

@@ -867,7 +867,7 @@
                     </div>
                 </div>
                 
-                <form class="login-form" id="login-form" @submit.prevent="handleLogin">
+                <form class="login-form" id="login-form">
                     <div class="form-group">
                         <label for="username"><i class="fas fa-user"></i> <span id="username-label">{{ usernameLabel }}</span></label>
                         <input type="text" id="username" v-model="username" required>
@@ -1212,6 +1212,7 @@
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    e.stopImmediatePropagation();
     const email = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
@@ -1219,8 +1220,8 @@
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // بعد تسجيل الدخول بنجاح، نحوله لصفحة الداشبورد الخاصة به
-      window.location.href = `dashboard.html?teacherId=${user.uid}`;
+      // بعد تسجيل الدخول بنجاح، نحوله لصفحة الداشبورد
+      window.location.href = `dashboard.html`;
     } catch (error) {
       alert("خطأ في تسجيل الدخول: " + error.message);
     }
