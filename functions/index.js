@@ -1,4 +1,5 @@
-const functions = require('firebase-functions');
+const { onRequest } = require('firebase-functions/v2/https');
+const { setGlobalOptions } = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
@@ -6,6 +7,8 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 
+// Configure default region; you can change to your preferred region
+setGlobalOptions({ region: 'us-central1' });
 admin.initializeApp();
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
@@ -152,4 +155,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal Server Error' });
 });
 
-exports.api = functions.https.onRequest(app);
+// Gen2 HTTPS function
+exports.api = onRequest(app);
