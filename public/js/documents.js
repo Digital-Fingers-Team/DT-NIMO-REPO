@@ -21,13 +21,46 @@ class DocumentsManager {
     // Load documents from storage
     async loadDocuments() {
         try {
-            // In a real app, this would fetch from Firebase
+            // Try to load from Firebase Firestore
+            const firebaseModule = await import('../firebase.js');
+            const { collection, getDocs, query, orderBy } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
+            
+            const db = firebaseModule.db;
+            const documentsRef = collection(db, 'documents');
+            const q = query(documentsRef, orderBy('uploadDate', 'desc'));
+            
+            const snapshot = await getDocs(q);
+            this.documents = [];
+            
+            snapshot.forEach(doc => {
+                const docData = doc.data();
+                
+                // Convert Firestore timestamp to ISO string
+                if (docData.uploadDate && docData.uploadDate.toDate) {
+                    docData.uploadDate = docData.uploadDate.toDate().toISOString();
+                }
+                
+                this.documents.push({
+                    id: doc.id,
+                    ...docData
+                });
+            });
+            
+            // If no documents in Firebase, load sample data
+            if (this.documents.length === 0) {
+                this.documents = this.getSampleDocuments();
+            }
+            
+            this.renderDocuments();
+            this.updateStats();
+            console.log('Documents loaded successfully:', this.documents.length);
+            
+        } catch (error) {
+            console.error('Error loading documents from Firebase:', error);
+            // Fallback to sample documents
             this.documents = this.getSampleDocuments();
             this.renderDocuments();
             this.updateStats();
-        } catch (error) {
-            console.error('Error loading documents:', error);
-            window.dtEduApp?.showNotification('فشل في تحميل المستندات', 'error');
         }
     }
     
@@ -281,34 +314,142 @@ class DocumentsManager {
     
     // Upload single file
     async uploadSingleFile(file, metadata) {
-        return new Promise((resolve) => {
-            // Simulate upload delay
-            setTimeout(() => {
-                const newDoc = {
-                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    title: metadata.title,
-                    type: file.name.split('.').pop().toLowerCase(),
-                    size: this.formatFileSize(file.size),
-                    sizeBytes: file.size,
-                    uploadedBy: window.dtEduApp?.currentUser?.name || 'مستخدم',
-                    uploadDate: new Date().toISOString(),
-                    category: metadata.category,
-                    description: metadata.description,
-                    downloads: 0,
-                    isPublic: metadata.isPublic,
-                    url: URL.createObjectURL(file)
-                };
-                
-                this.documents.unshift(newDoc);
-                resolve(newDoc);
-            }, 1000);
-        });
+        try {
+            // Import Firebase Storage functions
+            const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js');
+            const { getFirestore, collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
+            
+            // Get Firebase instances
+            const firebaseModule = await import('../firebase.js');
+            const storage = firebaseModule.storage;
+            const db = firebaseModule.db;
+            
+            // Create unique filename
+            const fileName = `${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, `documents/${fileName}`);
+            
+            // Upload file with progress tracking
+            const uploadTask = uploadBytesResumable(storageRef, file);
+            
+            return new Promise((resolve, reject) => {
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        // Track upload progress
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log('Upload is ' + progress + '% done');
+                        this.updateUploadProgress(progress);
+                    },
+                    (error) => {
+                        // Handle upload error
+                        console.error('Upload error:', error);
+                        reject(error);
+                    },
+                    async () => {
+                        // Upload completed successfully
+                        try {
+                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                            
+                            // Save document metadata to Firestore
+                            const docData = {
+                                title: metadata.title,
+                                type: file.name.split('.').pop().toLowerCase(),
+                                size: this.formatFileSize(file.size),
+                                sizeBytes: file.size,
+                                uploadedBy: window.dtEduApp?.currentUser?.name || 'مستخدم',
+                                uploaderId: window.dtEduApp?.currentUser?.username || 'unknown',
+                                uploadDate: serverTimestamp(),
+                                category: metadata.category,
+                                description: metadata.description,
+                                downloads: 0,
+                                isPublic: metadata.isPublic,
+                                url: downloadURL,
+                                fileName: fileName
+                            };
+                            
+                            const docRef = await addDoc(collection(db, 'documents'), docData);
+                            
+                            // Create local document object
+                            const newDoc = {
+                                id: docRef.id,
+                                ...docData,
+                                uploadDate: new Date().toISOString()
+                            };
+                            
+                            this.documents.unshift(newDoc);
+                            resolve(newDoc);
+                            
+                        } catch (error) {
+                            console.error('Error saving document metadata:', error);
+                            reject(error);
+                        }
+                    }
+                );
+            });
+            
+        } catch (error) {
+            console.error('Error in uploadSingleFile:', error);
+            
+            // Fallback to local simulation
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const newDoc = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        title: metadata.title,
+                        type: file.name.split('.').pop().toLowerCase(),
+                        size: this.formatFileSize(file.size),
+                        sizeBytes: file.size,
+                        uploadedBy: window.dtEduApp?.currentUser?.name || 'مستخدم',
+                        uploadDate: new Date().toISOString(),
+                        category: metadata.category,
+                        description: metadata.description,
+                        downloads: 0,
+                        isPublic: metadata.isPublic,
+                        url: URL.createObjectURL(file)
+                    };
+                    
+                    this.documents.unshift(newDoc);
+                    resolve(newDoc);
+                }, 1000);
+            });
+        }
     }
     
     // Show upload progress
     showUploadProgress() {
-        // Implementation for upload progress bar
-        console.log('Showing upload progress...');
+        const modalBody = document.querySelector('#upload-modal .modal-body');
+        if (!modalBody) return;
+        
+        // Check if progress bar already exists
+        let progressContainer = modalBody.querySelector('.upload-progress-container');
+        
+        if (!progressContainer) {
+            progressContainer = document.createElement('div');
+            progressContainer.className = 'upload-progress-container';
+            progressContainer.style.marginTop = '1rem';
+            progressContainer.innerHTML = `
+                <div class="upload-progress">
+                    <div class="upload-progress-bar" style="width: 0%"></div>
+                </div>
+                <p class="upload-progress-text" style="text-align: center; margin-top: 0.5rem; color: var(--text-light);">
+                    جاري الرفع... 0%
+                </p>
+            `;
+            modalBody.appendChild(progressContainer);
+        }
+    }
+    
+    // Update upload progress
+    updateUploadProgress(progress) {
+        const progressBar = document.querySelector('.upload-progress-bar');
+        const progressText = document.querySelector('.upload-progress-text');
+        
+        if (progressBar) {
+            progressBar.style.width = progress + '%';
+        }
+        
+        if (progressText) {
+            progressText.textContent = `جاري الرفع... ${Math.round(progress)}%`;
+        }
     }
     
     // Render documents
@@ -482,26 +623,42 @@ class DocumentsManager {
     }
     
     // Download document
-    downloadDocument(docId) {
+    async downloadDocument(docId) {
         const doc = this.documents.find(d => d.id === docId);
         if (!doc) return;
         
-        // Increment download count
-        doc.downloads = (doc.downloads || 0) + 1;
-        this.updateStats();
+        try {
+            // Increment download count in Firestore
+            const { getFirestore, doc: firestoreDoc, updateDoc, increment } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
+            const firebaseModule = await import('../firebase.js');
+            const db = firebaseModule.db;
+            
+            const docRef = firestoreDoc(db, 'documents', docId);
+            await updateDoc(docRef, {
+                downloads: increment(1)
+            });
+            
+            // Update local count
+            doc.downloads = (doc.downloads || 0) + 1;
+            this.updateStats();
+            
+        } catch (error) {
+            console.error('Error updating download count:', error);
+        }
         
-        // In a real app, this would download from Firebase Storage
-        console.log('Downloading document:', doc.title);
+        // Download the file
+        window.dtEduApp?.showNotification(`جاري تحميل: ${doc.title}`, 'info');
         
         // Create download link
         const link = document.createElement('a');
         link.href = doc.url || '#';
         link.download = doc.title + '.' + doc.type;
+        link.target = '_blank';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        window.dtEduApp?.showNotification(`جاري تحميل: ${doc.title}`, 'info');
+        console.log('Document download initiated:', doc.title);
     }
     
     // View document

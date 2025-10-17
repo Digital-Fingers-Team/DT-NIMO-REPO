@@ -21,23 +21,31 @@ class MessagingSystem {
     // Initialize Firebase for real-time messaging
     async initializeFirebase() {
         try {
-            // Import Firebase modules
-            const { db, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp } = await import('../firebase.js');
+            // Import Firebase modules dynamically
+            const firebaseModule = await import('../firebase.js');
             
-            this.db = db;
-            this.collection = collection;
-            this.addDoc = addDoc;
-            this.getDocs = getDocs;
-            this.query = query;
-            this.where = where;
-            this.orderBy = orderBy;
+            this.db = firebaseModule.db;
+            this.collection = firebaseModule.collection;
+            this.addDoc = firebaseModule.addDoc;
+            this.getDocs = firebaseModule.getDocs;
+            this.query = firebaseModule.query;
+            this.where = firebaseModule.where;
+            this.orderBy = firebaseModule.orderBy;
+            
+            // Import Firestore functions
+            const { onSnapshot, serverTimestamp, doc, updateDoc, Timestamp } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
             this.onSnapshot = onSnapshot;
             this.serverTimestamp = serverTimestamp;
+            this.doc = doc;
+            this.updateDoc = updateDoc;
+            this.Timestamp = Timestamp;
             
             // Load existing conversations
             await this.loadFirebaseConversations();
+            console.log('Firebase messaging initialized successfully');
         } catch (error) {
             console.error('Firebase initialization error:', error);
+            console.log('Falling back to local storage mode');
             // Fallback to local storage if Firebase fails
             this.loadLocalConversations();
         }
@@ -65,25 +73,54 @@ class MessagingSystem {
     }
     
     // Setup real-time listeners
-    setupRealTimeListeners() {
-        if (!this.db) return;
+    async setupRealTimeListeners() {
+        if (!this.db || !this.activeConversation) return;
         
-        // Listen for new messages
-        const messagesRef = this.collection(this.db, 'messages');
-        const q = this.query(
-            messagesRef,
-            this.where('conversationId', '==', this.activeConversation?.id),
-            this.orderBy('timestamp', 'asc')
-        );
-        
-        this.onSnapshot(q, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'added') {
-                    const message = { id: change.doc.id, ...change.doc.data() };
-                    this.displayMessage(message);
-                }
+        try {
+            // Unsubscribe from previous listener if exists
+            if (this.messagesUnsubscribe) {
+                this.messagesUnsubscribe();
+            }
+            
+            // Import Firestore query functions
+            const { query, collection, where, orderBy, onSnapshot } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
+            
+            // Listen for new messages in active conversation
+            const messagesRef = collection(this.db, 'messages');
+            const q = query(
+                messagesRef,
+                where('conversationId', '==', this.activeConversation.id),
+                orderBy('timestamp', 'asc')
+            );
+            
+            this.messagesUnsubscribe = onSnapshot(q, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const message = { id: change.doc.id, ...change.doc.data() };
+                        
+                        // Convert Firestore timestamp to ISO string
+                        if (message.timestamp && message.timestamp.toDate) {
+                            message.timestamp = message.timestamp.toDate().toISOString();
+                        }
+                        
+                        // Only display if not already in DOM
+                        if (!document.querySelector(`[data-message-id="${message.id}"]`)) {
+                            this.displayMessage(message, true);
+                        }
+                    } else if (change.type === 'modified') {
+                        // Update message status
+                        const message = { id: change.doc.id, ...change.doc.data() };
+                        this.updateMessageStatus(message);
+                    }
+                });
+            }, (error) => {
+                console.error('Real-time listener error:', error);
             });
-        });
+            
+            console.log('Real-time message listener established');
+        } catch (error) {
+            console.error('Error setting up real-time listeners:', error);
+        }
     }
     
     // Load conversations (fallback to local data)
@@ -216,6 +253,9 @@ class MessagingSystem {
         
         // Mark as read
         this.markAsRead(conversationId);
+        
+        // Setup real-time listeners for this conversation
+        this.setupRealTimeListeners();
     }
     
     // Load messages for conversation
@@ -345,38 +385,59 @@ class MessagingSystem {
         const content = input.value.trim();
         input.value = '';
         
-        const message = {
-            conversationId: this.activeConversation.id,
-            senderId: this.currentUser.username,
-            senderName: this.currentUser.name,
-            content: content,
-            timestamp: new Date().toISOString(),
-            type: 'text',
-            status: 'sent'
-        };
-        
         try {
             if (this.db) {
+                // Import Firestore functions
+                const { collection, addDoc, serverTimestamp, doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
+                
+                // Create message object
+                const message = {
+                    conversationId: this.activeConversation.id,
+                    senderId: this.currentUser.username,
+                    senderName: this.currentUser.name || this.currentUser.username,
+                    content: content,
+                    timestamp: serverTimestamp(),
+                    type: 'text',
+                    status: 'sent'
+                };
+                
                 // Send to Firebase
-                const messagesRef = this.collection(this.db, 'messages');
-                await this.addDoc(messagesRef, {
-                    ...message,
-                    timestamp: this.serverTimestamp()
+                const messagesRef = collection(this.db, 'messages');
+                const docRef = await addDoc(messagesRef, message);
+                
+                console.log('Message sent successfully:', docRef.id);
+                
+                // Update conversation last message
+                const conversationRef = doc(this.db, 'conversations', this.activeConversation.id);
+                await updateDoc(conversationRef, {
+                    lastMessage: content,
+                    timestamp: serverTimestamp()
                 });
+                
+                // Update local conversation
+                this.updateConversationLastMessage(content);
+                
             } else {
-                // Store locally
+                // Fallback: Store locally
+                const message = {
+                    id: Date.now().toString(),
+                    conversationId: this.activeConversation.id,
+                    senderId: this.currentUser.username,
+                    senderName: this.currentUser.name || this.currentUser.username,
+                    content: content,
+                    timestamp: new Date().toISOString(),
+                    type: 'text',
+                    status: 'sent'
+                };
+                
                 this.displayMessage(message);
                 this.saveMessageLocally(message);
+                this.updateConversationLastMessage(content);
             }
-            
-            // Update conversation last message
-            this.updateConversationLastMessage(content);
             
         } catch (error) {
             console.error('Error sending message:', error);
-            // Fallback to local storage
-            this.displayMessage(message);
-            this.saveMessageLocally(message);
+            window.dtEduApp?.showNotification('فشل في إرسال الرسالة', 'error');
         }
         
         // Stop typing indicator
@@ -482,6 +543,24 @@ class MessagingSystem {
                 return '<i class="fas fa-check-double status-icon status-read"></i>';
             default:
                 return '';
+        }
+    }
+    
+    // Update message status
+    updateMessageStatus(message) {
+        const messageEl = document.querySelector(`[data-message-id="${message.id}"]`);
+        if (!messageEl) return;
+        
+        const statusEl = messageEl.querySelector('.message-status');
+        if (statusEl) {
+            statusEl.innerHTML = this.getStatusIcon(message.status);
+        }
+    }
+    
+    // Clean up listeners on page unload
+    cleanup() {
+        if (this.messagesUnsubscribe) {
+            this.messagesUnsubscribe();
         }
     }
     
