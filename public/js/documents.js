@@ -7,6 +7,7 @@ class DocumentsManager {
         this.currentFilter = 'all';
         this.searchQuery = '';
         this.selectedFiles = [];
+        this.unsubscribeDocsListener = null;
         
         this.init();
     }
@@ -21,14 +22,61 @@ class DocumentsManager {
     // Load documents from storage
     async loadDocuments() {
         try {
-            // In a real app, this would fetch from Firebase
-            this.documents = this.getSampleDocuments();
-            this.renderDocuments();
-            this.updateStats();
+            // Try Firebase first
+            await this.initializeFirebase();
+            if (this.db) {
+                this.attachRealtimeDocuments();
+            } else {
+                // Fallback to samples
+                this.documents = this.getSampleDocuments();
+                this.renderDocuments();
+                this.updateStats();
+            }
         } catch (error) {
             console.error('Error loading documents:', error);
             window.dtEduApp?.showNotification('فشل في تحميل المستندات', 'error');
         }
+    }
+
+    async initializeFirebase() {
+        try {
+            const { auth, onAuthStateChanged, db, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, storage, ref, uploadBytes, getDownloadURL } = await import('../firebase.js');
+            this.auth = auth;
+            this.onAuthStateChanged = onAuthStateChanged;
+            this.db = db;
+            this.collection = collection;
+            this.addDoc = addDoc;
+            this.getDocs = getDocs;
+            this.query = query;
+            this.where = where;
+            this.orderBy = orderBy;
+            this.onSnapshot = onSnapshot;
+            this.serverTimestamp = serverTimestamp;
+            this.storage = storage;
+            this.ref = ref;
+            this.uploadBytes = uploadBytes;
+            this.getDownloadURL = getDownloadURL;
+        } catch (e) {
+            // Ignore, fallback handled by caller
+        }
+    }
+
+    attachRealtimeDocuments() {
+        if (!this.db) return;
+        if (typeof this.unsubscribeDocsListener === 'function') {
+            this.unsubscribeDocsListener();
+            this.unsubscribeDocsListener = null;
+        }
+
+        const docsRef = this.collection(this.db, 'documents');
+        const q = this.query(docsRef, this.orderBy('uploadDate', 'desc'));
+        this.unsubscribeDocsListener = this.onSnapshot(q, (snapshot) => {
+            const docs = [];
+            snapshot.forEach(d => docs.push({ id: d.id, ...d.data() }));
+            this.documents = docs;
+            this.renderDocuments();
+            this.updateStats();
+        });
     }
     
     // Get sample documents
@@ -257,21 +305,34 @@ class DocumentsManager {
         try {
             // Show progress
             this.showUploadProgress();
-            
-            // Simulate upload process
-            for (let i = 0; i < this.selectedFiles.length; i++) {
-                const file = this.selectedFiles[i];
-                await this.uploadSingleFile(file, {
-                    title: this.selectedFiles.length > 1 ? `${title} - ${i + 1}` : title,
-                    category,
-                    description,
-                    isPublic
-                });
+
+            if (this.db && this.storage) {
+                // Upload to Firebase Storage and create Firestore entries
+                for (let i = 0; i < this.selectedFiles.length; i++) {
+                    const file = this.selectedFiles[i];
+                    await this.uploadSingleFileFirebase(file, {
+                        title: this.selectedFiles.length > 1 ? `${title} - ${i + 1}` : title,
+                        category,
+                        description,
+                        isPublic
+                    });
+                }
+            } else {
+                // Fallback simulate upload process
+                for (let i = 0; i < this.selectedFiles.length; i++) {
+                    const file = this.selectedFiles[i];
+                    await this.uploadSingleFileLocal(file, {
+                        title: this.selectedFiles.length > 1 ? `${title} - ${i + 1}` : title,
+                        category,
+                        description,
+                        isPublic
+                    });
+                }
             }
-            
+
             window.dtEduApp?.showNotification('تم رفع المستندات بنجاح', 'success');
             this.hideUploadModal();
-            this.loadDocuments();
+            // Listeners will refresh the list automatically
             
         } catch (error) {
             console.error('Upload error:', error);
@@ -279,10 +340,34 @@ class DocumentsManager {
         }
     }
     
-    // Upload single file
-    async uploadSingleFile(file, metadata) {
+    // Upload single file - Firebase
+    async uploadSingleFileFirebase(file, metadata) {
+        const currentUser = window.dtEduApp?.currentUser || {};
+        const path = `documents/${(currentUser.uid || 'anonymous')}/${Date.now()}_${file.name}`;
+        const storageRef = this.ref(this.storage, path);
+        await this.uploadBytes(storageRef, file);
+        const url = await this.getDownloadURL(storageRef);
+
+        const docsRef = this.collection(this.db, 'documents');
+        await this.addDoc(docsRef, {
+            title: metadata.title,
+            type: file.name.split('.').pop().toLowerCase(),
+            size: this.formatFileSize(file.size),
+            sizeBytes: file.size,
+            uploadedBy: currentUser.uid || currentUser.username || 'anonymous',
+            uploaderName: currentUser.name || currentUser.email || 'مستخدم',
+            uploadDate: this.serverTimestamp(),
+            category: metadata.category,
+            description: metadata.description,
+            downloads: 0,
+            isPublic: metadata.isPublic,
+            url
+        });
+    }
+
+    // Upload single file - Local fallback
+    async uploadSingleFileLocal(file, metadata) {
         return new Promise((resolve) => {
-            // Simulate upload delay
             setTimeout(() => {
                 const newDoc = {
                     id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -298,10 +383,9 @@ class DocumentsManager {
                     isPublic: metadata.isPublic,
                     url: URL.createObjectURL(file)
                 };
-                
                 this.documents.unshift(newDoc);
                 resolve(newDoc);
-            }, 1000);
+            }, 800);
         });
     }
     
@@ -523,7 +607,9 @@ class DocumentsManager {
         if (['jpg', 'jpeg', 'png', 'gif'].includes(doc.type.toLowerCase())) {
             viewerContent = `<img src="${doc.url}" alt="${doc.title}">`;
         } else if (doc.type.toLowerCase() === 'pdf') {
-            viewerContent = `<iframe src="${doc.url}" type="application/pdf"></iframe>`;
+            // Use Google Docs viewer when url is a Firebase Storage URL to improve compatibility
+            const safeUrl = encodeURIComponent(doc.url);
+            viewerContent = `<iframe src="https://drive.google.com/viewerng/viewer?embedded=true&url=${safeUrl}" type="application/pdf"></iframe>`;
         } else {
             viewerContent = `
                 <div class="document-preview-placeholder">
@@ -608,6 +694,13 @@ function hideDocumentViewer() {
 document.addEventListener('DOMContentLoaded', () => {
     window.documentsManager = new DocumentsManager();
 });
+
+// Global helper to create a folder from HTML onclick
+function createFolder() {
+    if (window.documentsManager) {
+        window.documentsManager.createFolder();
+    }
+}
 
 // Close modals when clicking outside
 document.addEventListener('click', (e) => {

@@ -4,6 +4,8 @@ class MessagingSystem {
         this.currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
         this.conversations = new Map();
         this.activeConversation = null;
+        this.unsubscribeMessagesListener = null;
+        this.initialMessagesLoaded = false;
         this.socket = null;
         this.typingTimer = null;
         this.isTyping = false;
@@ -22,20 +24,54 @@ class MessagingSystem {
     async initializeFirebase() {
         try {
             // Import Firebase modules
-            const { db, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp } = await import('../firebase.js');
+            const { 
+                auth,
+                onAuthStateChanged,
+                db, 
+                collection, 
+                addDoc, 
+                getDocs, 
+                getDoc,
+                setDoc,
+                updateDoc,
+                doc,
+                query, 
+                where, 
+                orderBy, 
+                onSnapshot, 
+                serverTimestamp 
+            } = await import('../firebase.js');
             
+            this.auth = auth;
+            this.onAuthStateChanged = onAuthStateChanged;
             this.db = db;
             this.collection = collection;
             this.addDoc = addDoc;
             this.getDocs = getDocs;
+            this.getDoc = getDoc;
+            this.setDoc = setDoc;
+            this.updateDoc = updateDoc;
+            this.doc = doc;
             this.query = query;
             this.where = where;
             this.orderBy = orderBy;
             this.onSnapshot = onSnapshot;
             this.serverTimestamp = serverTimestamp;
             
-            // Load existing conversations
-            await this.loadFirebaseConversations();
+            // Watch auth and then load conversations
+            this.onAuthStateChanged(this.auth, async (user) => {
+                if (user) {
+                    // Prefer Firebase auth user
+                    this.currentUser = {
+                        ...this.currentUser,
+                        uid: user.uid,
+                        email: user.email,
+                        name: this.currentUser.name || user.email,
+                        username: this.currentUser.username || user.email
+                    };
+                }
+                await this.loadFirebaseConversations();
+            });
         } catch (error) {
             console.error('Firebase initialization error:', error);
             // Fallback to local storage if Firebase fails
@@ -47,15 +83,19 @@ class MessagingSystem {
     async loadFirebaseConversations() {
         try {
             const conversationsRef = this.collection(this.db, 'conversations');
+            const participantTokens = [];
+            if (this.currentUser.uid) participantTokens.push(this.currentUser.uid);
+            if (this.currentUser.username) participantTokens.push(this.currentUser.username);
             const q = this.query(
                 conversationsRef,
-                this.where('participants', 'array-contains', this.currentUser.username)
+                this.where('participants', 'array-contains-any', participantTokens.length ? participantTokens : ['public'])
             );
             
             const snapshot = await this.getDocs(q);
-            snapshot.forEach(doc => {
-                const conversation = { id: doc.id, ...doc.data() };
-                this.conversations.set(doc.id, conversation);
+            this.conversations.clear();
+            snapshot.forEach(d => {
+                const conversation = { id: d.id, ...d.data() };
+                this.conversations.set(d.id, conversation);
             });
             
             this.renderConversations();
@@ -66,17 +106,34 @@ class MessagingSystem {
     
     // Setup real-time listeners
     setupRealTimeListeners() {
-        if (!this.db) return;
-        
-        // Listen for new messages
+        if (!this.db || !this.activeConversation?.id) return;
+
+        // Tear down previous listener if any
+        if (typeof this.unsubscribeMessagesListener === 'function') {
+            this.unsubscribeMessagesListener();
+            this.unsubscribeMessagesListener = null;
+        }
+
         const messagesRef = this.collection(this.db, 'messages');
         const q = this.query(
             messagesRef,
-            this.where('conversationId', '==', this.activeConversation?.id),
+            this.where('conversationId', '==', this.activeConversation.id),
             this.orderBy('timestamp', 'asc')
         );
-        
-        this.onSnapshot(q, (snapshot) => {
+
+        // Reset state and container for new conversation
+        this.initialMessagesLoaded = false;
+        const container = document.getElementById('chat-messages') || document.querySelector('.chat-messages');
+        if (container) container.innerHTML = '';
+
+        this.unsubscribeMessagesListener = this.onSnapshot(q, (snapshot) => {
+            if (!this.initialMessagesLoaded) {
+                const messages = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                this.displayMessages(messages);
+                this.initialMessagesLoaded = true;
+                return;
+            }
+
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                     const message = { id: change.doc.id, ...change.doc.data() };
@@ -208,8 +265,8 @@ class MessagingSystem {
         
         document.querySelector(`[onclick*="${conversationId}"]`)?.classList.add('active');
         
-        // Load messages
-        this.loadMessages(conversationId);
+        // Attach real-time listener for this conversation
+        this.setupRealTimeListeners();
         
         // Update chat header
         this.updateChatHeader();
@@ -222,21 +279,8 @@ class MessagingSystem {
     async loadMessages(conversationId) {
         try {
             if (this.db) {
-                // Load from Firebase
-                const messagesRef = this.collection(this.db, 'messages');
-                const q = this.query(
-                    messagesRef,
-                    this.where('conversationId', '==', conversationId),
-                    this.orderBy('timestamp', 'asc')
-                );
-                
-                const snapshot = await this.getDocs(q);
-                const messages = [];
-                snapshot.forEach(doc => {
-                    messages.push({ id: doc.id, ...doc.data() });
-                });
-                
-                this.displayMessages(messages);
+                // Real-time listener will handle rendering
+                return;
             } else {
                 // Load from local storage
                 this.loadLocalMessages(conversationId);
@@ -347,8 +391,8 @@ class MessagingSystem {
         
         const message = {
             conversationId: this.activeConversation.id,
-            senderId: this.currentUser.username,
-            senderName: this.currentUser.name,
+            senderId: this.currentUser.uid || this.currentUser.username,
+            senderName: this.currentUser.name || this.currentUser.email || 'مستخدم',
             content: content,
             timestamp: new Date().toISOString(),
             type: 'text',
@@ -363,6 +407,15 @@ class MessagingSystem {
                     ...message,
                     timestamp: this.serverTimestamp()
                 });
+
+                // Update conversation last message
+                try {
+                    const convRef = this.doc(this.db, 'conversations', this.activeConversation.id);
+                    await this.updateDoc(convRef, {
+                        lastMessage: content,
+                        timestamp: this.serverTimestamp()
+                    });
+                } catch (_) {}
             } else {
                 // Store locally
                 this.displayMessage(message);
@@ -527,28 +580,37 @@ class MessagingSystem {
     
     // Create new conversation
     async createConversation(participantId, participantName) {
-        const conversationId = `conv_${Date.now()}`;
-        const conversation = {
-            id: conversationId,
+        const baseConversation = {
             name: participantName,
             avatar: participantName.substring(0, 2),
             lastMessage: '',
             timestamp: new Date().toISOString(),
             unreadCount: 0,
-            participants: [this.currentUser.username, participantId],
+            participants: [
+                this.currentUser.uid || this.currentUser.username,
+                participantId
+            ].filter(Boolean),
             type: 'user'
         };
-        
+
         try {
             if (this.db) {
                 const conversationsRef = this.collection(this.db, 'conversations');
-                await this.addDoc(conversationsRef, conversation);
+                const newDocRef = await this.addDoc(conversationsRef, {
+                    ...baseConversation,
+                    timestamp: this.serverTimestamp()
+                });
+                const conversation = { id: newDocRef.id, ...baseConversation };
+                this.conversations.set(conversation.id, conversation);
+                this.renderConversations();
+                this.selectConversation(conversation.id);
+            } else {
+                const conversationId = `conv_${Date.now()}`;
+                const conversation = { id: conversationId, ...baseConversation };
+                this.conversations.set(conversationId, conversation);
+                this.renderConversations();
+                this.selectConversation(conversationId);
             }
-            
-            this.conversations.set(conversationId, conversation);
-            this.renderConversations();
-            this.selectConversation(conversationId);
-            
         } catch (error) {
             console.error('Error creating conversation:', error);
         }
@@ -574,6 +636,10 @@ function sendMessage() {
 }
 
 function newMessage() {
-    // Implementation for creating new message dialog
-    console.log('New message dialog');
+    const participantId = prompt('أدخل معرف المستخدم (UID أو اسم المستخدم):');
+    if (!participantId) return;
+    const participantName = prompt('أدخل اسم المستخدم الظاهر:') || participantId;
+    if (window.messagingSystem) {
+        window.messagingSystem.createConversation(participantId.trim(), participantName.trim());
+    }
 }
