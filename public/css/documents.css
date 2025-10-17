@@ -147,7 +147,7 @@
 
 /* Documents Container */
 .documents-container {
-    background: white;
+    background: linear-gradient(180deg, #ffffff, #fafbff);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     padding: var(--spacing-lg);

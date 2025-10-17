@@ -27,14 +27,14 @@
 
 /* Dark Mode Variables */
 [data-theme="dark"] {
-    --light: #1a1a1a;
-    --dark: #f8f9fa;
-    --text: #e0e0e0;
-    --text-light: #b0b0b0;
-    --text-lighter: #888;
-    --border: #333;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --light: #111315;
+    --dark: #0b0d0f;
+    --text: #e6e9ef;
+    --text-light: #b7c0cd;
+    --text-lighter: #93a1b5;
+    --border: #2a2f37;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.6);
 }
 
 /* Reset and Base Styles */
@@ -167,7 +167,7 @@ body.rtl {
 
 /* Header */
 .header {
-    background: white;
+    background: linear-gradient(180deg, #ffffff, #fafbff);
     padding: var(--spacing-lg);
     border-bottom: 1px solid var(--border);
     display: flex;
@@ -266,7 +266,7 @@ body.rtl {
 
 /* Cards */
 .card {
-    background: white;
+    background: linear-gradient(180deg, #ffffff, #fafbff);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     padding: var(--spacing-lg);

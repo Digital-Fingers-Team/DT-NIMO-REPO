@@ -1146,18 +1146,35 @@
                 togglePasswordVisibility() {
                     this.showPassword = !this.showPassword;
                 },
-                handleLogin() {
+                async handleLogin() {
+                    // Prefer Firebase Auth if configured
+                    try {
+                        const module = await import('./firebase.js');
+                        const { auth, signInWithEmailAndPassword, ensureUserProfile } = module;
+                        const credential = await signInWithEmailAndPassword(auth, this.username, this.password);
+                        const user = credential.user;
+                        try { await ensureUserProfile(); } catch (_) {}
+                        localStorage.setItem('currentLanguage', this.currentLanguage);
+                        // Store minimal profile locally for existing pages
+                        const mapped = {
+                            username: user.email || user.uid,
+                            type: this.selectedUserType || 'student',
+                            name: user.displayName || (user.email ? user.email.split('@')[0] : 'مستخدم')
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(mapped));
+                        window.location.href = 'dashboard.html';
+                        return;
+                    } catch (e) {
+                        // fallback to local accounts list
+                    }
                     const user = users.find(u => u.username === this.username && u.password === this.password);
-                    
                     if (user) {
                         if (this.selectedUserType && user.type !== this.selectedUserType) {
                             alert(this.currentLanguage === 'ar' ? 'نوع المستخدم غير صحيح' : 'User type is incorrect');
                             return;
                         }
-                        
                         localStorage.setItem('currentUser', JSON.stringify(user));
                         localStorage.setItem('currentLanguage', this.currentLanguage);
-                        
                         window.location.href = 'dashboard.html';
                     } else {
                         alert(this.currentLanguage === 'ar' ? 'اسم المستخدم أو كلمة المرور غير صحيحة' : 'Invalid username or password');
@@ -1205,27 +1222,7 @@
             }
         }).mount('#app');
     </script>
-    <script type="module">
-  import { auth, signInWithEmailAndPassword } from "./firebase.js";
-
-  const form = document.getElementById("login-form");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // بعد تسجيل الدخول بنجاح، نحوله لصفحة الداشبورد الخاصة به
-      window.location.href = `dashboard.html?teacherId=${user.uid}`;
-    } catch (error) {
-      alert("خطأ في تسجيل الدخول: " + error.message);
-    }
-  });
-</script>
+    <!-- Firebase module is loaded internally by the login handler when needed -->
 
 </body>
 </html>
