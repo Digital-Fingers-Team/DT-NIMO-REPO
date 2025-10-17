@@ -13,8 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Firebase CLI
+        run: npm i -g firebase-tools
+      - name: Deploy Cloud Functions (preview)
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DT_EDU_F94CB }}
+        run: firebase deploy --only functions --project dt-edu-f94cb --non-interactive
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DT_EDU_1D5AD }}
-          projectId: dt-edu-1d5ad
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DT_EDU_F94CB }}
+          projectId: dt-edu-f94cb
