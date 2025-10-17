@@ -1,4 +1,6 @@
-const functions = require('firebase-functions');
+const { onRequest } = require('firebase-functions/v2/https');
+const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
@@ -410,65 +412,66 @@ app.use((error, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// Export the Express app as a Firebase Function
-exports.api = functions.https.onRequest(app);
+// Export the Express app as a Firebase Function (Gen 2)
+exports.api = onRequest({
+  region: 'us-central1',
+  memory: '256MiB',
+  timeoutSeconds: 60,
+  maxInstances: 10
+}, app);
 
-// Real-time triggers
+// Real-time triggers (Gen 2)
 
 // Trigger when a new message is added
-exports.onMessageCreated = functions.firestore
-  .document('messages/{messageId}')
-  .onCreate(async (snap, context) => {
-    const message = snap.data();
-    const messageId = context.params.messageId;
-    
-    console.log('New message created:', messageId, message);
-    
-    // Here you could add push notifications, email notifications, etc.
-    // For now, we'll just log the event
-    
-    return null;
-  });
+exports.onMessageCreated = onDocumentCreated('messages/{messageId}', async (event) => {
+  const message = event.data.data();
+  const messageId = event.params.messageId;
+  
+  console.log('New message created:', messageId, message);
+  
+  // Here you could add push notifications, email notifications, etc.
+  
+  return null;
+});
 
 // Trigger when a document is uploaded
-exports.onDocumentCreated = functions.firestore
-  .document('documents/{documentId}')
-  .onCreate(async (snap, context) => {
-    const document = snap.data();
-    const documentId = context.params.documentId;
-    
-    console.log('New document uploaded:', documentId, document);
-    
-    // Here you could add notifications to relevant users
-    
-    return null;
-  });
+exports.onDocumentCreated = onDocumentCreated('documents/{documentId}', async (event) => {
+  const document = event.data.data();
+  const documentId = event.params.documentId;
+  
+  console.log('New document uploaded:', documentId, document);
+  
+  // Here you could add notifications to relevant users
+  
+  return null;
+});
 
 // Cleanup old messages (runs daily)
-exports.cleanupOldMessages = functions.pubsub
-  .schedule('0 2 * * *') // Run at 2 AM daily
-  .timeZone('Asia/Riyadh')
-  .onRun(async (context) => {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 90); // Keep messages for 90 days
-    
-    const oldMessagesSnapshot = await db
-      .collection('messages')
-      .where('timestamp', '<', cutoffDate)
-      .get();
-    
-    const batch = db.batch();
-    let deleteCount = 0;
-    
-    oldMessagesSnapshot.forEach(doc => {
-      batch.delete(doc.ref);
-      deleteCount++;
-    });
-    
-    if (deleteCount > 0) {
-      await batch.commit();
-      console.log(`Deleted ${deleteCount} old messages`);
-    }
-    
-    return null;
+exports.cleanupOldMessages = onSchedule({
+  schedule: '0 2 * * *', // Run at 2 AM daily
+  timeZone: 'Asia/Riyadh',
+  region: 'us-central1'
+}, async (event) => {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - 90); // Keep messages for 90 days
+  
+  const oldMessagesSnapshot = await db
+    .collection('messages')
+    .where('timestamp', '<', cutoffDate)
+    .get();
+  
+  const batch = db.batch();
+  let deleteCount = 0;
+  
+  oldMessagesSnapshot.forEach(doc => {
+    batch.delete(doc.ref);
+    deleteCount++;
   });
+  
+  if (deleteCount > 0) {
+    await batch.commit();
+    console.log(`Deleted ${deleteCount} old messages`);
+  }
+  
+  return null;
+});
