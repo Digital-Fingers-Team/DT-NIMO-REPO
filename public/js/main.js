@@ -259,6 +259,10 @@ class DTEduApp {
         if (confirm(confirmLogout)) {
             localStorage.removeItem('currentUser');
             localStorage.removeItem('currentLanguage');
+            // Also sign out Firebase if loaded
+            try {
+                import('../firebase.js').then(({ auth, signOut }) => signOut(auth)).catch(() => {});
+            } catch (_) {}
             window.location.href = 'index.html';
         }
     }

@@ -18,16 +18,35 @@ class DocumentsManager {
         this.setupFileUpload();
     }
     
-    // Load documents from storage
+    // Load documents from API/Firestore via Cloud Functions
     async loadDocuments() {
         try {
-            // In a real app, this would fetch from Firebase
-            this.documents = this.getSampleDocuments();
+            const response = await fetch('/api/documents');
+            if (!response.ok) throw new Error('Failed to fetch documents');
+            const data = await response.json();
+            this.documents = (data.documents || []).map(d => ({
+                id: d.id,
+                title: d.title,
+                type: (d.fileName?.split('.').pop() || '').toLowerCase(),
+                size: this.formatFileSize(d.fileSize || 0),
+                sizeBytes: d.fileSize || 0,
+                uploadedBy: d.uploadedBy,
+                uploadDate: d.uploadDate?.toDate ? d.uploadDate.toDate().toISOString() : d.uploadDate || new Date().toISOString(),
+                category: d.category || 'other',
+                description: d.description || '',
+                downloads: d.downloads || 0,
+                isPublic: !!d.isPublic,
+                url: d.downloadURL || '#'
+            }));
             this.renderDocuments();
             this.updateStats();
         } catch (error) {
             console.error('Error loading documents:', error);
-            window.dtEduApp?.showNotification('فشل في تحميل المستندات', 'error');
+            // Fallback to sample data
+            this.documents = this.getSampleDocuments();
+            this.renderDocuments();
+            this.updateStats();
+            window.dtEduApp?.showNotification('تم عرض بيانات تجريبية للمستندات', 'warning');
         }
     }
     
@@ -255,24 +274,27 @@ class DocumentsManager {
         }
         
         try {
-            // Show progress
             this.showUploadProgress();
-            
-            // Simulate upload process
-            for (let i = 0; i < this.selectedFiles.length; i++) {
-                const file = this.selectedFiles[i];
-                await this.uploadSingleFile(file, {
-                    title: this.selectedFiles.length > 1 ? `${title} - ${i + 1}` : title,
-                    category,
-                    description,
-                    isPublic
-                });
-            }
-            
+
+            const formData = new FormData();
+            // Only upload first file if multiple selected for now (could iterate)
+            formData.append('file', this.selectedFiles[0]);
+            formData.append('title', title);
+            formData.append('category', category);
+            formData.append('description', description);
+            formData.append('isPublic', String(isPublic));
+            formData.append('uploadedBy', window.dtEduApp?.currentUser?.username || 'anonymous');
+
+            const response = await fetch('/api/documents/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+
             window.dtEduApp?.showNotification('تم رفع المستندات بنجاح', 'success');
-            this.hideUploadModal();
-            this.loadDocuments();
-            
+            hideUploadModal();
+            await this.loadDocuments();
         } catch (error) {
             console.error('Upload error:', error);
             window.dtEduApp?.showNotification('فشل في رفع المستندات', 'error');
@@ -280,30 +302,7 @@ class DocumentsManager {
     }
     
     // Upload single file
-    async uploadSingleFile(file, metadata) {
-        return new Promise((resolve) => {
-            // Simulate upload delay
-            setTimeout(() => {
-                const newDoc = {
-                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    title: metadata.title,
-                    type: file.name.split('.').pop().toLowerCase(),
-                    size: this.formatFileSize(file.size),
-                    sizeBytes: file.size,
-                    uploadedBy: window.dtEduApp?.currentUser?.name || 'مستخدم',
-                    uploadDate: new Date().toISOString(),
-                    category: metadata.category,
-                    description: metadata.description,
-                    downloads: 0,
-                    isPublic: metadata.isPublic,
-                    url: URL.createObjectURL(file)
-                };
-                
-                this.documents.unshift(newDoc);
-                resolve(newDoc);
-            }, 1000);
-        });
-    }
+    async uploadSingleFile(file, metadata) { /* deprecated path kept for compatibility */ }
     
     // Show upload progress
     showUploadProgress() {
@@ -482,25 +481,26 @@ class DocumentsManager {
     }
     
     // Download document
-    downloadDocument(docId) {
+    async downloadDocument(docId) {
         const doc = this.documents.find(d => d.id === docId);
         if (!doc) return;
-        
-        // Increment download count
-        doc.downloads = (doc.downloads || 0) + 1;
-        this.updateStats();
-        
-        // In a real app, this would download from Firebase Storage
-        console.log('Downloading document:', doc.title);
-        
+        try {
+            await fetch(`/api/documents/${encodeURIComponent(docId)}/download`, { method: 'POST' });
+        } catch (_) {
+            // ignore
+        }
+
         // Create download link
-        const link = document.createElement('a');
-        link.href = doc.url || '#';
-        link.download = doc.title + '.' + doc.type;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
+        if (doc.url && doc.url !== '#') {
+            const link = document.createElement('a');
+            link.href = doc.url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         window.dtEduApp?.showNotification(`جاري تحميل: ${doc.title}`, 'info');
     }
     

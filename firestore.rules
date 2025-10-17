@@ -17,7 +17,7 @@ service cloud.firestore {
     // Messages collection
     match /messages/{messageId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null && 
+      allow create: if request.auth != null &&
         request.auth.uid == request.resource.data.senderId;
       allow update: if request.auth != null && (
         request.auth.uid == resource.data.senderId ||
@@ -33,13 +33,13 @@ service cloud.firestore {
         resource.data.isPublic == true ||
         request.auth.uid == resource.data.uploadedBy
       );
-      
+
       // Only authenticated users can create documents
-      allow create: if request.auth != null && 
+      allow create: if request.auth != null &&
         request.auth.uid == request.resource.data.uploadedBy;
-      
+
       // Only document owner can update/delete
-      allow update, delete: if request.auth != null && 
+      allow update, delete: if request.auth != null &&
         request.auth.uid == resource.data.uploadedBy;
     }
     

@@ -1,12 +1,13 @@
-// Real-time Messaging System
+// Real-time Messaging System (Firestore-backed)
 class MessagingSystem {
     constructor() {
         this.currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
+        this.currentUserId = null;
         this.conversations = new Map();
         this.activeConversation = null;
-        this.socket = null;
         this.typingTimer = null;
         this.isTyping = false;
+        this.unsubscribeMessages = null;
         
         this.init();
     }
@@ -15,15 +16,13 @@ class MessagingSystem {
         this.loadConversations();
         this.setupEventListeners();
         this.initializeFirebase();
-        this.setupRealTimeListeners();
     }
     
     // Initialize Firebase for real-time messaging
     async initializeFirebase() {
         try {
-            // Import Firebase modules
-            const { db, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp } = await import('../firebase.js');
-            
+            const { db, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, auth, onAuthStateChanged, doc, updateDoc } = await import('../firebase.js');
+
             this.db = db;
             this.collection = collection;
             this.addDoc = addDoc;
@@ -33,14 +32,27 @@ class MessagingSystem {
             this.orderBy = orderBy;
             this.onSnapshot = onSnapshot;
             this.serverTimestamp = serverTimestamp;
-            
-            // Load existing conversations
+            this.auth = auth;
+            this.doc = doc;
+            this.updateDoc = updateDoc;
+
+            this.currentUserId = this.auth.currentUser?.uid || null;
+            if (onAuthStateChanged) {
+                onAuthStateChanged(this.auth, (user) => {
+                    this.currentUserId = user ? user.uid : null;
+                });
+            }
+
             await this.loadFirebaseConversations();
         } catch (error) {
             console.error('Firebase initialization error:', error);
             // Fallback to local storage if Firebase fails
             this.loadLocalConversations();
         }
+    }
+
+    getSelfId() {
+        return this.currentUserId || this.currentUser.username;
     }
     
     // Load conversations from Firebase
@@ -49,7 +61,7 @@ class MessagingSystem {
             const conversationsRef = this.collection(this.db, 'conversations');
             const q = this.query(
                 conversationsRef,
-                this.where('participants', 'array-contains', this.currentUser.username)
+                this.where('participants', 'array-contains', this.getSelfId())
             );
             
             const snapshot = await this.getDocs(q);
@@ -64,19 +76,22 @@ class MessagingSystem {
         }
     }
     
-    // Setup real-time listeners
-    setupRealTimeListeners() {
-        if (!this.db) return;
-        
-        // Listen for new messages
+    // Setup real-time listener for active conversation
+    subscribeToActiveConversation() {
+        if (!this.db || !this.activeConversation) return;
+        if (this.unsubscribeMessages) {
+            this.unsubscribeMessages();
+            this.unsubscribeMessages = null;
+        }
+
         const messagesRef = this.collection(this.db, 'messages');
         const q = this.query(
             messagesRef,
-            this.where('conversationId', '==', this.activeConversation?.id),
+            this.where('conversationId', '==', this.activeConversation.id),
             this.orderBy('timestamp', 'asc')
         );
-        
-        this.onSnapshot(q, (snapshot) => {
+
+        this.unsubscribeMessages = this.onSnapshot(q, (snapshot) => {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                     const message = { id: change.doc.id, ...change.doc.data() };
@@ -208,8 +223,9 @@ class MessagingSystem {
         
         document.querySelector(`[onclick*="${conversationId}"]`)?.classList.add('active');
         
-        // Load messages
+        // Load messages and subscribe realtime
         this.loadMessages(conversationId);
+        this.subscribeToActiveConversation();
         
         // Update chat header
         this.updateChatHeader();
@@ -347,7 +363,7 @@ class MessagingSystem {
         
         const message = {
             conversationId: this.activeConversation.id,
-            senderId: this.currentUser.username,
+            senderId: this.getSelfId(),
             senderName: this.currentUser.name,
             content: content,
             timestamp: new Date().toISOString(),
@@ -357,12 +373,22 @@ class MessagingSystem {
         
         try {
             if (this.db) {
-                // Send to Firebase
                 const messagesRef = this.collection(this.db, 'messages');
                 await this.addDoc(messagesRef, {
                     ...message,
                     timestamp: this.serverTimestamp()
                 });
+                // Update conversation metadata
+                try {
+                    if (this.updateDoc && this.doc) {
+                        const convRef = this.doc(this.db, 'conversations', this.activeConversation.id);
+                        await this.updateDoc(convRef, {
+                            lastMessage: content,
+                            lastMessageTime: this.serverTimestamp(),
+                            lastMessageSender: this.getSelfId()
+                        });
+                    }
+                } catch (_) {}
             } else {
                 // Store locally
                 this.displayMessage(message);
@@ -446,9 +472,7 @@ class MessagingSystem {
     }
     
     sendTypingIndicator(isTyping) {
-        // Implementation for real-time typing indicator
-        // This would typically use WebSocket or Firebase real-time database
-        console.log(`${this.currentUser.name} is ${isTyping ? 'typing' : 'not typing'}`);
+        // TODO: optional typing indicator via presence collection
     }
     
     // Utility functions
