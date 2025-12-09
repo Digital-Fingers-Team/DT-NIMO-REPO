@@ -1,0 +1,1325 @@
+<!-- parent-payments.html -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المدفوعات - DT Edu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --primary-dark: #3a56d4;
+            --secondary: #6c5ce7;
+            --accent: #00b894;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --text: #333;
+            --text-light: #666;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --sidebar-width: 260px;
+        }
+
+        .dark-mode {
+            --light: #1a1a2e;
+            --dark: #f8f9fa;
+            --text: #e6e6e6;
+            --text-light: #b0b0b0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+            transition: var(--transition);
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+        }
+
+        body.rtl { direction: rtl; }
+        body.ltr { direction: ltr; }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        body.rtl .sidebar { right: 0; }
+        body.ltr .sidebar { left: 0; }
+        body.rtl .main-content { margin-right: var(--sidebar-width); }
+        body.ltr .main-content { margin-left: var(--sidebar-width); margin-right: 0; }
+
+        .sidebar-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .logo svg { width: 50px; height: 50px; }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, white, #e1f0fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .user-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .user-type {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 15px;
+        }
+
+        .menu-item {
+            margin-bottom: 8px;
+            border-radius: 10px;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .menu-item a:hover,
+        .menu-item.active a {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        body.rtl .menu-item a:hover,
+        body.rtl .menu-item.active a { transform: translateX(-5px); }
+        body.ltr .menu-item a:hover,
+        body.ltr .menu-item.active a { transform: translateX(5px); }
+
+        .menu-item i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        body.rtl .menu-item i { margin-left: 10px; }
+        body.ltr .menu-item i { margin-right: 10px; }
+
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .header {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .dark-mode-toggle,
+        .logout-btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dark-mode-toggle {
+            background: rgba(74, 108, 247, 0.1);
+            color: var(--primary);
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(74, 108, 247, 0.2);
+        }
+
+        .logout-btn {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        .children-selector {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        body.dark-mode .children-selector {
+            background: var(--light);
+        }
+
+        .children-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .child-tab {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .child-tab:hover,
+        .child-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .stat-card {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        body.rtl .stat-icon { margin-left: 15px; }
+        body.ltr .stat-icon { margin-right: 15px; }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .payments-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        body.dark-mode .payments-card {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .payments-table th,
+        .payments-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        body.dark-mode .payments-table th,
+        body.dark-mode .payments-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.rtl .payments-table th,
+        body.rtl .payments-table td {
+            text-align: right;
+        }
+
+        body.ltr .payments-table th,
+        body.ltr .payments-table td {
+            text-align: left;
+        }
+
+        .payments-table th {
+            background: rgba(74, 108, 247, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: rgba(0, 184, 148, 0.1); color: #00b894; }
+        .badge-warning { background: rgba(243, 156, 18, 0.1); color: #f39c12; }
+        .badge-danger { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
+
+        .pay-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pay-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .download-btn {
+            background: rgba(0, 184, 148, 0.1);
+            color: #00b894;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .download-btn:hover {
+            background: rgba(0, 184, 148, 0.2);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+        }
+
+        body.dark-mode .modal-content {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-mode .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--accent);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select {
+            background: #2d3748;
+            border-color: #4a5568;
+            color: var(--dark);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        body.dark-mode .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            font-weight: 600;
+            animation: slideDown 0.3s ease;
+        }
+
+        .toast-success {
+            background: #00b894;
+            color: white;
+        }
+
+        .toast-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .toast-info {
+            background: #3498db;
+            color: white;
+        }
+
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 0); opacity: 1; }
+            to { transform: translate(-50%, -100%); opacity: 0; }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar { width: 80px; }
+            .sidebar-header .logo-text,
+            .user-info,
+            .menu-item span { display: none; }
+            body.rtl .main-content { margin-right: 80px; }
+            body.ltr .main-content { margin-left: 80px; }
+            .menu-item a {
+                justify-content: center;
+                padding: 15px;
+            }
+            .menu-item i {
+                margin: 0;
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-cards { grid-template-columns: 1fr; }
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .payments-table {
+                font-size: 14px;
+            }
+            .payments-table th,
+            .payments-table td {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content { padding: 15px; }
+            .sidebar { width: 70px; }
+            body.rtl .main-content { margin-right: 70px; }
+            body.ltr .main-content { margin-left: 70px; }
+        }
+    </style>
+</head>
+<body class="rtl">
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#4a6cf7"/>
+                                <stop offset="100%" stop-color="#00b894"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
+                        <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
+                        <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
+                        <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
+                        <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
+                    </svg>
+                </div>
+                <div class="logo-text">DT Edu</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name">ولي الأمر</div>
+                    <div class="user-type" id="user-type">Parent</div>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="parent-dashboard.html">
+                        <i class="fas fa-home"></i>
+                        <span id="menu-dashboard">لوحة التحكم</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="parent-children.html">
+                        <i class="fas fa-child"></i>
+                        <span id="menu-children">الأبناء</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="parent-attendance.html">
+                        <i class="fas fa-calendar-check"></i>
+                        <span id="menu-attendance">الحضور والغياب</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="parent-grades.html">
+                        <i class="fas fa-chart-line"></i>
+                        <span id="menu-grades">الدرجات والتقييمات</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="parent-messages.html">
+                        <i class="fas fa-comments"></i>
+                        <span id="menu-messages">الرسائل</span>
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a href="parent-payments.html">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span id="menu-payments">المدفوعات</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="parent-settings.html">
+                        <i class="fas fa-cog"></i>
+                        <span id="menu-settings">الإعدادات</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="#" id="sidebar-dark-mode-toggle">
+                            <i class="fas fa-moon"></i>
+                            <span id="dark-mode-text">الوضع الداكن</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" id="sidebar-language-toggle">
+                            <i class="fas fa-language"></i>
+                            <span id="language-text">English</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span id="logout-text">تسجيل الخروج</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1 id="page-title">المدفوعات</h1>
+                <div class="header-actions">
+                    <button class="dark-mode-toggle" id="dark-mode-toggle">
+                        <i class="fas fa-moon"></i>
+                        <span id="header-dark-mode-text">الوضع الداكن</span>
+                    </button>
+                    <button class="logout-btn" onclick="window.location.href='index.html'">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span id="header-logout-text">تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="children-selector">
+                <h3 id="select-child-title" style="margin-bottom: 15px; color: var(--text);">اختر الابن/الابنة:</h3>
+                <div class="children-tabs">
+                    <button class="child-tab active" data-child="أحمد محمد">
+                        <i class="fas fa-user"></i>
+                        <span>أحمد محمد</span>
+                    </button>
+                    <button class="child-tab" data-child="فاطمة محمد">
+                        <i class="fas fa-user"></i>
+                        <span>فاطمة محمد</span>
+                    </button>
+                    <button class="child-tab" data-child="عمر محمد">
+                        <i class="fas fa-user"></i>
+                        <span>عمر محمد</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #00b894, #00d2ff);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="total-paid">0</div>
+                        <div class="stat-label" id="paid-label">المدفوع (ريال)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="total-pending">0</div>
+                        <div class="stat-label" id="pending-label">المستحق (ريال)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4a6cf7, #6c5ce7);">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="total-amount">0</div>
+                        <div class="stat-label" id="total-label">الإجمالي (ريال)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="total-overdue">0</div>
+                        <div class="stat-label" id="overdue-label">المتأخر (ريال)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payments-card">
+                <h2 class="card-title">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span id="payment-history-title">سجل المدفوعات</span>
+                </h2>
+                <div class="table-container">
+                    <table class="payments-table">
+                        <thead>
+                            <tr>
+                                <th id="th-invoice">#الفاتورة</th>
+                                <th id="th-description">الوصف</th>
+                                <th id="th-amount">المبلغ</th>
+                                <th id="th-due-date">تاريخ الاستحقاق</th>
+                                <th id="th-status">الحالة</th>
+                                <th id="th-actions">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-tbody">
+                            <!-- البيانات سيتم إضافتها بواسطة JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Payment -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="paymentModalTitle">تأكيد الدفع</div>
+                <button class="modal-close" id="closePaymentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label for="invoiceId">رقم الفاتورة</label>
+                        <input type="text" id="invoiceId" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentName">اسم الطالب</label>
+                        <input type="text" id="studentName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentAmount">المبلغ المطلوب (ريال)</label>
+                        <input type="number" id="paymentAmount" step="0.01" min="0" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentDescription">الوصف</label>
+                        <input type="text" id="paymentDescription" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentDate">تاريخ الدفع</label>
+                        <input type="date" id="paymentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentMethod">طريقة الدفع</label>
+                        <select id="paymentMethod" required>
+                            <option value="">اختر طريقة الدفع</option>
+                            <option value="credit_card">بطاقة ائتمان</option>
+                            <option value="bank_transfer">تحويل بنكي</option>
+                            <option value="cash">نقدي</option>
+                            <option value="online">دفع إلكتروني</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelPayment">إلغاء</button>
+                <button class="btn btn-primary" id="confirmPayment">تأكيد الدفع</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تهيئة قاعدة البيانات
+        let paymentsDB;
+        
+        function initDatabase() {
+            paymentsDB = new Dexie('PaymentsDB');
+            paymentsDB.version(1).stores({
+                payments: '++id, parentName, studentName, amount, status, date, invoiceId, description'
+            });
+            return paymentsDB.open();
+        }
+
+        // بيانات المدفوعات الافتراضية
+        const defaultPayments = [
+            {
+                invoiceId: 'INV-2024-001',
+                description: 'الرسوم الدراسية - الفصل الأول',
+                amount: 10000,
+                dueDate: '2024-09-01',
+                status: 'pending'
+            },
+            {
+                invoiceId: 'INV-2024-002',
+                description: 'رسوم النقل المدرسي',
+                amount: 3000,
+                dueDate: '2024-10-01',
+                status: 'pending'
+            },
+            {
+                invoiceId: 'INV-2024-003',
+                description: 'رسوم الأنشطة المدرسية',
+                amount: 2000,
+                dueDate: '2024-10-15',
+                status: 'pending'
+            },
+            {
+                invoiceId: 'INV-2024-004',
+                description: 'الرسوم الدراسية - الفصل الثاني',
+                amount: 10000,
+                dueDate: '2024-12-01',
+                status: 'pending'
+            }
+        ];
+
+        // الترجمة
+        const translations = {
+            ar: {
+                pageTitle: 'المدفوعات',
+                userType: 'ولي أمر',
+                menuDashboard: 'لوحة التحكم',
+                menuChildren: 'الأبناء',
+                menuAttendance: 'الحضور والغياب',
+                menuGrades: 'الدرجات والتقييمات',
+                menuMessages: 'الرسائل',
+                menuPayments: 'المدفوعات',
+                menuSettings: 'الإعدادات',
+                darkModeText: 'الوضع الداكن',
+                languageText: 'English',
+                logoutText: 'تسجيل الخروج',
+                selectChildTitle: 'اختر الابن/الابنة:',
+                paidLabel: 'المدفوع (ريال)',
+                pendingLabel: 'المستحق (ريال)',
+                totalLabel: 'الإجمالي (ريال)',
+                overdueLabel: 'المتأخر (ريال)',
+                paymentHistoryTitle: 'سجل المدفوعات',
+                thInvoice: '#الفاتورة',
+                thDescription: 'الوصف',
+                thAmount: 'المبلغ',
+                thDueDate: 'تاريخ الاستحقاق',
+                thStatus: 'الحالة',
+                thActions: 'الإجراءات',
+                statusPaid: 'مدفوع',
+                statusPending: 'مستحق',
+                download: 'تحميل',
+                payNow: 'ادفع الآن',
+                confirmPayment: 'تأكيد الدفع',
+                cancel: 'إلغاء'
+            },
+            en: {
+                pageTitle: 'Payments',
+                userType: 'Parent',
+                menuDashboard: 'Dashboard',
+                menuChildren: 'Children',
+                menuAttendance: 'Attendance',
+                menuGrades: 'Grades',
+                menuMessages: 'Messages',
+                menuPayments: 'Payments',
+                menuSettings: 'Settings',
+                darkModeText: 'Dark Mode',
+                languageText: 'العربية',
+                logoutText: 'Logout',
+                selectChildTitle: 'Select Child:',
+                paidLabel: 'Paid (SAR)',
+                pendingLabel: 'Pending (SAR)',
+                totalLabel: 'Total (SAR)',
+                overdueLabel: 'Overdue (SAR)',
+                paymentHistoryTitle: 'Payment History',
+                thInvoice: 'Invoice #',
+                thDescription: 'Description',
+                thAmount: 'Amount',
+                thDueDate: 'Due Date',
+                thStatus: 'Status',
+                thActions: 'Actions',
+                statusPaid: 'Paid',
+                statusPending: 'Pending',
+                download: 'Download',
+                payNow: 'Pay Now',
+                confirmPayment: 'Confirm Payment',
+                cancel: 'Cancel'
+            }
+        };
+
+        // المتغيرات العامة
+        let currentLanguage = 'ar';
+        let currentChild = 'أحمد محمد';
+        let currentInvoice = null;
+
+        // تحديث اللغة
+        function updateLanguage(lang) {
+            currentLanguage = lang;
+            const t = translations[lang];
+            
+            // تحديث النصوص
+            document.getElementById('page-title').textContent = t.pageTitle;
+            document.getElementById('user-type').textContent = t.userType;
+            document.getElementById('menu-dashboard').textContent = t.menuDashboard;
+            document.getElementById('menu-children').textContent = t.menuChildren;
+            document.getElementById('menu-attendance').textContent = t.menuAttendance;
+            document.getElementById('menu-grades').textContent = t.menuGrades;
+            document.getElementById('menu-messages').textContent = t.menuMessages;
+            document.getElementById('menu-payments').textContent = t.menuPayments;
+            document.getElementById('menu-settings').textContent = t.menuSettings;
+            document.getElementById('dark-mode-text').textContent = t.darkModeText;
+            document.getElementById('header-dark-mode-text').textContent = t.darkModeText;
+            document.getElementById('language-text').textContent = t.languageText;
+            document.getElementById('logout-text').textContent = t.logoutText;
+            document.getElementById('header-logout-text').textContent = t.logoutText;
+            document.getElementById('select-child-title').textContent = t.selectChildTitle;
+            document.getElementById('paid-label').textContent = t.paidLabel;
+            document.getElementById('pending-label').textContent = t.pendingLabel;
+            document.getElementById('total-label').textContent = t.totalLabel;
+            document.getElementById('overdue-label').textContent = t.overdueLabel;
+            document.getElementById('payment-history-title').textContent = t.paymentHistoryTitle;
+            document.getElementById('th-invoice').textContent = t.thInvoice;
+            document.getElementById('th-description').textContent = t.thDescription;
+            document.getElementById('th-amount').textContent = t.thAmount;
+            document.getElementById('th-due-date').textContent = t.thDueDate;
+            document.getElementById('th-status').textContent = t.thStatus;
+            document.getElementById('th-actions').textContent = t.thActions;
+            
+            // تحديث أزرار الدفع
+            document.querySelectorAll('.pay-btn').forEach(btn => {
+                const span = btn.querySelector('span');
+                if (span) span.textContent = t.payNow;
+            });
+            
+            document.querySelectorAll('.download-btn').forEach(btn => {
+                const span = btn.querySelector('span');
+                if (span) span.textContent = t.download;
+            });
+            
+            // تحديث Modal
+            document.getElementById('paymentModalTitle').textContent = t.confirmPayment;
+            document.getElementById('confirmPayment').textContent = t.confirmPayment;
+            document.getElementById('cancelPayment').textContent = t.cancel;
+        }
+
+        // عرض رسائل Toast
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // تحميل المدفوعات وعرضها
+        async function loadPayments() {
+            try {
+                await initDatabase();
+                
+                // جلب المدفوعات من قاعدة البيانات
+                const paidPayments = await paymentsDB.payments.toArray();
+                const currentPayments = [...defaultPayments];
+                
+                // تحديث الحالة بناءً على المدفوعات المسجلة
+                paidPayments.forEach(paid => {
+                    const payment = currentPayments.find(p => p.invoiceId === paid.invoiceId);
+                    if (payment) {
+                        payment.status = 'paid';
+                        payment.paidDate = paid.date;
+                    }
+                });
+                
+                // تحديث الإحصائيات
+                updateStatistics(currentPayments);
+                
+                // عرض المدفوعات في الجدول
+                displayPayments(currentPayments);
+            } catch (error) {
+                console.error('Error loading payments:', error);
+                showToast('حدث خطأ في تحميل البيانات', 'warning');
+            }
+        }
+
+        // تحديث الإحصائيات
+        function updateStatistics(payments) {
+            const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+            const totalPaid = payments
+                .filter(p => p.status === 'paid')
+                .reduce((sum, p) => sum + p.amount, 0);
+            const totalPending = payments
+                .filter(p => p.status === 'pending')
+                .reduce((sum, p) => sum + p.amount, 0);
+            
+            // حساب المتأخرات (المستحق قبل اليوم)
+            const today = new Date().toISOString().split('T')[0];
+            const totalOverdue = payments
+                .filter(p => p.status === 'pending' && p.dueDate < today)
+                .reduce((sum, p) => sum + p.amount, 0);
+            
+            document.getElementById('total-amount').textContent = totalAmount.toLocaleString();
+            document.getElementById('total-paid').textContent = totalPaid.toLocaleString();
+            document.getElementById('total-pending').textContent = totalPending.toLocaleString();
+            document.getElementById('total-overdue').textContent = totalOverdue.toLocaleString();
+        }
+
+        // عرض المدفوعات في الجدول
+        function displayPayments(payments) {
+            const tbody = document.getElementById('payments-tbody');
+            tbody.innerHTML = '';
+            
+            const t = translations[currentLanguage];
+            
+            payments.forEach(payment => {
+                const row = document.createElement('tr');
+                
+                const statusText = payment.status === 'paid' ? t.statusPaid : t.statusPending;
+                const statusClass = payment.status === 'paid' ? 'badge-success' : 'badge-warning';
+                
+                row.innerHTML = `
+                    <td>${payment.invoiceId}</td>
+                    <td>${payment.description}</td>
+                    <td><strong>${payment.amount.toLocaleString()} ريال</strong></td>
+                    <td>${payment.dueDate}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        ${payment.status === 'pending' ? 
+                            `<button class="pay-btn" onclick="openPaymentModal('${payment.invoiceId}')">
+                                <i class="fas fa-credit-card"></i>
+                                <span>${t.payNow}</span>
+                            </button>` :
+                            `<button class="download-btn" onclick="downloadReceipt('${payment.invoiceId}')">
+                                <i class="fas fa-download"></i>
+                                <span>${t.download}</span>
+                            </button>`
+                        }
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // فتح نافذة الدفع
+        function openPaymentModal(invoiceId) {
+            const payment = defaultPayments.find(p => p.invoiceId === invoiceId);
+            if (!payment) return;
+            
+            currentInvoice = payment;
+            
+            // تعبئة البيانات في النموذج
+            document.getElementById('invoiceId').value = payment.invoiceId;
+            document.getElementById('studentName').value = currentChild;
+            document.getElementById('paymentAmount').value = payment.amount;
+            document.getElementById('paymentDescription').value = payment.description;
+            
+            // تعيين تاريخ اليوم كافتراضي
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('paymentDate').value = today;
+            
+            // فتح النافذة
+            document.getElementById('paymentModal').classList.add('active');
+        }
+
+        // إغلاق نافذة الدفع
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+            document.getElementById('paymentForm').reset();
+            currentInvoice = null;
+        }
+
+        // تأكيد الدفع
+        async function confirmPayment() {
+            try {
+                const paymentMethod = document.getElementById('paymentMethod').value;
+                const paymentDate = document.getElementById('paymentDate').value;
+                
+                if (!paymentMethod || !paymentDate) {
+                    showToast('يرجى ملء جميع الحقول', 'warning');
+                    return;
+                }
+                
+                // حفظ الدفعة في قاعدة البيانات
+                await paymentsDB.payments.add({
+                    parentName: 'ولي الأمر',
+                    studentName: currentChild,
+                    amount: currentInvoice.amount,
+                    status: 'paid',
+                    date: paymentDate,
+                    invoiceId: currentInvoice.invoiceId,
+                    description: currentInvoice.description,
+                    paymentMethod: paymentMethod,
+                    timestamp: new Date().getTime()
+                });
+                
+                showToast('تم تسجيل الدفعة بنجاح', 'success');
+                closePaymentModal();
+                
+                // إعادة تحميل المدفوعات
+                await loadPayments();
+            } catch (error) {
+                console.error('Error saving payment:', error);
+                showToast('حدث خطأ في حفظ الدفعة', 'warning');
+            }
+        }
+
+        // تحميل الإيصال
+        function downloadReceipt(invoiceId) {
+            showToast(`جاري تحميل إيصال ${invoiceId}`, 'info');
+            // في التطبيق الحقيقي، هنا سيتم إنشاء ملف PDF أو عرضه
+        }
+
+        // تبديل الوضع الداكن
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        // تبديل اللغة
+        function toggleLanguage() {
+            const isRTL = document.body.classList.contains('rtl');
+            
+            if (isRTL) {
+                // التبديل إلى الإنجليزية
+                document.body.classList.remove('rtl');
+                document.body.classList.add('ltr');
+                document.documentElement.lang = 'en';
+                document.documentElement.dir = 'ltr';
+                updateLanguage('en');
+                localStorage.setItem('language', 'en');
+            } else {
+                // التبديل إلى العربية
+                document.body.classList.remove('ltr');
+                document.body.classList.add('rtl');
+                document.documentElement.lang = 'ar';
+                document.documentElement.dir = 'rtl';
+                updateLanguage('ar');
+                localStorage.setItem('language', 'ar');
+            }
+        }
+
+        // تغيير الطفل المحدد
+        function changeChild(childName) {
+            currentChild = childName;
+            document.querySelectorAll('.child-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            loadPayments();
+        }
+
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحميل الإعدادات من localStorage
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            if (localStorage.getItem('language') === 'en') {
+                document.body.classList.remove('rtl');
+                document.body.classList.add('ltr');
+                document.documentElement.lang = 'en';
+                document.documentElement.dir = 'ltr';
+                updateLanguage('en');
+            } else {
+                updateLanguage('ar');
+            }
+            
+            // تعيين أحداث الأزرار
+            document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
+            document.getElementById('sidebar-dark-mode-toggle').addEventListener('click', toggleDarkMode);
+            document.getElementById('sidebar-language-toggle').addEventListener('click', toggleLanguage);
+            
+            // أحداث أزرار الأطفال
+            document.querySelectorAll('.child-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const childName = this.getAttribute('data-child');
+                    changeChild(childName);
+                });
+            });
+            
+            // أحداث نافذة الدفع
+            document.getElementById('closePaymentModal').addEventListener('click', closePaymentModal);
+            document.getElementById('cancelPayment').addEventListener('click', closePaymentModal);
+            document.getElementById('confirmPayment').addEventListener('click', confirmPayment);
+            
+            // إغلاق النافذة عند النقر خارجها
+            document.getElementById('paymentModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closePaymentModal();
+                }
+            });
+            
+            // تحميل المدفوعات
+            loadPayments();
+            
+            // تعيين تاريخ اليوم في حقل تاريخ الدفع
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('paymentDate').value = today;
+        });
+    </script>
+</body>
+</html>

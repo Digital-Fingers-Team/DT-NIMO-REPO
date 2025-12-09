@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat with AI | Message anyone - DT Edu</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
+        --accent: #00b894;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --text: #333;
+        --text-light: #666;
+        --card-dark: #111827;
+        --card-darker: #0b1220;
+        --border-light: #e6eaf0;
+        --border-dark: rgba(255, 255, 255, 0.08);
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --sidebar-width: 260px;
+      }
+
+      .dark-mode {
+        --light: #0f172a;
+        --dark: #e6e6e6;
+        --text: #e6e6e6;
+        --text-light: #94a3b8;
+        --shadow: 0 12px 45px rgba(0, 0, 0, 0.5);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Tajawal", "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: var(--transition);
+      }
+
+      body.dark-mode {
+        background: radial-gradient(
+          circle at 10% 20%,
+          #0b1220 0%,
+          #0a1224 25%,
+          #0b1530 60%,
+          #0b1220 100%
+        );
+      }
+
+      body.rtl {
+        direction: rtl;
+      }
+
+      body.ltr {
+        direction: ltr;
+      }
+
+      /* التصميم الرئيسي */
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* الشريط الجانبي - إصلاح مشكلة تغيير اللغة */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(
+          180deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 20px 0;
+        box-shadow: var(--shadow);
+        z-index: 100;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        transition: var(--transition);
+        /* إصلاح: بقاء القائمة في مكانها بغض النظر عن اللغة */
+        right: 0;
+      }
+
+      body.ltr .sidebar {
+        right: auto;
+        left: 0;
+      }
+
+      .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .logo img {
+        width: 140px;
+        height: auto;
+        object-fit: contain;
+        display: block;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, white, #e1f0fa);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .user-info {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .user-name {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .user-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+        display: inline-block;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0 15px;
+        margin-bottom: 20px;
+      }
+
+      .menu-item {
+        margin-bottom: 8px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .menu-item a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .menu-item a:hover,
+      .menu-item.active a {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateX(5px);
+      }
+
+      body.ltr .menu-item a:hover,
+      body.ltr .menu-item.active a {
+        transform: translateX(-5px);
+      }
+
+      .menu-item i {
+        margin-left: 10px;
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      body.ltr .menu-item i {
+        margin-left: 0;
+        margin-right: 10px;
+      }
+
+      .menu-item span {
+        flex: 1;
+      }
+
+      .sidebar-footer {
+        padding: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: auto;
+      }
+
+      .sidebar-footer .menu-item a {
+        padding: 10px 15px;
+      }
+
+      /* المحتوى الرئيسي - إصلاح مشكلة التداخل */
+      .main-content {
+        flex: 1;
+        margin-right: var(--sidebar-width);
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      body.ltr .main-content {
+        margin-right: 0;
+        margin-left: var(--sidebar-width);
+      }
+
+      .header {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .header {
+        background: var(--card-dark);
+        color: var(--dark);
+        border: 1px solid var(--border-dark);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      }
+
+      .header h1 {
+        color: var(--primary);
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .dark-mode-toggle,
+      .back-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dark-mode-toggle {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .dark-mode-toggle:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      .back-btn {
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--secondary);
+      }
+
+      .back-btn:hover {
+        background: rgba(108, 92, 231, 0.2);
+      }
+
+      .chat-container {
+        display: flex;
+        gap: 0;
+        height: calc(100vh - 180px);
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        border: 1px solid transparent;
+      }
+
+      @keyframes pulseGlow {
+        from {
+          box-shadow: 0 10px 30px rgba(74, 108, 247, 0.3);
+        }
+        to {
+          box-shadow: 0 10px 40px rgba(74, 108, 247, 0.6);
+        }
+      }
+
+      body.dark-mode .chat-container {
+        background: var(--card-darker);
+        color: var(--dark);
+        border-color: var(--border-dark);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .contacts-panel {
+        width: 300px;
+        background: #f7f9fc;
+        border-inline-end: 1px solid #e6eaf0;
+        display: flex;
+        flex-direction: column;
+      }
+      .contacts-header {
+        padding: 14px 16px;
+        font-weight: 700;
+        color: var(--primary);
+        border-bottom: 1px solid #e6eaf0;
+      }
+      .contacts-list {
+        overflow: auto;
+      }
+      .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .contact-item:hover {
+        background: #eef3ff;
+      }
+      .contact-item.active {
+        background: #e6eeff;
+      }
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #fff;
+        font-weight: 700;
+      }
+      .contact-name {
+        font-weight: 700;
+      }
+
+      body.dark-mode .contacts-panel {
+        background: #0c1525;
+        border-inline-end: 1px solid var(--border-dark);
+      }
+      body.dark-mode .contacts-header {
+        color: #c7d2fe;
+        border-bottom: 1px solid var(--border-dark);
+      }
+      body.dark-mode .contact-item:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      body.dark-mode .contact-item.active {
+        background: rgba(74, 108, 247, 0.15);
+      }
+
+      .model-select {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: none;
+        font-family: inherit;
+        font-size: 14px;
+        background: rgba(0, 0, 0, 0.3);
+        color: white;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .model-select option {
+        background: white;
+        color: var(--text);
+      }
+
+      .chat-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-top {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e6eaf0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      body.dark-mode .chat-top {
+        border-bottom: 1px solid var(--border-dark);
+        color: var(--dark);
+        background: var(--card-dark);
+      }
+      .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: rgba(10, 10, 20, 0.05);
+      }
+      .timestamp {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--text-light);
+        opacity: 0.9;
+      }
+
+      body.dark-mode .chat-messages {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .message {
+        max-width: 75%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 15px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        opacity: 0;
+        transform: translateY(15px);
+        animation: fadeSlideIn 0.5s forwards;
+      }
+
+      @keyframes fadeSlideIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .user {
+        align-self: flex-end;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border-bottom-right-radius: 0;
+      }
+
+      body.ltr .user {
+        border-bottom-right-radius: 12px;
+        border-bottom-left-radius: 0;
+      }
+
+      .bot {
+        align-self: flex-start;
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--text);
+        border-bottom-left-radius: 0;
+      }
+
+      body.dark-mode .bot {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--dark);
+        border: 1px solid var(--border-dark);
+      }
+
+      body.ltr .bot {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 0;
+      }
+
+      .chat-input {
+        padding: 20px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        gap: 10px;
+        background: white;
+      }
+
+      body.dark-mode .chat-input {
+        border-top: 1px solid var(--border-dark);
+        background: var(--card-dark);
+      }
+
+      .message-input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        font-size: 16px;
+        transition: var(--transition);
+        background-color: #f8f9fa;
+      }
+
+      body.dark-mode .message-input {
+        background-color: rgba(255, 255, 255, 0.04);
+        color: var(--dark);
+        border-color: var(--border-dark);
+      }
+
+      .message-input:focus {
+        border-color: var(--primary);
+        background-color: white;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+      }
+
+      body.dark-mode .message-input:focus {
+        background-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.35);
+      }
+
+      .send-btn {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 0 10px rgba(74, 108, 247, 0.5);
+      }
+
+      .send-btn:hover {
+        background: linear-gradient(
+          135deg,
+          var(--primary-dark),
+          var(--secondary)
+        );
+        transform: scale(1.05);
+      }
+
+      /* التصميم المتجاوب */
+      @media (max-width: 992px) {
+        .sidebar {
+          width: 80px;
+          right: 0;
+        }
+
+        body.ltr .sidebar {
+          left: 0;
+        }
+
+        .sidebar-header .logo-text,
+        .user-info,
+        .menu-item span {
+          display: none;
+        }
+
+        .main-content {
+          margin-right: 80px;
+        }
+
+        body.ltr .main-content {
+          margin-left: 80px;
+          margin-right: 0;
+        }
+
+        .menu-item a {
+          justify-content: center;
+          padding: 15px;
+        }
+
+        .menu-item i {
+          margin-left: 0;
+          font-size: 20px;
+        }
+
+        body.ltr .menu-item i {
+          margin-right: 0;
+        }
+
+        .sidebar-footer .menu-item span {
+          display: none;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
+        }
+
+        .header-actions {
+          justify-content: center;
+        }
+
+        .message {
+          max-width: 85%;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .main-content {
+          padding: 15px;
+        }
+
+        .sidebar {
+          width: 70px;
+          right: 0;
+        }
+
+        body.ltr .sidebar {
+          left: 0;
+        }
+
+        .main-content {
+          margin-right: 70px;
+        }
+
+        body.ltr .main-content {
+          margin-left: 70px;
+          margin-right: 0;
+        }
+
+        .chat-header {
+          flex-direction: column;
+          gap: 10px;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body class="rtl">
+    <div class="dashboard-container">
+      <!-- الشريط الجانبي -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <img src="logo.png" alt="Logo" />
+          </div>
+          <div class="logo-text">DT Edu</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">عبير حسن</div>
+            <div class="user-type" id="user-type">مدير المدرسة</div>
+          </div>
+        </div>
+
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="admin-dashboard.html">
+              <i class="fas fa-home"></i>
+              <span id="menu-dashboard">لوحة التحكم</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-users.html">
+              <i class="fas fa-users-cog"></i>
+              <span id="menu-users">إدارة المستخدمين</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-payments.html">
+              <i class="fas fa-money-bill-wave"></i>
+              <span>المدفوعات والرسوم</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-reports.html">
+              <i class="fas fa-chart-bar"></i>
+              <span id="menu-reports">التقارير والإحصائيات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-schedule.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-schedule">الجدول المدرسي</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="classroom.html">
+              <i class="fas fa-chalkboard"></i>
+              <span>الفصل الدراسي</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="admin-messages.html">
+              <i class="fas fa-comments"></i>
+              <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-settings.html">
+              <i class="fas fa-cog"></i>
+              <span id="menu-settings">إعدادات النظام</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-footer">
+          <ul class="sidebar-menu">
+            <li class="menu-item">
+              <a href="#" id="dark-mode-toggle-sidebar">
+                <i class="fas fa-moon"></i>
+                <span id="dark-mode-text">الوضع الداكن</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" id="sidebar-language-toggle">
+                <i class="fas fa-language"></i>
+                <span>English</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" id="logout-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span id="logout-text">تسجيل الخروج</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- المحتوى الرئيسي -->
+      <div class="main-content">
+        <div class="header">
+          <h1 id="header-title">Chat with AI - Message anyone</h1>
+          <div class="header-actions">
+            <button id="dark-mode-toggle" class="dark-mode-toggle">
+              <i class="fas fa-moon"></i>
+              <span id="dark-mode-btn-text">الوضع الداكن</span>
+            </button>
+            <button id="back-btn" class="back-btn" onclick="goBack()">
+              <i class="fas fa-arrow-right"></i>
+              <span id="back-text">العودة</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-container" id="chatApp">
+          <div class="contacts-panel">
+            <div class="contacts-header">الجهات</div>
+            <div class="contacts-list" id="contactsList"></div>
+          </div>
+          <div class="chat-panel">
+            <div class="chat-top" id="activeContactName">اختر جهة للبدء</div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+              <input
+                type="text"
+                class="message-input"
+                id="message-input"
+                placeholder="اكتب رسالتك هنا..."
+                required
+              />
+              <button class="send-btn" type="button" id="sendBtn">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script>
+      // استعادة اللغة المحفوظة
+      let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
+
+      // استعادة وضع التصميم المحفوظ
+      let darkMode = localStorage.getItem("darkMode") === "true";
+
+      // تحديث اتجاه الصفحة واللغة والوضع الداكن
+      document.body.className = currentLanguage === "ar" ? "rtl" : "ltr";
+      if (darkMode) {
+        document.body.classList.add("dark-mode");
+      }
+
+      // إعداد زر الوضع الداكن
+      document
+        .querySelectorAll("#dark-mode-toggle, #dark-mode-toggle-sidebar")
+        .forEach((btn) => {
+          btn.addEventListener("click", function () {
+            // تبديل الوضع الداكن
+            darkMode = !darkMode;
+
+            // تحديث الوضع الداكن في التخزين المحلي
+            localStorage.setItem("darkMode", darkMode);
+
+            // تحديث الوضع الداكن في الصفحة
+            if (darkMode) {
+              document.body.classList.add("dark-mode");
+            } else {
+              document.body.classList.remove("dark-mode");
+            }
+
+            // تحديث نص الزر
+            updateDarkModeText();
+          });
+        });
+
+      // إعداد زر تسجيل الخروج
+      document
+        .getElementById("logout-link")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("currentUser");
+          window.location.href = "login.html";
+        });
+
+      // وظيفة العودة
+      function goBack() {
+        window.history.back();
+      }
+
+      const chatMessages = document.getElementById("chatMessages");
+      const userInput = document.getElementById("message-input");
+      const sendBtn = document.getElementById("sendBtn");
+      const contactsListEl = document.getElementById("contactsList");
+      const activeContactNameEl = document.getElementById("activeContactName");
+      const currentUserRole = "admin";
+      const AI_CONTACT = { id: "ai", name: "Chat with AI" };
+      const AI_API_URL = "https://api.openai.com/v1/chat/completions";
+      const AI_MODEL = "gpt-3.5-turbo";
+      const AI_API_KEY = ""; // ضع مفتاح واجهة الذكاء الاصطناعي هنا
+      const roles = [
+        { id: "admin", name: "الإدارة" },
+        { id: "teacher", name: "المعلم" },
+        { id: "student", name: "الطالب" },
+        { id: "parent", name: "ولي الأمر" },
+      ];
+      const contacts = [
+        AI_CONTACT,
+        ...roles.filter((r) => r.id !== currentUserRole),
+      ];
+      const db = new Dexie("messagingDB");
+      db.version(1).stores({
+        messages: "++id,sender,receiver,timestamp,status",
+      });
+      let activeContact = null;
+
+      function renderContacts() {
+        contactsListEl.innerHTML = "";
+        contacts.forEach((c) => {
+          const item = document.createElement("div");
+          item.className = "contact-item";
+          item.dataset.id = c.id;
+          const av = document.createElement("div");
+          av.className = "avatar";
+          av.textContent = c.id === "ai" ? "AI" : c.name[0];
+          const name = document.createElement("div");
+          name.className = "contact-name";
+          name.textContent = c.name;
+          item.appendChild(av);
+          item.appendChild(name);
+          item.addEventListener("click", () => setActiveContact(c));
+          contactsListEl.appendChild(item);
+        });
+      }
+
+      function appendBubble(message, { autoScroll = true } = {}) {
+        const bubble = document.createElement("div");
+        bubble.className =
+          "message " + (message.sender === currentUserRole ? "user" : "bot");
+        bubble.textContent = message.content;
+        const ts = document.createElement("div");
+        ts.className = "timestamp";
+        ts.textContent = new Date(message.timestamp).toLocaleString(
+          document.documentElement.lang === "ar" ? "ar" : "en"
+        );
+        bubble.appendChild(ts);
+        chatMessages.appendChild(bubble);
+        if (autoScroll) {
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      }
+
+      async function loadConversation() {
+        if (!activeContact) return;
+        const msgs = await db.messages
+          .orderBy("timestamp")
+          .filter(
+            (m) =>
+              (m.sender === currentUserRole &&
+                m.receiver === activeContact.id) ||
+              (m.sender === activeContact.id && m.receiver === currentUserRole)
+          )
+          .toArray();
+        chatMessages.innerHTML = "";
+        msgs.forEach((m) => appendBubble(m, { autoScroll: false }));
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        [...contactsListEl.children].forEach((el) =>
+          el.classList.toggle("active", el.dataset.id === activeContact.id)
+        );
+      }
+
+      function setActiveContact(contact) {
+        activeContact = contact;
+        activeContactNameEl.textContent = contact.name;
+        loadConversation();
+      }
+
+      async function getAiReply(userMessage) {
+        if (!AI_API_KEY) {
+          return currentLanguage === "ar"
+            ? "أضف مفتاح واجهة الذكاء الاصطناعي في المتغير AI_API_KEY أعلى السكربت."
+            : "Add your AI API key in the AI_API_KEY constant near the top of the script.";
+        }
+        try {
+          const response = await fetch(AI_API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${AI_API_KEY}`,
+            },
+            body: JSON.stringify({
+              model: AI_MODEL,
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You are a helpful school assistant who answers concisely.",
+                },
+                { role: "user", content: userMessage },
+              ],
+            }),
+          });
+
+          if (!response.ok) {
+            console.error("AI response error:", await response.text());
+            return currentLanguage === "ar"
+              ? "تعذر الوصول إلى خدمة الذكاء الاصطناعي."
+              : "Could not reach the AI service.";
+          }
+
+          const data = await response.json();
+          return data?.choices?.[0]?.message?.content?.trim() || "";
+        } catch (error) {
+          console.error("AI request failed", error);
+          return currentLanguage === "ar"
+            ? "حدث خطأ أثناء جلب رد الذكاء الاصطناعي."
+            : "AI reply failed.";
+        }
+      }
+
+      async function sendMessage() {
+        const content = userInput.value.trim();
+        if (!content || !activeContact) return;
+        const msg = {
+          sender: currentUserRole,
+          receiver: activeContact.id,
+          content,
+          timestamp: new Date().toISOString(),
+          status: "sent",
+        };
+        await db.messages.add(msg);
+        userInput.value = "";
+        appendBubble(msg);
+
+        if (activeContact.id === "ai") {
+          const aiContent = await getAiReply(content);
+          if (!aiContent) return;
+          const botMsg = {
+            sender: activeContact.id,
+            receiver: currentUserRole,
+            content: aiContent,
+            timestamp: new Date().toISOString(),
+            status: "sent",
+          };
+          await db.messages.add(botMsg);
+          appendBubble(botMsg);
+          return;
+        }
+      }
+
+      userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+      });
+      sendBtn.addEventListener("click", sendMessage);
+
+      renderContacts();
+      if (contacts.length) setActiveContact(contacts[0]);
+
+      // تحديث النصوص حسب اللغة الحالية
+      function updateLanguage() {
+        const translations = {
+          ar: {
+            "header-title": "Chat with AI - راسل أي شخص",
+            "menu-dashboard": "لوحة التحكم",
+            "menu-users": "إدارة المستخدمين",
+            "menu-reports": "التقارير والإحصائيات",
+            "menu-schedule": "الجدول المدرسي",
+            "menu-messages": "الرسائل",
+            "menu-settings": "إعدادات النظام",
+
+            // عناصر مشتركة
+            "logout-text": "تسجيل الخروج",
+            "dark-mode-text": "الوضع الداكن",
+            "dark-mode-btn-text": "الوضع الداكن",
+            "back-text": "العودة",
+          },
+          en: {
+            "header-title": "Chat with AI - Message anyone",
+            "menu-dashboard": "Dashboard",
+            "menu-users": "Users Management",
+            "menu-reports": "Reports & Statistics",
+            "menu-schedule": "School Schedule",
+            "menu-messages": "Messages",
+            "menu-settings": "System Settings",
+
+            // عناصر مشتركة
+            "logout-text": "Logout",
+            "dark-mode-text": "Dark Mode",
+            "dark-mode-btn-text": "Dark Mode",
+            "back-text": "Back",
+          },
+        };
+
+        // تطبيق الترجمات
+        Object.keys(translations[currentLanguage]).forEach((key) => {
+          const element = document.getElementById(key);
+          if (element) {
+            element.textContent = translations[currentLanguage][key];
+          }
+        });
+
+        // تحديث النص البديل لحقل الإدخال
+        document.getElementById("message-input").placeholder =
+          currentLanguage === "ar" ? "راسل أي شخص..." : "Message anyone...";
+      }
+
+      // تحديث نص زر الوضع الداكن
+      function updateDarkModeText() {
+        const darkModeText =
+          currentLanguage === "ar"
+            ? darkMode
+              ? "الوضع الفاتح"
+              : "الوضع الداكن"
+            : darkMode
+            ? "Light Mode"
+            : "Dark Mode";
+
+        document.getElementById("dark-mode-text").textContent = darkModeText;
+        document.getElementById("dark-mode-btn-text").textContent =
+          darkModeText;
+
+        // تحديث الأيقونة
+        const icons = document.querySelectorAll(
+          "#dark-mode-toggle i, #dark-mode-toggle-sidebar i"
+        );
+        icons.forEach((icon) => {
+          icon.className = darkMode ? "fas fa-sun" : "fas fa-moon";
+        });
+      }
+
+      updateLanguage();
+      updateDarkModeText();
+    </script>
+  </body>
+</html>

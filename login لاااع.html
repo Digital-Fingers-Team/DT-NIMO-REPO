@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - DT Edu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0a325c; /* لون أزرق أغمق */
+            --primary-dark: #1e2c7a;
+            --secondary: #5a4fd9;
+            --accent: #00b894;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --text: #333;
+            --text-light: #666;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --light: #1a1a2e;
+            --dark: #f8f9fa;
+            --text: #e6e6e6;
+            --text-light: #b0b0b0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a2a6c, #0a325c, #00b894); /* تحديث الألوان */
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow:scroll;
+            position: relative;
+            padding: 20px;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        /* تأثيرات الخلفية المتحركة */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 15s infinite linear;
+        }
+
+        .bg-circle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .bg-circle:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            left: 80%;
+            animation-delay: 2s;
+        }
+
+        .bg-circle:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 70%;
+            animation-delay: 4s;
+        }
+
+        .bg-circle:nth-child(4) {
+            width: 120px;
+            height: 120px;
+            top: 80%;
+            left: 20%;
+            animation-delay: 6s;
+        }
+
+        .bg-circle:nth-child(5) {
+            width: 60px;
+            height: 60px;
+            top: 40%;
+            left: 50%;
+            animation-delay: 8s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+
+            100% {
+                transform: translateY(0) rotate(360deg);
+            }
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1100px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-section {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); /* تحديث الألوان */
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s infinite linear;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+
+
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .logo {
+            width: 280px; /* تكبير الشعار */
+            height: auto;
+        }
+
+        .logo-text {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, white, #e1f0fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-section h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-section p {
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            width: 150px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            transition: var(--transition);
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .feature i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .login-section {
+            flex: 1;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: var(--text-light);
+            font-size: 16px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: var(--primary);
+        }
+
+        .form-group input {
+            padding: 15px 45px 15px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: #f8f9fa;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            background-color: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44, 62, 170, 0.2); /* تحديث اللون */
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            color: var(--text-light);
+            font-size: 18px;
+        }
+
+        /* زر إظهار/إخفاء كلمة المرور */
+        .password-toggle {
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            color: var(--text-light);
+            font-size: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .user-type-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .user-type-option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-type-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-type-option.selected {
+            background: rgba(44, 62, 170, 0.1); /* تحديث اللون */
+            border-color: var(--primary);
+        }
+
+        .user-type-option i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .user-type-option p {
+            font-weight: 600;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .login-button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); /* تحديث الألوان */
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(44, 62, 170, 0.4); /* تحديث اللون */
+        }
+
+        .login-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(44, 62, 170, 0.6); /* تحديث اللون */
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .additional-options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .language-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        /* تصميم متجاوب */
+        @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+                max-width: 500px;
+            }
+
+            .welcome-section {
+                padding: 30px 20px;
+            }
+
+            .login-section {
+                padding: 30px 20px;
+            }
+
+            .user-type-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-section h1 {
+                font-size: 24px;
+            }
+
+            .login-header h2 {
+                font-size: 24px;
+            }
+
+            .features {
+                gap: 10px;
+            }
+
+            .feature {
+                width: 130px;
+                padding: 10px;
+            }
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        body.rtl .toast-container {
+            left: 20px;
+            right: auto;
+        }
+        .toast {
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.3s ease-out;
+            font-weight: 600;
+        }
+        .toast-success { background: #00b894; }
+        .toast-error { background: #e74c3c; }
+        .toast-info { background: #6c5ce7; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- خلفية متحركة -->
+    <div class="bg-animation">
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+    </div>
+
+    <button id="language-toggle" class="language-toggle">
+        <i class="fas fa-language"></i>
+        <span id="language-text">English</span>
+    </button>
+
+    <div class="container">
+        <div class="welcome-section">
+            <div class="logo-container">
+                <div class="logo-wrapper">
+                    <!-- الشعار داخل دائرة بيضاء -->
+                    <img src="file:///C:/Users/os/Downloads/finsh%D8%A7%D8%A7%D8%A7%D8%A7%D8%A7/finsh%20dt/finsh%20dt/logo.png" class="logo" alt="DT Edu Logo">
+                </div>
+                <div class="logo-text">DT Edu</div>
+            </div>
+            <h1 id="welcome-title">مرحباً بك في نظام DT Edu</h1>
+            <p id="welcome-subtitle">منصة التعليم التفاعلي المتكاملة لتجربة تعليمية استثنائية</p>
+
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span id="feature1">تعليم تفاعلي</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span id="feature2">معلمون متميزون</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-laptop-code"></i>
+                    <span id="feature3">منصة ذكية</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-chart-line"></i>
+                    <span id="feature4">تتبع التقدم</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-section">
+            <div class="login-header">
+                <h2 id="login-title">تسجيل الدخول</h2>
+                <p id="login-subtitle">الرجاء إدخال بيانات الدخول الخاصة بك</p>
+            </div>
+
+            <div class="user-type-selector">
+                <div class="user-type-option" data-type="student">
+                    <i class="fas fa-user-graduate"></i>
+                    <p id="student-text">طالب</p>
+                </div>
+                <div class="user-type-option" data-type="teacher">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <p id="teacher-text">معلم</p>
+                </div>
+                <div class="user-type-option" data-type="admin">
+                    <i class="fas fa-user-tie"></i>
+                    <p id="admin-text">مدير</p>
+                </div>
+                <div class="user-type-option" data-type="parent">
+                    <i class="fas fa-user-friends"></i>
+                    <p id="parent-text">ولي أمر</p>
+                </div>
+            </div>
+
+            <form class="login-form" id="login-form">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> <span id="username-label">اسم
+                            المستخدم</span></label>
+                    <input type="text" id="username" name="username" required>
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> <span id="password-label">كلمة
+                            المرور</span></label>
+                    <input type="password" id="password" name="password" required>
+                    <div class="input-icon">
+                        
+                    </div>
+                    <div class="password-toggle" id="password-toggle">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                </div>
+
+                <div class="additional-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <label for="remember" id="remember-label">تذكرني</label>
+                    </div>
+                    <a href="#" class="forgot-password" id="forgot-password">نسيت كلمة المرور؟</a>
+                </div>
+
+                <button type="submit" class="login-button" id="login-button">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span id="login-button-text">تسجيل الدخول</span>
+                </button>
+            </form>
+
+            <div class="footer">
+                <p id="footer-text">© 2023 DT Edu - جميع الحقوق محفوظة</p>
+            </div>
+        </div>
+    </div>
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="core.js"></script>
+    <script>
+        // بيانات المستخدمين المحدثة
+        const users = [
+            // مدير
+            { username: "admin", password: "admin123", type: "admin", name: "مدير النظام", nameEn: "System Administrator" },
+
+            // المعلمين (7 معلمين)
+            { username: "teacher_arabic", password: "teacher123", type: "teacher", name: "أحمد العربي", nameEn: "Ahmed Arabic", subject: "اللغة العربية" },
+            { username: "teacher_history", password: "teacher123", type: "teacher", name: "محمد التاريخ", nameEn: "Mohamed History", subject: "التاريخ" },
+            { username: "teacher_math", password: "teacher123", type: "teacher", name: "علي الرياضيات", nameEn: "Ali Math", subject: "الرياضيات" },
+            { username: "teacher_science", password: "teacher123", type: "teacher", name: "حسن العلوم", nameEn: "Hassan Science", subject: "العلوم" },
+            { username: "teacher_english", password: "teacher123", type: "teacher", name: "محمود الإنجليزي", nameEn: "Mahmoud English", subject: "الإنجليزية" },
+            { username: "teacher_philosophy", password: "teacher123", type: "teacher", name: "يوسف الفلسفة", nameEn: "Youssef Philosophy", subject: "الفلسفة" },
+            { username: "teacher_social", password: "teacher123", type: "teacher", name: "خالد الاجتماعي", nameEn: "Khaled Social", subject: "الاخصائي الاجتماعي" },
+
+            // الطلاب (12 طالب)
+            { username: "student1", password: "student123", type: "student", name: "أحمد الطالب", nameEn: "Ahmed Student" },
+            { username: "student2", password: "student123", type: "student", name: "محمد الطالب", nameEn: "Mohamed Student" },
+            { username: "student3", password: "student123", type: "student", name: "علي الطالب", nameEn: "Ali Student" },
+            { username: "student4", password: "student123", type: "student", name: "حسن الطالب", nameEn: "Hassan Student" },
+            { username: "student5", password: "student123", type: "student", name: "محمود الطالب", nameEn: "Mahmoud Student" },
+            { username: "student6", password: "student123", type: "student", name: "يوسف الطالب", nameEn: "Youssef Student" },
+            { username: "student7", password: "student123", type: "student", name: "خالد الطالب", nameEn: "Khaled Student" },
+            { username: "student8", password: "student123", type: "student", name: "سعيد الطالب", nameEn: "Saeed Student" },
+            { username: "student9", password: "student123", type: "student", name: "طارق الطالب", nameEn: "Tariq Student" },
+            { username: "student10", password: "student123", type: "student", name: "ياسر الطالب", nameEn: "Yasser Student" },
+            { username: "student11", password: "student123", type: "student", name: "وليد الطالب", nameEn: "Waleed Student" },
+            { username: "student12", password: "student123", type: "student", name: "عمرو الطالب", nameEn: "Amr Student" },
+
+            // أولياء الأمور (12 ولي أمر)
+            { username: "parent1", password: "parent123", type: "parent", name: "أحمد ولي الأمر", nameEn: "Ahmed Parent" },
+            { username: "parent2", password: "parent123", type: "parent", name: "محمد ولي الأمر", nameEn: "Mohamed Parent" },
+            { username: "parent3", password: "parent123", type: "parent", name: "علي ولي الأمر", nameEn: "Ali Parent" },
+            { username: "parent4", password: "parent123", type: "parent", name: "حسن ولي الأمر", nameEn: "Hassan Parent" },
+            { username: "parent5", password: "parent123", type: "parent", name: "محمود ولي الأمر", nameEn: "Mahmoud Parent" },
+            { username: "parent6", password: "parent123", type: "parent", name: "يوسف ولي الأمر", nameEn: "Youssef Parent" },
+            { username: "parent7", password: "parent123", type: "parent", name: "خالد ولي الأمر", nameEn: "Khaled Parent" },
+            { username: "parent8", password: "parent123", type: "parent", name: "سعيد ولي الأمر", nameEn: "Saeed Parent" },
+            { username: "parent9", password: "parent123", type: "parent", name: "طارق ولي الأمر", nameEn: "Tariq Parent" },
+            { username: "parent10", password: "parent123", type: "parent", name: "ياسر ولي الأمر", nameEn: "Yasser Parent" },
+            { username: "parent11", password: "parent123", type: "parent", name: "وليد ولي الأمر", nameEn: "Waleed Parent" },
+            { username: "parent12", password: "parent123", type: "parent", name: "عمرو ولي الأمر", nameEn: "Amr Parent" }
+        ];
+
+        // متغير اللغة الحالية
+        let currentLanguage = localStorage.getItem('currentLanguage') || 'ar';
+
+        // نوع المستخدم المحدد
+        let selectedUserType = 'student';
+
+        // تحديث اتجاه الصفحة عند تحميلها
+        document.body.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+
+        // إعداد زر إظهار/إخفاء كلمة المرور
+        document.getElementById('password-toggle').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // إعداد زر تغيير اللغة
+        document.getElementById('language-toggle').addEventListener('click', function () {
+            // تبديل اللغة
+            currentLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+
+            // تحديث اتجاه الصفحة
+            document.body.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+
+            // تحديث نص الزر
+            document.getElementById('language-text').textContent = currentLanguage === 'ar' ? 'English' : 'العربية';
+
+            // تحديث جميع النصوص
+            updateLanguage();
+        });
+
+        // تحديث النصوص حسب اللغة الحالية
+        function updateLanguage() {
+            const translations = {
+                'ar': {
+                    'welcome-title': 'مرحباً بك في نظام DT Edu',
+                    'welcome-subtitle': 'منصة التعليم التفاعلي المتكاملة لتجربة تعليمية استثنائية',
+                    'login-title': 'تسجيل الدخول',
+                    'login-subtitle': 'الرجاء إدخال بيانات الدخول الخاصة بك',
+                    'username-label': 'اسم المستخدم',
+                    'password-label': 'كلمة المرور',
+                    'remember-label': 'تذكرني',
+                    'forgot-password': 'نسيت كلمة المرور؟',
+                    'login-button-text': 'تسجيل الدخول',
+                    'student-text': 'طالب',
+                    'teacher-text': 'معلم',
+                    'admin-text': 'مدير',
+                    'parent-text': 'ولي أمر',
+                    'footer-text': '© 2023 DT Edu - جميع الحقوق محفوظة',
+                    'feature1': 'تعليم تفاعلي',
+                    'feature2': 'معلمون متميزون',
+                    'feature3': 'منصة ذكية',
+                    'feature4': 'تتبع التقدم'
+                },
+                'en': {
+                    'welcome-title': 'Welcome to DT Edu System',
+                    'welcome-subtitle': 'Integrated interactive education platform for an exceptional learning experience',
+                    'login-title': 'Login',
+                    'login-subtitle': 'Please enter your login credentials',
+                    'username-label': 'Username',
+                    'password-label': 'Password',
+                    'remember-label': 'Remember me',
+                    'forgot-password': 'Forgot password?',
+                    'login-button-text': 'Login',
+                    'student-text': 'Student',
+                    'teacher-text': 'Teacher',
+                    'admin-text': 'Principal',
+                    'parent-text': 'Parent',
+                    'footer-text': '© 2023 DT Edu - All Rights Reserved',
+                    'feature1': 'Interactive Learning',
+                    'feature2': 'Expert Teachers',
+                    'feature3': 'Smart Platform',
+                    'feature4': 'Progress Tracking'
+                }
+            };
+
+            // تطبيق الترجمات
+            Object.keys(translations[currentLanguage]).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+        }
+
+        // إعداد اختيار نوع المستخدم
+        document.querySelectorAll('.user-type-option').forEach(option => {
+            option.addEventListener('click', function () {
+                // إزالة الفئة المحددة من جميع الخيارات
+                document.querySelectorAll('.user-type-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+
+                // إضافة الفئة المحددة إلى الخيار المحدد
+                this.classList.add('selected');
+
+                // تخزين نوع المستخدم المحدد
+                selectedUserType = this.getAttribute('data-type');
+            });
+        });
+
+        // إعداد نموذج تسجيل الدخول
+        document.getElementById('login-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // التحقق من صحة بيانات تسجيل الدخول
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                // التحقق من نوع المستخدم إذا تم تحديده
+                if (selectedUserType && user.type !== selectedUserType) {
+                    showToast('error', currentLanguage === 'ar' ? 'نوع المستخدم غير صحيح' : 'User type is incorrect');
+                    return;
+                }
+
+                // تخزين معلومات المستخدم في التخزين المحلي
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('currentLanguage', currentLanguage);
+
+                // توجيه المستخدم إلى الصفحة المناسبة حسب نوعه
+                redirectToDashboard(user.type);
+            } else {
+                // عرض رسالة الخطأ
+                showToast('error', currentLanguage === 'ar' ? 'اسم المستخدم أو كلمة المرور غير صحيحة' : 'Invalid username or password');
+            }
+        });
+
+        // توجيه المستخدم للصفحة المناسبة حسب نوعه
+        function redirectToDashboard(userType) {
+            let targetPage = 'login.html'; // Default fallback
+
+            switch (userType) {
+                case 'student':
+                    targetPage = 'student-dashboard.html';
+                    break;
+                case 'teacher':
+                    targetPage = 'teacher-dashboard.html';
+                    break;
+                case 'admin':
+                    targetPage = 'admin-dashboard.html';
+                    break;
+                case 'parent':
+                    targetPage = 'parent-dashboard.html';
+                    break;
+                default:
+                    targetPage = 'login.html';
+            }
+
+            window.location.href = targetPage;
+        }
+
+        // تحديث اللغة عند تحميل الصفحة
+        updateLanguage();
+        document.getElementById('language-text').textContent = currentLanguage === 'ar' ? 'English' : 'العربية';
+
+        // اختيار أول نوع مستخدم افتراضياً
+        document.querySelector('.user-type-option[data-type="student"]').classList.add('selected');
+        selectedUserType = 'student';
+
+        
+    </script>
+</body>
+
+</html>

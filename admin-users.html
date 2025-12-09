@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إدارة المستخدمين - DT Edu</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- إضافة مكتبة dexie.js -->
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <style>
+      :root {
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
+        --accent: #00b894;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --text: #333;
+        --text-light: #666;
+        --card-dark: #111827;
+        --card-darker: #0b1220;
+        --border-light: #e6eaf0;
+        --border-dark: rgba(255, 255, 255, 0.08);
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --sidebar-width: 260px;
+      }
+
+      .dark-mode {
+        --light: #0f172a;
+        --dark: #e6e6e6;
+        --text: #e6e6e6;
+        --text-light: #94a3b8;
+        --shadow: 0 12px 45px rgba(0, 0, 0, 0.5);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Tajawal", "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: var(--transition);
+      }
+
+      body.dark-mode {
+        background: radial-gradient(
+          circle at 10% 20%,
+          #0b1220 0%,
+          #0a1224 25%,
+          #0b1530 60%,
+          #0b1220 100%
+        );
+      }
+
+      body.rtl {
+        direction: rtl;
+      }
+
+      body.ltr {
+        direction: ltr;
+      }
+
+      /* التصميم الرئيسي */
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* الشريط الجانبي */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(
+          180deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 20px 0;
+        box-shadow: var(--shadow);
+        z-index: 100;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        transition: var(--transition);
+      }
+
+      /* عندما تكون اللغة عربية */
+      body.rtl .sidebar {
+        right: 0;
+      }
+
+      body.rtl .main-content {
+        margin-right: var(--sidebar-width);
+      }
+
+      /* عندما تكون اللغة إنجليزية */
+      body.ltr .sidebar {
+        left: 0;
+      }
+
+      body.ltr .main-content {
+        margin-left: var(--sidebar-width);
+        margin-right: 0;
+      }
+
+      .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+      
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .logo img {
+        width: 140px;
+        object-fit: contain;
+        display: block;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, white, #e1f0fa);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .user-info {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .user-name {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .user-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+        display: inline-block;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0 15px;
+        margin-bottom: 20px;
+      }
+
+      .menu-item {
+        margin-bottom: 8px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .menu-item a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .menu-item a:hover,
+      .menu-item.active a {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      body.rtl .menu-item a:hover,
+      body.rtl .menu-item.active a {
+        transform: translateX(-5px);
+      }
+
+      body.ltr .menu-item a:hover,
+      body.ltr .menu-item.active a {
+        transform: translateX(5px);
+      }
+
+      .menu-item i {
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      body.rtl .menu-item i {
+        margin-left: 10px;
+      }
+
+      body.ltr .menu-item i {
+        margin-right: 10px;
+      }
+
+      .menu-item span {
+        flex: 1;
+      }
+
+      .sidebar-footer {
+        padding: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: auto;
+      }
+
+      .sidebar-footer .menu-item a {
+        padding: 10px 15px;
+      }
+
+      /* المحتوى الرئيسي */
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      .header {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .header {
+        background: var(--card-dark);
+        color: var(--dark);
+        border: 1px solid var(--border-dark);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      }
+
+      .header h1 {
+        color: var(--primary);
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .dark-mode-toggle,
+      .logout-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dark-mode-toggle {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .dark-mode-toggle:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      .logout-btn {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      .logout-btn:hover {
+        background: rgba(231, 76, 60, 0.2);
+      }
+
+      /* محتوى صفحة إدارة المستخدمين */
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .page-title {
+        color: var(--primary);
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .page-actions {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+      }
+
+      .primary-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+      }
+
+      .primary-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .secondary-btn {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+      }
+
+      .secondary-btn:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      /* فلتر البحث */
+      .filter-section {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        margin-bottom: 25px;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .filter-section {
+        background: var(--card-dark);
+        color: var(--dark);
+        border: 1px solid var(--border-dark);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      }
+
+      .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: var(--transition);
+        background-color: #f8f9fa;
+      }
+
+      body.dark-mode .form-group input,
+      body.dark-mode .form-group select {
+        background-color: rgba(255, 255, 255, 0.04);
+        color: var(--dark);
+        border-color: var(--border-dark);
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        border-color: var(--primary);
+        background-color: white;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+      }
+
+      body.dark-mode .form-group input:focus,
+      body.dark-mode .form-group select:focus {
+        background-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.35);
+      }
+
+      /* جدول المستخدمين */
+      .users-table-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        transition: var(--transition);
+        overflow-x: auto;
+      }
+
+      body.dark-mode .users-table-container {
+        background: var(--card-darker);
+        color: var(--dark);
+        border: 1px solid var(--border-dark);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .table-info {
+        margin-bottom: 15px;
+        font-weight: 600;
+        color: var(--text-light);
+      }
+
+      .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+      }
+
+      .users-table th,
+      .users-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+      }
+
+      body.rtl .users-table th,
+      body.rtl .users-table td {
+        text-align: right;
+      }
+
+      body.ltr .users-table th,
+      body.ltr .users-table td {
+        text-align: left;
+      }
+
+      body.dark-mode .users-table th,
+      body.dark-mode .users-table td {
+        border-bottom: 1px solid var(--border-dark);
+        color: var(--dark);
+      }
+
+      .users-table th {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      body.dark-mode .users-table th {
+        background: rgba(255, 255, 255, 0.04);
+        color: #c7d2fe;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
+
+      .user-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        white-space: nowrap;
+      }
+
+      .status-active {
+        background: rgba(0, 184, 148, 0.1);
+        color: #00b894;
+      }
+
+      .status-inactive {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      .status-pending {
+        background: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+      }
+
+      .user-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .action-btn {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+      }
+
+      .action-btn:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      .action-btn.delete {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      .action-btn.delete:hover {
+        background: rgba(231, 76, 60, 0.2);
+      }
+
+      /* الترقيم */
+      .pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .pagination .action-btn.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* مودال إضافة/تعديل المستخدم */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        transform: translateY(-20px);
+        transition: var(--transition);
+      }
+
+      .modal-overlay.active .modal {
+        transform: translateY(0);
+      }
+
+      body.dark-mode .modal {
+        background: var(--card-dark);
+        color: var(--dark);
+        border: 1px solid var(--border-dark);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      }
+
+      .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-light);
+        transition: var(--transition);
+      }
+
+      .modal-close:hover {
+        color: var(--primary);
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      /* التصميم المتجاوب */
+      @media (max-width: 1200px) {
+        .filter-row {
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+      }
+
+      @media (max-width: 992px) {
+        .sidebar {
+          width: 80px;
+        }
+
+        .sidebar-header .logo-text,
+        .user-info,
+        .menu-item span {
+          display: none;
+        }
+
+        body.rtl .main-content {
+          margin-right: 80px;
+        }
+
+        body.ltr .main-content {
+          margin-left: 80px;
+        }
+
+        .menu-item a {
+          justify-content: center;
+          padding: 15px;
+        }
+
+        .menu-item i {
+          margin: 0;
+          font-size: 20px;
+        }
+
+        .sidebar-footer .menu-item span {
+          display: none;
+        }
+
+        .filter-row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
+        }
+
+        .header-actions {
+          justify-content: center;
+        }
+
+        .page-header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
+        }
+
+        .page-actions {
+          justify-content: center;
+        }
+
+        .filter-row {
+          grid-template-columns: 1fr;
+        }
+
+        .users-table {
+          font-size: 14px;
+        }
+
+        .users-table th,
+        .users-table td {
+          padding: 8px 10px;
+        }
+
+        .user-actions {
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+          padding: 10px 15px;
+          font-size: 14px;
+        }
+
+        .modal {
+          width: 95%;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .main-content {
+          padding: 15px;
+        }
+
+        .sidebar {
+          width: 70px;
+        }
+
+        body.rtl .main-content {
+          margin-right: 70px;
+        }
+
+        body.ltr .main-content {
+          margin-left: 70px;
+        }
+
+        .header h1 {
+          font-size: 22px;
+        }
+
+        .page-title {
+          font-size: 20px;
+        }
+
+        .filter-section {
+          padding: 20px;
+        }
+
+        .users-table-container {
+          padding: 20px;
+        }
+
+        .users-table {
+          font-size: 12px;
+          min-width: 600px;
+        }
+
+        .users-table th,
+        .users-table td {
+          padding: 6px 8px;
+        }
+
+        .user-avatar {
+          width: 35px;
+          height: 35px;
+          font-size: 14px;
+        }
+
+        .action-btn {
+          padding: 4px 8px;
+          font-size: 11px;
+        }
+
+        .modal-footer {
+          flex-direction: column;
+        }
+
+        .modal-footer button {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .page-actions {
+          flex-direction: column;
+          width: 100%;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .header-actions {
+          flex-direction: column;
+          width: 100%;
+        }
+
+        .dark-mode-toggle,
+        .logout-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      body.rtl .toast-container {
+        left: 20px;
+        right: auto;
+      }
+
+      .toast {
+        padding: 12px 16px;
+        border-radius: 8px;
+        color: #fff;
+        box-shadow: var(--shadow);
+        animation: fadeIn 0.3s ease-out;
+        font-weight: 600;
+      }
+
+      .toast-success {
+        background: #00b894;
+      }
+
+      .toast-error {
+        background: #e74c3c;
+      }
+
+      .toast-info {
+        background: #6c5ce7;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+
+  <body class="rtl">
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- مودال إضافة/تعديل المستخدم -->
+    <div id="user-modal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-title">إضافة مستخدم جديد</h3>
+          <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="user-form">
+            <div class="filter-row">
+              <div class="form-group">
+                <label for="name">الاسم الكامل</label>
+                <input type="text" id="name" name="name" required />
+              </div>
+              <div class="form-group">
+                <label for="email">البريد الإلكتروني</label>
+                <input type="email" id="email" name="email" required />
+              </div>
+            </div>
+            <div class="filter-row">
+              <div class="form-group">
+                <label for="type">نوع المستخدم</label>
+                <select id="type" name="type" required>
+                  <option value="student">طالب</option>
+                  <option value="teacher">معلم</option>
+                  <option value="parent">ولي أمر</option>
+                  <option value="admin">مدير</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="class">الصف الدراسي</label>
+                <select id="class" name="class">
+                  <option value="">غير محدد</option>
+                  <option value="1">الصف الأول</option>
+                  <option value="2">الصف الثاني</option>
+                  <option value="3">الصف الثالث</option>
+                  <option value="4">الصف الرابع</option>
+                  <option value="5">الصف الخامس</option>
+                  <option value="6">الصف السادس</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-row">
+              <div class="form-group">
+                <label for="status">الحالة</label>
+                <select id="status" name="status" required>
+                  <option value="active">نشط</option>
+                  <option value="inactive">غير نشط</option>
+                  <option value="pending">في انتظار التفعيل</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" name="password" />
+                <small
+                  style="
+                    color: var(--text-light);
+                    display: block;
+                    margin-top: 5px;
+                  "
+                >
+                  اتركه فارغاً إذا كنت لا تريد تغيير كلمة المرور
+                </small>
+              </div>
+            </div>
+            <input type="hidden" id="user-id" name="id" />
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="secondary-btn" id="modal-cancel">إلغاء</button>
+          <button class="primary-btn" id="modal-save">حفظ</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-container">
+      <!-- الشريط الجانبي -->
+      <div class="sidebar">
+       <div class="sidebar-header">
+              <div class="logo">
+                  <img src="logo.png" alt="Logo" />
+              </div>
+                            
+              <div class="logo-text">DT Edu</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name">عبير حسن</div>
+                    <div class="user-type" id="user-type">مدير المدرسة</div>
+                </div>
+            </div>
+
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="admin-dashboard.html">
+              <i class="fas fa-home"></i>
+              <span id="menu-dashboard">لوحة التحكم</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="admin-users.html">
+              <i class="fas fa-users-cog"></i>
+              <span id="menu-users">إدارة المستخدمين</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-payments.html">
+              <i class="fas fa-money-bill-wave"></i>
+              <span>المدفوعات والرسوم</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-reports.html">
+              <i class="fas fa-chart-bar"></i>
+              <span id="menu-reports">التقارير والإحصائيات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-schedule.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-schedule">الجدول المدرسي</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="classroom.html">
+              <i class="fas fa-chalkboard"></i>
+              <span>الفصل الدراسي</span>
+            </a>
+          </li>
+
+          <li class="menu-item">
+            <a href="admin-messages.html">
+              <i class="fas fa-comments"></i>
+              <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-settings.html">
+              <i class="fas fa-cogs"></i>
+              <span id="menu-settings">إعدادات النظام</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-footer">
+          <ul class="sidebar-menu">
+            <li class="menu-item">
+              <a href="#" id="sidebar-dark-mode-toggle">
+                <i class="fas fa-moon"></i>
+                <span id="dark-mode-text">الوضع الداكن</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" id="sidebar-language-toggle">
+                <i class="fas fa-language"></i>
+                <span>English</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" id="logout-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span id="logout-text">تسجيل الخروج</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- المحتوى الرئيسي -->
+      <div class="main-content">
+        <div class="header">
+          <h1 id="header-title">إدارة المستخدمين - نظام DT Edu</h1>
+          <div class="header-actions">
+            <button class="dark-mode-toggle" id="header-dark-mode-toggle">
+              <i class="fas fa-moon"></i>
+              <span id="dark-mode-btn-text">الوضع الداكن</span>
+            </button>
+            <button class="logout-btn" id="header-logout-btn">
+              <i class="fas fa-sign-out-alt"></i>
+              <span id="header-logout-text">تسجيل الخروج</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- محتوى صفحة إدارة المستخدمين -->
+        <div class="page-header">
+          <h2 class="page-title" id="page-title">إدارة المستخدمين</h2>
+          <div class="page-actions">
+            <button class="secondary-btn" id="export-btn">
+              <i class="fas fa-download"></i>
+              <span id="export-btn-text">تصدير البيانات</span>
+            </button>
+            <button class="primary-btn" id="add-user-btn">
+              <i class="fas fa-plus"></i>
+              <span id="add-user-btn-text">إضافة مستخدم جديد</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- قسم الفلترة والبحث -->
+        <div class="filter-section">
+          <div class="filter-row">
+            <div class="form-group">
+              <label for="search-input">بحث</label>
+              <input
+                type="text"
+                id="search-input"
+                placeholder="ابحث بالاسم أو البريد الإلكتروني"
+              />
+            </div>
+            <div class="form-group">
+              <label for="user-type-filter">نوع المستخدم</label>
+              <select id="user-type-filter">
+                <option value="all">جميع المستخدمين</option>
+                <option value="student">طلاب</option>
+                <option value="teacher">معلمين</option>
+                <option value="parent">أولياء أمور</option>
+                <option value="admin">مديرين</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="status-filter">الحالة</label>
+              <select id="status-filter">
+                <option value="all">جميع الحالات</option>
+                <option value="active">نشط</option>
+                <option value="inactive">غير نشط</option>
+                <option value="pending">في انتظار التفعيل</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-row">
+            <div class="form-group">
+              <label for="class-filter">الصف الدراسي</label>
+              <select id="class-filter">
+                <option value="all">جميع الصفوف</option>
+                <option value="1">الصف الأول</option>
+                <option value="2">الصف الثاني</option>
+                <option value="3">الصف الثالث</option>
+                <option value="4">الصف الرابع</option>
+                <option value="5">الصف الخامس</option>
+                <option value="6">الصف السادس</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="date-from">من تاريخ</label>
+              <input type="date" id="date-from" />
+            </div>
+            <div class="form-group">
+              <label for="date-to">إلى تاريخ</label>
+              <input type="date" id="date-to" />
+            </div>
+          </div>
+          <div class="page-actions">
+            <button class="secondary-btn" id="reset-filters-btn">
+              <i class="fas fa-redo"></i>
+              <span id="reset-filters-btn-text">إعادة تعيين</span>
+            </button>
+            <button class="primary-btn" id="apply-filters-btn">
+              <i class="fas fa-filter"></i>
+              <span id="apply-filters-btn-text">تطبيق الفلترة</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- جدول المستخدمين -->
+        <div class="users-table-container">
+          <div class="table-info">
+            <p id="table-info">جارٍ تحميل البيانات...</p>
+          </div>
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th id="user-col">المستخدم</th>
+                <th id="email-col">البريد الإلكتروني</th>
+                <th id="type-col">نوع المستخدم</th>
+                <th id="class-col">الصف</th>
+                <th id="date-col">تاريخ التسجيل</th>
+                <th id="status-col">الحالة</th>
+                <th id="actions-col">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              <!-- سيتم تعبئته بالجافاسكريبت -->
+            </tbody>
+          </table>
+
+          <!-- الترقيم -->
+          <div class="pagination">
+            <button class="action-btn" id="prev-page">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+            <div id="page-numbers"></div>
+            <button class="action-btn" id="next-page">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // تعريف قاعدة البيانات باستخدام Dexie
+      const db = new Dexie("DTEduDB");
+
+      // تعريف الجداول والمفاتيح (النسخة المحدثة)
+      db.version(3)
+        .stores({
+          users:
+            "++id, name, email, type, class, status, registrationDate, avatar, password",
+          logs: "++id, userId, action, details, timestamp",
+          statistics: "id, value",
+        })
+        .upgrade(async (tx) => {
+          // ترقية قاعدة البيانات: إضافة جدول الإحصائيات إذا لزم الأمر
+          try {
+            const stats = await tx.table("statistics").toArray();
+            if (stats.length === 0) {
+              await tx.table("statistics").bulkAdd([
+                { id: "students", value: 0 },
+                { id: "teachers", value: 0 },
+                { id: "parents", value: 0 },
+                { id: "admins", value: 0 },
+                { id: "totalUsers", value: 0 },
+                { id: "pendingPreps", value: 0 },
+              ]);
+              console.log("تم تهيئة جدول الإحصائيات");
+            }
+          } catch (error) {
+            console.error("خطأ في ترقية قاعدة البيانات:", error);
+          }
+        });
+
+      function showToast(type, message) {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast toast-" + type;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.remove();
+        }, 4000);
+      }
+
+      // استعادة اللغة المحفوظة
+      let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
+
+      // استعادة وضع التصميم المحفوظ
+      let darkMode = localStorage.getItem("darkMode") === "true";
+
+      // استعادة معلومات المستخدم
+      const currentUser = JSON.parse(
+        localStorage.getItem("currentUser") || "{}"
+      );
+
+      // متغيرات إدارة البيانات
+      let currentPage = 1;
+      const usersPerPage = 10;
+      let totalUsers = 0;
+      let currentFilter = {
+        search: "",
+        type: "all",
+        status: "all",
+        class: "all",
+        dateFrom: "",
+        dateTo: "",
+      };
+
+      // تحديث اتجاه الصفحة واللغة والوضع الداكن
+      document.body.className = currentLanguage === "ar" ? "rtl" : "ltr";
+      if (darkMode) {
+        document.body.classList.add("dark-mode");
+      }
+
+      document.getElementById("user-name").textContent = "عبير حسن";
+
+      // إعداد زر الوضع الداكن
+      document
+        .querySelectorAll("#header-dark-mode-toggle, #sidebar-dark-mode-toggle")
+        .forEach((btn) => {
+          btn.addEventListener("click", function () {
+            // تبديل الوضع الداكن
+            darkMode = !darkMode;
+
+            // تحديث الوضع الداكن في التخزين المحلي
+            localStorage.setItem("darkMode", darkMode);
+
+            // تحديث الوضع الداكن في الصفحة
+            if (darkMode) {
+              document.body.classList.add("dark-mode");
+            } else {
+              document.body.classList.remove("dark-mode");
+            }
+
+            // تحديث نص الزر
+            updateDarkModeText();
+          });
+        });
+
+      // إعداد زر تسجيل الخروج
+      document
+        .getElementById("logout-link")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("currentUser");
+          window.location.href = "login.html";
+        });
+
+      document
+        .getElementById("header-logout-btn")
+        .addEventListener("click", function () {
+          localStorage.removeItem("currentUser");
+          window.location.href = "login.html";
+        });
+
+      // تحديث النصوص حسب اللغة الحالية
+      function updateLanguage() {
+        const translations = {
+          ar: {
+            "header-title": "إدارة المستخدمين - نظام DT Edu",
+            "menu-dashboard": "لوحة التحكم",
+            "menu-users": "إدارة المستخدمين",
+            "menu-reports": "التقارير والإحصائيات",
+            "menu-schedule": "الجدول المدرسي",
+            "menu-settings": "إعدادات النظام",
+            "menu-messages": "الرسائل",
+
+            // عناصر الصفحة
+            "page-title": "إدارة المستخدمين",
+            "export-btn-text": "تصدير البيانات",
+            "add-user-btn-text": "إضافة مستخدم جديد",
+            "reset-filters-btn-text": "إعادة تعيين",
+            "apply-filters-btn-text": "تطبيق الفلترة",
+
+            // عناوين الجدول
+            "user-col": "المستخدم",
+            "email-col": "البريد الإلكتروني",
+            "type-col": "نوع المستخدم",
+            "class-col": "الصف",
+            "date-col": "تاريخ التسجيل",
+            "status-col": "الحالة",
+            "actions-col": "الإجراءات",
+
+            // عناصر مشتركة
+            "logout-text": "تسجيل الخروج",
+            "header-logout-text": "تسجيل الخروج",
+            "dark-mode-text": "الوضع الداكن",
+            "dark-mode-btn-text": "الوضع الداكن",
+          },
+          en: {
+            "header-title": "Users Management - DT Edu System",
+            "menu-dashboard": "Dashboard",
+            "menu-users": "Users Management",
+            "menu-reports": "Reports & Statistics",
+            "menu-schedule": "School Schedule",
+            "menu-settings": "System Settings",
+            "menu-messages": "Messages",
+
+            // عناصر الصفحة
+            "page-title": "Users Management",
+            "export-btn-text": "Export Data",
+            "add-user-btn-text": "Add New User",
+            "reset-filters-btn-text": "Reset",
+            "apply-filters-btn-text": "Apply Filters",
+
+            // عناوين الجدول
+            "user-col": "User",
+            "email-col": "Email",
+            "type-col": "User Type",
+            "class-col": "Class",
+            "date-col": "Registration Date",
+            "status-col": "Status",
+            "actions-col": "Actions",
+
+            // عناصر مشتركة
+            "logout-text": "Logout",
+            "header-logout-text": "Logout",
+            "dark-mode-text": "Dark Mode",
+            "dark-mode-btn-text": "Dark Mode",
+          },
+        };
+
+        // تطبيق الترجمات
+        Object.keys(translations[currentLanguage]).forEach((key) => {
+          const element = document.getElementById(key);
+          if (element) {
+            element.textContent = translations[currentLanguage][key];
+          }
+        });
+      }
+
+      // تحديث نص زر الوضع الداكن
+      function updateDarkModeText() {
+        const darkModeText =
+          currentLanguage === "ar"
+            ? darkMode
+              ? "الوضع الفاتح"
+              : "الوضع الداكن"
+            : darkMode
+            ? "Light Mode"
+            : "Dark Mode";
+
+        document.getElementById("dark-mode-text").textContent = darkModeText;
+        document.getElementById("dark-mode-btn-text").textContent =
+          darkModeText;
+
+        // تحديث الأيقونة
+        const icons = document.querySelectorAll(
+          "#header-dark-mode-toggle i, #sidebar-dark-mode-toggle i"
+        );
+        icons.forEach((icon) => {
+          icon.className = darkMode ? "fas fa-sun" : "fas fa-moon";
+        });
+      }
+
+      // تهيئة البيانات الأولية في قاعدة البيانات
+      async function initializeDatabase() {
+        try {
+          // تهيئة المستخدمين
+          const usersCount = await db.users.count();
+          if (usersCount === 0) {
+            const initialUsers = [
+              {
+                name: "أحمد محمد",
+                email: "ahmed@example.com",
+                type: "student",
+                class: "1",
+                status: "active",
+                registrationDate: "2023-01-15",
+                avatar: "أ",
+                password: "password123",
+              },
+              {
+                name: "سارة علي",
+                email: "sara@example.com",
+                type: "teacher",
+                class: "3",
+                status: "active",
+                registrationDate: "2023-02-20",
+                avatar: "س",
+                password: "password123",
+              },
+              {
+                name: "محمد خالد",
+                email: "mohamed@example.com",
+                type: "parent",
+                class: "",
+                status: "pending",
+                registrationDate: "2023-03-10",
+                avatar: "م",
+                password: "password123",
+              },
+              {
+                name: "فاطمة عبدالله",
+                email: "fatma@example.com",
+                type: "admin",
+                class: "",
+                status: "active",
+                registrationDate: "2023-01-05",
+                avatar: "ف",
+                password: "password123",
+              },
+            ];
+
+            await db.users.bulkAdd(initialUsers);
+            console.log("تم تهيئة قاعدة البيانات بالمستخدمين الافتراضيين");
+
+            // إعادة حساب الإحصائيات بعد إضافة المستخدمين الافتراضيين
+            await recalculateStatistics();
+          }
+
+          // التأكد من وجود جدول الإحصائيات
+          const statsCount = await db.statistics.count();
+          if (statsCount === 0) {
+            await recalculateStatistics();
+          }
+        } catch (error) {
+          console.error("خطأ في تهيئة قاعدة البيانات:", error);
+        }
+      }
+
+      // دالة لإعادة حساب جميع الإحصائيات
+      async function recalculateStatistics() {
+        try {
+          // حساب عدد كل نوع من المستخدمين
+          const students = await db.users
+            .where("type")
+            .equals("student")
+            .count();
+          const teachers = await db.users
+            .where("type")
+            .equals("teacher")
+            .count();
+          const parents = await db.users.where("type").equals("parent").count();
+          const admins = await db.users.where("type").equals("admin").count();
+          const totalUsers = await db.users.count();
+
+          // تحديث أو إضافة الإحصائيات
+          await db.statistics.put({ id: "students", value: students });
+          await db.statistics.put({ id: "teachers", value: teachers });
+          await db.statistics.put({ id: "parents", value: parents });
+          await db.statistics.put({ id: "admins", value: admins });
+          await db.statistics.put({ id: "totalUsers", value: totalUsers });
+          await db.statistics.put({ id: "pendingPreps", value: 0 });
+
+          console.log("تم إعادة حساب الإحصائيات");
+
+          // إرسال إشعار بالتحديث
+          notifyStatsUpdate();
+        } catch (error) {
+          console.error("خطأ في إعادة حساب الإحصائيات:", error);
+        }
+      }
+
+      // دالة مساعدة لتحديث الإحصائيات
+      async function updateUserStatistics(operation, userType, oldType = null) {
+        try {
+          // التأكد من وجود جدول الإحصائيات أولاً
+          const statsCount = await db.statistics.count();
+          if (statsCount === 0) {
+            await recalculateStatistics();
+            return;
+          }
+
+          const tx = db.transaction(["statistics", "users"], "readwrite");
+
+          if (operation === "increment") {
+            const statKey = userType + "s";
+
+            // التحقق من وجود السجل، وإذا لم يكن موجوداً، إنشاؤه
+            const existingStat = await tx.table("statistics").get(statKey);
+            if (existingStat) {
+              await tx
+                .table("statistics")
+                .where("id")
+                .equals(statKey)
+                .modify((stat) => (stat.value += 1));
+            } else {
+              // حساب العدد الحالي من قاعدة البيانات
+              const count = await db.users
+                .where("type")
+                .equals(userType)
+                .count();
+              await tx
+                .table("statistics")
+                .put({ id: statKey, value: count + 1 });
+            }
+
+            // تحديث العدد الإجمالي
+            const totalStat = await tx.table("statistics").get("totalUsers");
+            if (totalStat) {
+              await tx
+                .table("statistics")
+                .where("id")
+                .equals("totalUsers")
+                .modify((stat) => (stat.value += 1));
+            } else {
+              const totalCount = await db.users.count();
+              await tx
+                .table("statistics")
+                .put({ id: "totalUsers", value: totalCount + 1 });
+            }
+          } else if (operation === "decrement") {
+            const statKey = userType + "s";
+
+            // تقليل العدد للنوع القديم
+            const existingStat = await tx.table("statistics").get(statKey);
+            if (existingStat && existingStat.value > 0) {
+              await tx
+                .table("statistics")
+                .where("id")
+                .equals(statKey)
+                .modify((stat) => (stat.value = Math.max(0, stat.value - 1)));
+            }
+
+            // تقليل العدد الإجمالي
+            const totalStat = await tx.table("statistics").get("totalUsers");
+            if (totalStat && totalStat.value > 0) {
+              await tx
+                .table("statistics")
+                .where("id")
+                .equals("totalUsers")
+                .modify((stat) => (stat.value = Math.max(0, stat.value - 1)));
+            }
+          } else if (operation === "change" && oldType) {
+            // تغيير نوع المستخدم: تقليل القديم وزيادة الجديد
+            const oldStatKey = oldType + "s";
+            const newStatKey = userType + "s";
+
+            // تقليل القديم
+            const oldStat = await tx.table("statistics").get(oldStatKey);
+            if (oldStat && oldStat.value > 0) {
+              await tx
+                .table("statistics")
+                .where("id")
+                .equals(oldStatKey)
+                .modify((stat) => (stat.value = Math.max(0, stat.value - 1)));
+            }
+
+            // زيادة الجديد
+            const newStat = await tx.table("statistics").get(newStatKey);
+            if (newStat) {
+              await tx
+                .table("statistics")
+                .where("id")
+                .equals(newStatKey)
+                .modify((stat) => (stat.value += 1));
+            } else {
+              const count = await db.users
+                .where("type")
+                .equals(userType)
+                .count();
+              await tx
+                .table("statistics")
+                .put({ id: newStatKey, value: count + 1 });
+            }
+          }
+
+          await tx.done;
+
+          // إرسال حدث لتحديث لوحة التحكم في الصفحات الأخرى
+          notifyStatsUpdate();
+        } catch (error) {
+          console.error("خطأ في تحديث الإحصائيات:", error);
+          // في حالة الخطأ، إعادة حساب الإحصائيات من الصفر
+          try {
+            await recalculateStatistics();
+          } catch (recalcError) {
+            console.error("خطأ في إعادة حساب الإحصائيات:", recalcError);
+          }
+        }
+      }
+
+      // إرسال إشعار بتحديث الإحصائيات
+      function notifyStatsUpdate() {
+        if ("BroadcastChannel" in window) {
+          try {
+            const channel = new BroadcastChannel("stats-update");
+            channel.postMessage({
+              action: "statsUpdated",
+              timestamp: Date.now(),
+            });
+          } catch (error) {
+            console.error("خطأ في إرسال إشعار تحديث الإحصائيات:", error);
+          }
+        }
+      }
+
+      async function logActivity(userId, action, details) {
+        try {
+          await db.logs.add({
+            userId: userId,
+            action: action,
+            details: details,
+            timestamp: new Date().toISOString(),
+          });
+        } catch (error) {
+          console.error("خطأ في تسجيل النشاط:", error);
+        }
+      }
+
+      const ALLOWED_TYPES = ["student", "teacher", "parent", "admin"];
+      const ALLOWED_STATUS = ["active", "inactive", "pending"];
+
+      async function logError(
+        action,
+        errorCode,
+        requestData,
+        responseStatus,
+        error
+      ) {
+        try {
+          await db.logs.add({
+            userId: currentUser && currentUser.id ? currentUser.id : "system",
+            action: action,
+            details: JSON.stringify({ errorCode, requestData, responseStatus }),
+            timestamp: new Date().toISOString(),
+            errorCode: errorCode,
+            requestData: requestData ? JSON.stringify(requestData) : null,
+            responseStatus: responseStatus || null,
+            stack: error && error.stack ? error.stack : "",
+          });
+        } catch (e) {
+          console.error("خطأ في تسجيل الخطأ:", e);
+        }
+      }
+
+      function validateUserData(userData, isUpdate) {
+        const name = (userData.name || "").trim();
+        const email = (userData.email || "").trim();
+        const type = (userData.type || "").trim();
+        const status = (userData.status || "").trim();
+        const cls = (userData.class || "").trim();
+        const password = userData.password || "";
+        const errors = [];
+        if (!name || name.length < 2) {
+          errors.push({
+            code: "V_NAME_REQUIRED",
+            message:
+              currentLanguage === "ar"
+                ? "يرجى إدخال اسم صحيح"
+                : "Please enter a valid name",
+          });
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+          errors.push({
+            code: "V_EMAIL_INVALID",
+            message:
+              currentLanguage === "ar"
+                ? "يرجى إدخال بريد إلكتروني صحيح"
+                : "Please enter a valid email",
+          });
+        }
+        if (!ALLOWED_TYPES.includes(type)) {
+          errors.push({
+            code: "V_TYPE_INVALID",
+            message:
+              currentLanguage === "ar"
+                ? "نوع المستخدم غير صالح"
+                : "Invalid user type",
+          });
+        }
+        if (!ALLOWED_STATUS.includes(status)) {
+          errors.push({
+            code: "V_STATUS_INVALID",
+            message:
+              currentLanguage === "ar"
+                ? "حالة المستخدم غير صالحة"
+                : "Invalid status",
+          });
+        }
+        if (type === "student" && !cls) {
+          errors.push({
+            code: "V_CLASS_REQUIRED",
+            message:
+              currentLanguage === "ar"
+                ? "يرجى تحديد الصف الدراسي"
+                : "Please select class",
+          });
+        }
+        if (!isUpdate) {
+          if (!password || password.trim().length < 6) {
+            errors.push({
+              code: "V_PASSWORD_REQUIRED",
+              message:
+                currentLanguage === "ar"
+                  ? "كلمة المرور مطلوبة ويجب أن تكون 6 أحرف على الأقل"
+                  : "Password required and must be at least 6 characters",
+            });
+          }
+        } else {
+          if (
+            password &&
+            password.trim() !== "" &&
+            password.trim().length < 6
+          ) {
+            errors.push({
+              code: "V_PASSWORD_WEAK",
+              message:
+                currentLanguage === "ar"
+                  ? "كلمة المرور ضعيفة، يجب أن تكون 6 أحرف على الأقل"
+                  : "Weak password, minimum 6 characters",
+            });
+          }
+        }
+        return {
+          valid: errors.length === 0,
+          errors,
+          normalized: { name, email, type, status, class: cls, password },
+        };
+      }
+
+      // تحميل جدول المستخدمين مع الفلترة
+      async function loadUsersTable() {
+        try {
+          const usersTableBody = document.getElementById("users-table-body");
+          usersTableBody.innerHTML =
+            '<tr><td colspan="7" style="text-align: center; padding: 20px;">جارٍ تحميل البيانات...</td></tr>';
+
+          // بناء استعلام الفلترة
+          let query = db.users.toCollection();
+
+          if (currentFilter.search) {
+            query = query.filter(
+              (user) =>
+                user.name
+                  .toLowerCase()
+                  .includes(currentFilter.search.toLowerCase()) ||
+                user.email
+                  .toLowerCase()
+                  .includes(currentFilter.search.toLowerCase())
+            );
+          }
+
+          if (currentFilter.type !== "all") {
+            query = query.filter((user) => user.type === currentFilter.type);
+          }
+
+          if (currentFilter.status !== "all") {
+            query = query.filter(
+              (user) => user.status === currentFilter.status
+            );
+          }
+
+          if (currentFilter.class !== "all") {
+            query = query.filter((user) => user.class === currentFilter.class);
+          }
+
+          if (currentFilter.dateFrom) {
+            query = query.filter(
+              (user) => user.registrationDate >= currentFilter.dateFrom
+            );
+          }
+
+          if (currentFilter.dateTo) {
+            query = query.filter(
+              (user) => user.registrationDate <= currentFilter.dateTo
+            );
+          }
+
+          // الحصول على إجمالي عدد المستخدمين بعد الفلترة
+          totalUsers = await query.count();
+
+          // الحصول على المستخدمين للصفحة الحالية
+          const users = await query
+            .offset((currentPage - 1) * usersPerPage)
+            .limit(usersPerPage)
+            .toArray();
+
+          // تحديث معلومات الجدول
+          const start = (currentPage - 1) * usersPerPage + 1;
+          const end = Math.min(currentPage * usersPerPage, totalUsers);
+          document.getElementById("table-info").textContent =
+            currentLanguage === "ar"
+              ? `عرض ${start}-${end} من ${totalUsers} مستخدم`
+              : `Showing ${start}-${end} of ${totalUsers} users`;
+
+          // إعادة تعيين محتوى الجدول
+          usersTableBody.innerHTML = "";
+
+          if (users.length === 0) {
+            usersTableBody.innerHTML =
+              '<tr><td colspan="7" style="text-align: center; padding: 20px;">لا توجد بيانات</td></tr>';
+            updatePagination();
+            return;
+          }
+
+          // ملء الجدول بالمستخدمين
+          users.forEach((user) => {
+            const row = document.createElement("tr");
+
+            // نوع المستخدم
+            const typeText =
+              currentLanguage === "ar"
+                ? {
+                    student: "طالب",
+                    teacher: "معلم",
+                    parent: "ولي أمر",
+                    admin: "مدير",
+                  }
+                : {
+                    student: "Student",
+                    teacher: "Teacher",
+                    parent: "Parent",
+                    admin: "Admin",
+                  };
+
+            // حالة المستخدم
+            const statusText =
+              currentLanguage === "ar"
+                ? {
+                    active: "نشط",
+                    inactive: "غير نشط",
+                    pending: "في انتظار التفعيل",
+                  }
+                : {
+                    active: "Active",
+                    inactive: "Inactive",
+                    pending: "Pending",
+                  };
+
+            row.innerHTML = `
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="user-avatar">${
+                                  user.avatar || user.name.charAt(0)
+                                }</div>
+                                <div>${user.name}</div>
+                            </div>
+                        </td>
+                        <td>${user.email}</td>
+                        <td>${typeText[user.type] || user.type}</td>
+                        <td>${user.class || "-"}</td>
+                        <td>${user.registrationDate || "غير محدد"}</td>
+                        <td>
+                            <span class="user-status status-${user.status}">
+                                ${statusText[user.status] || user.status}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="user-actions">
+                                <button class="action-btn" onclick="editUser(${
+                                  user.id
+                                })">
+                                    <i class="fas fa-edit"></i>
+                                    <span>${
+                                      currentLanguage === "ar"
+                                        ? "تعديل"
+                                        : "Edit"
+                                    }</span>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteUser(${
+                                  user.id
+                                })">
+                                    <i class="fas fa-trash"></i>
+                                    <span>${
+                                      currentLanguage === "ar"
+                                        ? "حذف"
+                                        : "Delete"
+                                    }</span>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+            usersTableBody.appendChild(row);
+          });
+
+          updatePagination();
+        } catch (error) {
+          console.error("خطأ في تحميل المستخدمين:", error);
+          showToast(
+            "error",
+            currentLanguage === "ar"
+              ? "حدث خطأ في تحميل البيانات"
+              : "Error loading data"
+          );
+        }
+      }
+
+      // تحديث الترقيم
+      function updatePagination() {
+        const pageNumbers = document.getElementById("page-numbers");
+        const totalPages = Math.ceil(totalUsers / usersPerPage);
+
+        pageNumbers.innerHTML = "";
+
+        // إضافة أرقام الصفحات
+        for (let i = 1; i <= totalPages; i++) {
+          const pageBtn = document.createElement("button");
+          pageBtn.className = `action-btn ${i === currentPage ? "active" : ""}`;
+          pageBtn.textContent = i;
+          pageBtn.addEventListener("click", () => {
+            currentPage = i;
+            loadUsersTable();
+          });
+          pageNumbers.appendChild(pageBtn);
+        }
+
+        // تحديث حالة أزرار السابق/التالي
+        document.getElementById("prev-page").disabled = currentPage === 1;
+        document.getElementById("next-page").disabled =
+          currentPage === totalPages;
+      }
+
+      // فتح مودال إضافة مستخدم
+      function openAddUserModal() {
+        document.getElementById("modal-title").textContent =
+          currentLanguage === "ar" ? "إضافة مستخدم جديد" : "Add New User";
+
+        // إعادة تعيين النموذج
+        document.getElementById("user-form").reset();
+        document.getElementById("user-id").value = "";
+        document.getElementById("password").placeholder =
+          currentLanguage === "ar"
+            ? "مطلوب للمستخدم الجديد"
+            : "Required for new user";
+        document.getElementById("modal-save").textContent =
+          currentLanguage === "ar" ? "حفظ" : "Save";
+
+        // إظهار المودال
+        document.getElementById("user-modal").classList.add("active");
+      }
+
+      // دالة تعديل المستخدم
+      async function editUser(id) {
+        await openEditUserModal(id);
+      }
+
+      // فتح مودال تعديل مستخدم
+      async function openEditUserModal(id) {
+        try {
+          const user = await db.users.get(id);
+          if (!user) {
+            showToast(
+              "error",
+              currentLanguage === "ar" ? "المستخدم غير موجود" : "User not found"
+            );
+            return;
+          }
+
+          document.getElementById("modal-title").textContent =
+            currentLanguage === "ar" ? "تعديل بيانات المستخدم" : "Edit User";
+
+          // تعبئة النموذج ببيانات المستخدم
+          document.getElementById("user-id").value = user.id;
+          document.getElementById("name").value = user.name;
+          document.getElementById("email").value = user.email;
+          document.getElementById("type").value = user.type;
+          document.getElementById("class").value = user.class || "";
+          document.getElementById("status").value = user.status;
+          // لا نعرض كلمة المرور لأسباب أمنية
+          document.getElementById("password").value = "";
+          document.getElementById("password").placeholder =
+            currentLanguage === "ar"
+              ? "اتركه فارغاً للحفاظ على كلمة المرور الحالية"
+              : "Leave empty to keep current password";
+
+          document.getElementById("modal-save").textContent =
+            currentLanguage === "ar" ? "تحديث" : "Update";
+
+          // إظهار المودال
+          document.getElementById("user-modal").classList.add("active");
+        } catch (error) {
+          console.error("خطأ في تحميل بيانات المستخدم:", error);
+          showToast(
+            "error",
+            currentLanguage === "ar"
+              ? "حدث خطأ في تحميل بيانات المستخدم"
+              : "Error loading user data"
+          );
+        }
+      }
+
+      // إضافة مستخدم جديد
+      async function addUser(userData) {
+        try {
+          const emailExists = await db.users
+            .where("email")
+            .equals(userData.email)
+            .first();
+          if (emailExists) {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "البريد الإلكتروني مستخدم بالفعل (USER_EMAIL_EXISTS)"
+                : "Email is already in use (USER_EMAIL_EXISTS)"
+            );
+            await logError(
+              "add_user_error",
+              "USER_EMAIL_EXISTS",
+              userData,
+              "constraint_error"
+            );
+            throw new Error("Email already exists");
+          }
+          const avatar = userData.name.charAt(0);
+          const registrationDate = new Date().toISOString().split("T")[0];
+          const newUser = { ...userData, avatar, registrationDate };
+
+          // إضافة المستخدم
+          const id = await db.users.add(newUser);
+
+          // تحديث الإحصائيات
+          await updateUserStatistics("increment", userData.type);
+
+          await logActivity(
+            currentUser.id || "system",
+            "add_user",
+            `تم إضافة مستخدم جديد: ${userData.name} (ID: ${id})`
+          );
+          showToast(
+            "success",
+            currentLanguage === "ar"
+              ? "تم إضافة المستخدم بنجاح"
+              : "User added successfully"
+          );
+          return id;
+        } catch (error) {
+          console.error("خطأ في إضافة المستخدم:", error);
+          if (error.message === "Email already exists") {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "البريد الإلكتروني مستخدم بالفعل (USER_EMAIL_EXISTS)"
+                : "Email is already in use (USER_EMAIL_EXISTS)"
+            );
+          } else {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "حدث خطأ في إضافة المستخدم (ADD_USER_EXCEPTION)"
+                : "Error adding user (ADD_USER_EXCEPTION)"
+            );
+          }
+          await logError(
+            "add_user_error",
+            error.message === "Email already exists"
+              ? "USER_EMAIL_EXISTS"
+              : "ADD_USER_EXCEPTION",
+            userData,
+            "exception",
+            error
+          );
+          throw error;
+        }
+      }
+
+      // تحديث مستخدم
+      async function updateUser(id, userData) {
+        try {
+          const existingUser = await db.users.get(id);
+          if (!existingUser) {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "المستخدم غير موجود (USER_NOT_FOUND)"
+                : "User not found (USER_NOT_FOUND)"
+            );
+            await logError(
+              "update_user_error",
+              "USER_NOT_FOUND",
+              { id, ...userData },
+              "not_found"
+            );
+            return;
+          }
+
+          // التحقق من تغيير البريد الإلكتروني
+          if (userData.email !== existingUser.email) {
+            const emailExists = await db.users
+              .where("email")
+              .equals(userData.email)
+              .first();
+            if (emailExists) {
+              showToast(
+                "error",
+                currentLanguage === "ar"
+                  ? "البريد الإلكتروني مستخدم بالفعل من قبل مستخدم آخر (USER_EMAIL_EXISTS)"
+                  : "Email is already used by another user (USER_EMAIL_EXISTS)"
+              );
+              await logError(
+                "update_user_error",
+                "USER_EMAIL_EXISTS",
+                { id, ...userData },
+                "constraint_error"
+              );
+              return;
+            }
+          }
+
+          // التحقق من تغيير نوع المستخدم
+          const typeChanged = userData.type !== existingUser.type;
+
+          const updateData = {
+            name: userData.name,
+            email: userData.email,
+            type: userData.type,
+            class: userData.class || "",
+            status: userData.status,
+          };
+
+          if (userData.password && userData.password.trim() !== "") {
+            updateData.password = userData.password;
+          }
+
+          await db.users.update(id, updateData);
+
+          // تحديث الإحصائيات إذا تغير نوع المستخدم
+          if (typeChanged) {
+            await updateUserStatistics(
+              "change",
+              userData.type,
+              existingUser.type
+            );
+          }
+
+          await logActivity(
+            currentUser.id || "system",
+            "update_user",
+            `تم تحديث بيانات المستخدم: ${userData.name} (ID: ${id})`
+          );
+          showToast(
+            "success",
+            currentLanguage === "ar"
+              ? "تم تحديث بيانات المستخدم بنجاح"
+              : "User updated successfully"
+          );
+          return id;
+        } catch (error) {
+          console.error("خطأ في تحديث المستخدم:", error);
+          if (error.name === "ConstraintError") {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "البريد الإلكتروني مستخدم بالفعل (USER_EMAIL_EXISTS)"
+                : "Email is already in use (USER_EMAIL_EXISTS)"
+            );
+            await logError(
+              "update_user_error",
+              "USER_EMAIL_EXISTS",
+              { id, ...userData },
+              "constraint_error",
+              error
+            );
+          } else {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "حدث خطأ في تحديث المستخدم (UPDATE_USER_EXCEPTION)"
+                : "Error updating user (UPDATE_USER_EXCEPTION)"
+            );
+            await logError(
+              "update_user_error",
+              "UPDATE_USER_EXCEPTION",
+              { id, ...userData },
+              "exception",
+              error
+            );
+          }
+          throw error;
+        }
+      }
+
+      // حذف مستخدم
+      async function deleteUser(id) {
+        try {
+          const user = await db.users.get(id);
+          if (!user) {
+            showToast(
+              "error",
+              currentLanguage === "ar" ? "المستخدم غير موجود" : "User not found"
+            );
+            return;
+          }
+
+          if (
+            confirm(
+              currentLanguage === "ar"
+                ? `هل أنت متأكد من حذف المستخدم "${user.name}"؟`
+                : `Are you sure you want to delete user "${user.name}"?`
+            )
+          ) {
+            await db.users.delete(id);
+
+            // تحديث الإحصائيات
+            await updateUserStatistics("decrement", user.type);
+
+            // تسجيل النشاط
+            await logActivity(
+              currentUser.id || "system",
+              "delete_user",
+              `تم حذف المستخدم: ${user.name} (ID: ${id})`
+            );
+
+            showToast(
+              "success",
+              currentLanguage === "ar"
+                ? "تم حذف المستخدم بنجاح"
+                : "User deleted successfully"
+            );
+
+            // إعادة تحميل الجدول
+            await loadUsersTable();
+          }
+        } catch (error) {
+          console.error("خطأ في حذف المستخدم:", error);
+          showToast(
+            "error",
+            currentLanguage === "ar"
+              ? "حدث خطأ في حذف المستخدم"
+              : "Error deleting user"
+          );
+        }
+      }
+
+      // حفظ المستخدم (إضافة/تعديل)
+      async function saveUser() {
+        const form = document.getElementById("user-form");
+        const formData = new FormData(form);
+        const rawData = Object.fromEntries(formData.entries());
+        const idStr = (rawData.id || "").toString().trim();
+        const userId = idStr ? parseInt(idStr, 10) : null;
+        const validation = validateUserData(rawData, !!userId);
+        if (!validation.valid) {
+          const firstError = validation.errors[0];
+          const msg = `${firstError.message} (${firstError.code})`;
+          showToast("error", msg);
+          await logError(
+            "validation_error",
+            firstError.code,
+            rawData,
+            "validation_failed"
+          );
+          return;
+        }
+        const userData = validation.normalized;
+        try {
+          if (userId) {
+            await updateUser(userId, userData);
+          } else {
+            await addUser(userData);
+          }
+          document.getElementById("user-modal").classList.remove("active");
+          document.getElementById("user-form").reset();
+          await loadUsersTable();
+        } catch (error) {
+          await logError(
+            "save_user_error",
+            "SAVE_USER_EXCEPTION",
+            { id: userId, ...userData },
+            "exception",
+            error
+          );
+          console.error("خطأ في حفظ المستخدم:", error);
+        }
+      }
+
+      // تطبيق الفلترة
+      function applyFilters() {
+        currentFilter = {
+          search: document.getElementById("search-input").value,
+          type: document.getElementById("user-type-filter").value,
+          status: document.getElementById("status-filter").value,
+          class: document.getElementById("class-filter").value,
+          dateFrom: document.getElementById("date-from").value,
+          dateTo: document.getElementById("date-to").value,
+        };
+
+        currentPage = 1; // العودة للصفحة الأولى بعد التصفية
+        loadUsersTable();
+
+        showToast(
+          "info",
+          currentLanguage === "ar"
+            ? "تم تطبيق الفلترة على البيانات"
+            : "Filters applied"
+        );
+      }
+
+      // إعادة تعيين الفلترة
+      function resetFilters() {
+        document.getElementById("search-input").value = "";
+        document.getElementById("user-type-filter").value = "all";
+        document.getElementById("status-filter").value = "all";
+        document.getElementById("class-filter").value = "all";
+        document.getElementById("date-from").value = "";
+        document.getElementById("date-to").value = "";
+
+        currentFilter = {
+          search: "",
+          type: "all",
+          status: "all",
+          class: "all",
+          dateFrom: "",
+          dateTo: "",
+        };
+
+        currentPage = 1;
+        loadUsersTable();
+
+        showToast(
+          "info",
+          currentLanguage === "ar" ? "تم إعادة تعيين الفلترة" : "Filters reset"
+        );
+      }
+
+      // تصدير البيانات
+      async function exportData() {
+        try {
+          const users = await db.users.toArray();
+
+          // تحويل البيانات إلى تنسيق CSV
+          const headers =
+            currentLanguage === "ar"
+              ? [
+                  "الاسم",
+                  "البريد الإلكتروني",
+                  "نوع المستخدم",
+                  "الصف",
+                  "الحالة",
+                  "تاريخ التسجيل",
+                ]
+              : [
+                  "Name",
+                  "Email",
+                  "User Type",
+                  "Class",
+                  "Status",
+                  "Registration Date",
+                ];
+
+          const csvRows = [
+            headers.join(","),
+            ...users.map((user) =>
+              [
+                user.name,
+                user.email,
+                currentLanguage === "ar"
+                  ? user.type === "student"
+                    ? "طالب"
+                    : user.type === "teacher"
+                    ? "معلم"
+                    : user.type === "parent"
+                    ? "ولي أمر"
+                    : "مدير"
+                  : user.type,
+                user.class || "-",
+                currentLanguage === "ar"
+                  ? user.status === "active"
+                    ? "نشط"
+                    : user.status === "inactive"
+                    ? "غير نشط"
+                    : "في انتظار التفعيل"
+                  : user.status,
+                user.registrationDate,
+              ].join(",")
+            ),
+          ];
+
+          const csvString = csvRows.join("\n");
+          const blob = new Blob([csvString], {
+            type: "text/csv;charset=utf-8;",
+          });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `users_${new Date().toISOString().split("T")[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+
+          showToast(
+            "success",
+            currentLanguage === "ar"
+              ? "تم تصدير البيانات بنجاح"
+              : "Data exported successfully"
+          );
+        } catch (error) {
+          console.error("خطأ في تصدير البيانات:", error);
+          showToast(
+            "error",
+            currentLanguage === "ar"
+              ? "حدث خطأ في تصدير البيانات"
+              : "Error exporting data"
+          );
+        }
+      }
+
+      // تهيئة الأحداث عند تحميل الصفحة
+      document.addEventListener("DOMContentLoaded", async () => {
+        // تحديث اللغة والوضع الداكن
+        updateLanguage();
+        updateDarkModeText();
+
+        // فتح قاعدة البيانات وتهيئتها
+        try {
+          await db.open();
+          await initializeDatabase();
+        } catch (error) {
+          console.error("خطأ في فتح قاعدة البيانات:", error);
+        }
+
+        // تحميل جدول المستخدمين
+        await loadUsersTable();
+
+        const addBtn = document.getElementById("add-user-btn");
+        if (addBtn) addBtn.addEventListener("click", openAddUserModal);
+        const exportBtn = document.getElementById("export-btn");
+        if (exportBtn) exportBtn.addEventListener("click", exportData);
+        const applyFiltersBtn = document.getElementById("apply-filters-btn");
+        if (applyFiltersBtn)
+          applyFiltersBtn.addEventListener("click", applyFilters);
+        const resetFiltersBtn = document.getElementById("reset-filters-btn");
+        if (resetFiltersBtn)
+          resetFiltersBtn.addEventListener("click", resetFilters);
+
+        // إعداد أحداث البحث أثناء الكتابة
+        let searchTimeout;
+        document
+          .getElementById("search-input")
+          .addEventListener("input", function () {
+            // إعادة التصفية بعد تأخير 500 مللي ثانية
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(applyFilters, 500);
+          });
+
+        // إعداد أحداث المودال
+        document
+          .getElementById("modal-close")
+          .addEventListener("click", function () {
+            document.getElementById("user-modal").classList.remove("active");
+            document.getElementById("user-form").reset();
+          });
+
+        document
+          .getElementById("modal-cancel")
+          .addEventListener("click", function () {
+            document.getElementById("user-modal").classList.remove("active");
+            document.getElementById("user-form").reset();
+          });
+
+        document
+          .getElementById("modal-save")
+          .addEventListener("click", saveUser);
+
+        // إغلاق المودال عند النقر خارج المحتوى
+        document
+          .getElementById("user-modal")
+          .addEventListener("click", function (e) {
+            if (e.target === this) {
+              this.classList.remove("active");
+              document.getElementById("user-form").reset();
+            }
+          });
+
+        // إعداد أحداث الترقيم
+        document
+          .getElementById("prev-page")
+          .addEventListener("click", function () {
+            if (currentPage > 1) {
+              currentPage--;
+              loadUsersTable();
+            }
+          });
+
+        document
+          .getElementById("next-page")
+          .addEventListener("click", function () {
+            const totalPages = Math.ceil(totalUsers / usersPerPage);
+            if (currentPage < totalPages) {
+              currentPage++;
+              loadUsersTable();
+            }
+          });
+
+        // دعم اختصار لوحة المفاتيح لإغلاق المودال
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") {
+            document.getElementById("user-modal").classList.remove("active");
+            document.getElementById("user-form").reset();
+          }
+        });
+
+        // دعم إرسال النموذج بالزر Enter
+        document
+          .getElementById("user-form")
+          .addEventListener("submit", function (e) {
+            e.preventDefault();
+            saveUser();
+          });
+      });
+
+      // جعل الدوال متاحة عالمياً للاستدعاء من HTML
+      window.editUser = editUser;
+      window.deleteUser = deleteUser;
+    </script>
+  </body>
+</html>

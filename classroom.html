@@ -1,0 +1,3538 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل الدراسي التفاعلي ثلاثي الأبعاد</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', Arial, sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        body {
+            overflow: hidden;
+        }
+        
+        body.rtl {
+            direction: rtl;
+        }
+        
+        body.ltr {
+            direction: ltr;
+        }
+        
+        #scene-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0;
+        }
+        
+        #info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 100;
+            max-width: 300px;
+        }
+        
+        body.ltr #info {
+            right: auto;
+            left: 10px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #555;
+        }
+        
+        body.ltr .close-btn {
+            left: auto;
+            right: 10px;
+        }
+        
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        
+        .info-row {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .info-value {
+            color: #333;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #3498db;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            color: white;
+        }
+        
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid white;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .controls-info {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 100;
+        }
+        
+        body.ltr .controls-info {
+            right: auto;
+            left: 10px;
+        }
+        
+        .ai-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        body.ltr .ai-toggle {
+            left: auto;
+            right: 10px;
+        }
+        
+        .ai-toggle:hover {
+            background-color: #2980b9;
+        }
+        
+        .ai-toggle.active {
+            background-color: #27ae60;
+        }
+        
+        .ai-toggle-icon {
+            margin-left: 8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+            position: relative;
+        }
+        
+        body.ltr .ai-toggle-icon {
+            margin-left: 0;
+            margin-right: 8px;
+        }
+        
+        .ai-toggle.active .ai-toggle-icon {
+            background-color: #2ecc71;
+        }
+        
+        .ai-panel {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            z-index: 100;
+            display: none;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+        }
+        
+        body.ltr .ai-panel {
+            left: auto;
+            right: 10px;
+        }
+        
+        .ai-panel.active {
+            display: block;
+        }
+        
+        .ai-panel h3 {
+            margin-bottom: 10px;
+            color: #3498db;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        .ai-recommendation {
+            margin-top: 15px;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+        
+        body.ltr .ai-recommendation {
+            border-left: none;
+            border-right: 3px solid #3498db;
+        }
+        
+        .ai-recommendation h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .ai-recommendation p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .ai-subject-recommendation {
+            margin-top: 20px;
+        }
+        
+        .ai-subject-recommendation h4 {
+            color: #333;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 3px;
+        }
+        
+        .subject-method {
+            background-color: #f5f5f5;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #27ae60;
+        }
+        
+        body.ltr .subject-method {
+            border-left: none;
+            border-right: 3px solid #27ae60;
+        }
+        
+        .subject-method h5 {
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .subject-method p {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+        
+        .book-tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .digital-twin-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            z-index: 100;
+            display: none;
+        }
+        
+        body.ltr .digital-twin-panel {
+            left: auto;
+            right: 10px;
+        }
+        
+        .digital-twin-panel.active {
+            display: block;
+        }
+        
+        .digital-twin-panel h3 {
+            margin-bottom: 10px;
+            color: #9c27b0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        .digital-twin-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .twin-control-btn {
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        
+        .twin-control-btn:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .twin-data-display {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .twin-data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 3px;
+        }
+        
+        .twin-data-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .twin-data-value {
+            color: #9c27b0;
+        }
+        
+        .twin-toggle {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            z-index: 100;
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        body.ltr .twin-toggle {
+            left: auto;
+            right: 10px;
+        }
+        
+        .twin-toggle:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .twin-toggle.active {
+            background-color: #6a1b9a;
+        }
+        
+        .time-controls {
+            position: absolute;
+            top: 110px;
+            left: 10px;
+            z-index: 100;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            display: none;
+        }
+        
+        body.ltr .time-controls {
+            left: auto;
+            right: 10px;
+        }
+        
+        .time-controls.active {
+            display: block;
+        }
+        
+        .time-control-btn {
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        
+        body.ltr .time-control-btn {
+            margin-right: 0;
+            margin-left: 5px;
+        }
+        
+        .time-control-btn:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .time-label {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #555;
+            text-align: center;
+        }
+        
+        .kpi-panel {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+        
+        .kpi-item {
+            text-align: center;
+            color: white;
+            padding: 0 10px;
+        }
+        
+        .kpi-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .kpi-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 10px;
+            left: 320px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+        
+        body.ltr .status-indicator {
+            left: auto;
+            right: 320px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #2ecc71;
+            margin-left: 8px;
+        }
+        
+        body.ltr .status-dot {
+            margin-left: 0;
+            margin-right: 8px;
+        }
+        
+        .status-dot.warning {
+            background-color: #f39c12;
+        }
+        
+        .status-dot.error {
+            background-color: #e74c3c;
+        }
+        
+        .sensor-data {
+            position: absolute;
+            top: 170px;
+            left: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            z-index: 100;
+            width: 300px;
+            display: none;
+        }
+        
+        body.ltr .sensor-data {
+            left: auto;
+            right: 10px;
+        }
+        
+        .sensor-data.active {
+            display: block;
+        }
+        
+        .sensor-data h3 {
+            margin-bottom: 10px;
+            color: #9c27b0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        .sensor-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .sensor-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .sensor-value {
+            color: #333;
+        }
+        
+        .sensor-value.warning {
+            color: #f39c12;
+        }
+        
+        .sensor-value.error {
+            color: #e74c3c;
+        }
+        
+        .language-toggle {
+            position: absolute;
+            top: 110px;
+            left: 10px;
+            z-index: 100;
+            background-color: #525252;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        body.ltr .language-toggle {
+            left: auto;
+            right: 10px;
+        }
+        
+        .language-toggle:hover {
+            background-color: #6b7181;
+        }
+        
+        .book-label {
+            position: absolute;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 2px 5px;
+            border-radius: 3px;
+            pointer-events: none;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 160px;
+            left: 10px;
+            z-index: 100;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        body.ltr .back-btn {
+            left: auto;
+            right: 10px;
+        }
+        
+        .back-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body class="rtl">
+    <div id="scene-container"></div>
+    
+    <div id="info" data-ar="انقر على أي طالب أو المدرس أو السبورة أو الكتب لعرض المعلومات" data-en="Click on any student, teacher, board, or book to view information"></div>
+    
+    <div class="controls-info" data-ar="استخدم الماوس للتحكم: انقر واسحب للدوران | عجلة الماوس للتكبير/التصغير" data-en="Use mouse to control: Click and drag to rotate | Mouse wheel to zoom"></div>
+    
+    <button id="ai-toggle" class="ai-toggle" data-ar-active="إيقاف مساعد الذكاء الاصطناعي" data-ar-inactive="تفعيل مساعد الذكاء الاصطناعي" data-en-active="Disable AI Assistant" data-en-inactive="Enable AI Assistant">
+        <span class="ai-toggle-icon"></span>
+        <span id="ai-toggle-text">تفعيل مساعد الذكاء الاصطناعي</span>
+    </button>
+    
+    <button id="twin-toggle" class="twin-toggle" data-ar-active="إيقاف التوأمة الرقمية" data-ar-inactive="تفعيل التوأمة الرقمية" data-en-active="Disable Digital Twin" data-en-inactive="Enable Digital Twin">
+        <span id="twin-toggle-text">تفعيل التوأمة الرقمية</span>
+    </button>
+    
+    <button id="language-toggle" class="language-toggle" data-ar="English" data-en="العربية">
+        English
+    </button>
+    
+    <button id="back-btn" class="back-btn" data-ar="العودة للوحة التحكم" data-en="Back to Dashboard">
+        العودة للوحة التحكم
+    </button>
+    
+    <div id="time-controls" class="time-controls">
+        <button id="time-past" class="time-control-btn" data-ar="بيانات سابقة" data-en="Past Data"></button>
+        <button id="time-now" class="time-control-btn" data-ar="الوقت الحالي" data-en="Current Time"></button>
+        <button id="time-future" class="time-control-btn" data-ar="توقعات مستقبلية" data-en="Future Predictions"></button>
+        <span id="time-label" class="time-label" data-ar-current="الوقت الحالي: 10:30 صباحاً" data-ar-past="بيانات سابقة: 09:30 صباحاً" data-ar-future="توقعات مستقبلية: 11:30 صباحاً" data-en-current="Current Time: 10:30 AM" data-en-past="Past Data: 09:30 AM" data-en-future="Future Predictions: 11:30 AM"></span>
+    </div>
+    
+    <div id="ai-panel" class="ai-panel">
+        <h3 data-ar="مساعد الذكاء الاصطناعي" data-en="AI Assistant"></h3>
+        <p data-ar="انقر على أي طالب لعرض تحليل بياناته وتوصيات التدريس المناسبة له" data-en="Click on any student to view data analysis and appropriate teaching recommendations"></p>
+        <div id="ai-content"></div>
+    </div>
+    
+    <div id="digital-twin-panel" class="digital-twin-panel">
+        <h3 data-ar="نظام التوأمة الرقمية" data-en="Digital Twin System"></h3>
+        <div class="digital-twin-controls">
+            <button class="twin-control-btn" id="monitor-temp" data-ar="مراقبة درجة الحرارة" data-en="Monitor Temperature"></button>
+            <button class="twin-control-btn" id="monitor-light" data-ar="مراقبة الإضاءة" data-en="Monitor Lighting"></button>
+            <button class="twin-control-btn" id="monitor-attendance" data-ar="مراقبة الحضور" data-en="Monitor Attendance"></button>
+            <button class="twin-control-btn" id="monitor-engagement" data-ar="مراقبة التفاعل" data-en="Monitor Engagement"></button>
+        </div>
+        <div class="twin-data-display" id="twin-data">
+            <div class="twin-data-row">
+                <span class="twin-data-label" data-ar="حالة النظام:" data-en="System Status:"></span>
+                <span class="twin-data-value" data-ar="جاهز" data-en="Ready"></span>
+            </div>
+            <div class="twin-data-row">
+                <span class="twin-data-label" data-ar="آخر تحديث:" data-en="Last Update:"></span>
+                <span class="twin-data-value">10:30:45 AM</span>
+            </div>
+            <div class="twin-data-row">
+                <span class="twin-data-label" data-ar="عدد الطلاب الحاضرين:" data-en="Students Present:"></span>
+                <span class="twin-data-value">9/9</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="sensor-data" class="sensor-data">
+        <h3 data-ar="بيانات أجهزة الاستشعار" data-en="Sensor Data"></h3>
+        <div class="sensor-item">
+            <span class="sensor-label" data-ar="درجة الحرارة:" data-en="Temperature:"></span>
+            <span class="sensor-value" id="temp-value">24°C</span>
+        </div>
+        <div class="sensor-item">
+            <span class="sensor-label" data-ar="مستوى الإضاءة:" data-en="Light Level:"></span>
+            <span class="sensor-value" id="light-value">650 lux</span>
+        </div>
+        <div class="sensor-item">
+            <span class="sensor-label" data-ar="مستوى الضوضاء:" data-en="Noise Level:"></span>
+            <span class="sensor-value" id="noise-value">45 dB</span>
+        </div>
+        <div class="sensor-item">
+            <span class="sensor-label" data-ar="جودة الهواء:" data-en="Air Quality:"></span>
+            <span class="sensor-value" id="air-value" data-ar-good="جيدة" data-ar-medium="متوسطة" data-ar-bad="سيئة" data-en-good="Good" data-en-medium="Medium" data-en-bad="Poor"></span>
+        </div>
+        <div class="sensor-item">
+            <span class="sensor-label" data-ar="الرطوبة:" data-en="Humidity:"></span>
+            <span class="sensor-value" id="humidity-value">40%</span>
+        </div>
+    </div>
+    
+    <div class="kpi-panel">
+        <div class="kpi-item">
+            <div class="kpi-value" id="engagement-kpi">85%</div>
+            <div class="kpi-label" data-ar="مستوى التفاعل" data-en="Engagement Level"></div>
+        </div>
+        <div class="kpi-item">
+            <div class="kpi-value" id="attendance-kpi">100%</div>
+            <div class="kpi-label" data-ar="نسبة الحضور" data-en="Attendance Rate"></div>
+        </div>
+        <div class="kpi-item">
+            <div class="kpi-value" id="performance-kpi">78%</div>
+            <div class="kpi-label" data-ar="متوسط الأداء" data-en="Average Performance"></div>
+        </div>
+        <div class="kpi-item">
+            <div class="kpi-value" id="comfort-kpi">92%</div>
+            <div class="kpi-label" data-ar="مؤشر الراحة" data-en="Comfort Index"></div>
+        </div>
+    </div>
+    
+    <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span data-ar="جميع الأنظمة تعمل بشكل طبيعي" data-en="All systems operating normally"></span>
+    </div>
+    
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="modal-title">عنوان</h2>
+            <div id="modal-body">
+                <!-- سيتم إضافة المحتوى ديناميكياً -->
+            </div>
+        </div>
+    </div>
+    
+    <div id="book-tooltip" class="book-tooltip"></div>
+    
+    <div class="loading-screen">
+        <div class="spinner"></div>
+        <h2 data-ar="جاري تحميل نظام التوأمة الرقمية للفصل الدراسي..." data-en="Loading Digital Twin Classroom System..."></h2>
+    </div>
+
+    <!-- تضمين مكتبة Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    
+    <script>
+        // التحقق من تسجيل الدخول
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+        
+        // استعادة اللغة المحفوظة
+        let currentLanguage = localStorage.getItem('currentLanguage') || 'ar';
+        
+        // تحديث اتجاه الصفحة واللغة
+        document.body.className = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+        
+        // بيانات المدرسين حسب المواد
+        const teachersData = {
+            'arabic': {
+                id: 'arabic_teacher',
+                ar: {
+                    name: "أ. سماح ",
+                    age: 38,
+                    subject: "اللغة العربية",
+                    experience: "12 سنة",
+                    education: "ماجستير في الأدب العربي",
+                    achievements: "مؤلفة كتاب في النحو وعدة مقالات أدبية",
+                    teachingMethods: ["التعلم النشط", "المناقشة والحوار", "تحليل النصوص"],
+                    specialties: ["النحو", "البلاغة", "الأدب العربي الحديث"]
+                },
+                en: {
+                    name: "Ms. Samah ",
+                    age: 38,
+                    subject: "Arabic Language",
+                    experience: "12 years",
+                    education: "Master's in Arabic Literature",
+                    achievements: "Author of a grammar book and several literary articles",
+                    teachingMethods: ["Active Learning", "Discussion and Dialogue", "Text Analysis"],
+                    specialties: ["Grammar", "Rhetoric", "Modern Arabic Literature"]
+                }
+            },
+            'english': {
+                id: 'english_teacher',
+                ar: {
+                    name: "أ. محمد ",
+                    age: 45,
+                    subject: "اللغة الإنجليزية",
+                    experience: "20 سنة",
+                    education: "ماجستير في تدريس اللغة الإنجليزية كلغة ثانية",
+                    achievements: "مطور مناهج لغوية وخبير في التعليم الدولي",
+                    teachingMethods: ["الغمر اللغوي", "التعلم التواصلي", "الوسائط المتعددة"],
+                    specialties: ["القواعد", "الأدب الإنجليزي", "مهارات التواصل"]
+                },
+                en: {
+                    name: "Mr. mohamed ",
+                    age: 45,
+                    subject: "English Language",
+                    experience: "20 years",
+                    education: "Master's in TESOL",
+                    achievements: "Curriculum developer and international education expert",
+                    teachingMethods: ["Language Immersion", "Communicative Learning", "Multimedia"],
+                    specialties: ["Grammar", "English Literature", "Communication Skills"]
+                }
+            },
+            'math': {
+                id: 'math_teacher',
+                ar: {
+                    name: "د. ايمن محمد",
+                    age: 42,
+                    subject: "الرياضيات",
+                    experience: "15 سنة",
+                    education: "دكتوراه في الرياضيات التطبيقية",
+                    achievements: "نشر 5 أبحاث علمية ومؤلف كتاب في الرياضيات",
+                    teachingMethods: ["التعلم النشط", "حل المشكلات", "التعلم التعاوني"],
+                    specialties: ["الجبر", "التفاضل والتكامل", "الإحصاء"]
+                },
+                en: {
+                    name: "Dr. Ayman Mohamed",
+                    age: 42,
+                    subject: "Mathematics",
+                    experience: "15 years",
+                    education: "PhD in Applied Mathematics",
+                    achievements: "Published 5 scientific papers and authored a mathematics book",
+                    teachingMethods: ["Active Learning", "Problem Solving", "Cooperative Learning"],
+                    specialties: ["Algebra", "Calculus", "Statistics"]
+                }
+            },
+            'science': {
+                id: 'science_teacher',
+                ar: {
+                    name: "د. مها العلوي",
+                    age: 40,
+                    subject: "العلوم",
+                    experience: "14 سنة",
+                    education: "دكتوراه في الفيزياء",
+                    achievements: "باحث في مجال الطاقة المتجددة ومطور تجارب علمية",
+                    teachingMethods: ["التعلم بالاكتشاف", "التجريب العملي", "التعلم القائم على المشاريع"],
+                    specialties: ["الفيزياء", "الكيمياء", "علوم البيئة"]
+                },
+                en: {
+                    name: "Dr. Maha Al-Alawi",
+                    age: 40,
+                    subject: "Science",
+                    experience: "14 years",
+                    education: "PhD in Physics",
+                    achievements: "Researcher in renewable energy and developer of scientific experiments",
+                    teachingMethods: ["Discovery Learning", "Practical Experimentation", "Project-Based Learning"],
+                    specialties: ["Physics", "Chemistry", "Environmental Science"]
+                }
+            },
+            'history': {
+                id: 'history_teacher',
+                ar: {
+                    name: "أ. جمال التاريخي",
+                    age: 42,
+                    subject: "التاريخ",
+                    experience: "25 سنة",
+                    education: "ماجستير في التاريخ الإسلامي",
+                    achievements: "مؤلف كتب تاريخية ومشارك في مؤتمرات دولية",
+                    teachingMethods: ["السرد القصصي", "تحليل المصادر التاريخية", "الزيارات الميدانية"],
+                    specialties: ["التاريخ الإسلامي", "تاريخ الحضارات", "التاريخ المعاصر"]
+                },
+                en: {
+                    name: "Mr. Gamal Al-Tarikhi",
+                    age: 42,
+                    subject: "History",
+                    experience: "25 years",
+                    education: "Master's in Islamic History",
+                    achievements: "Author of historical books and participant in international conferences",
+                    teachingMethods: ["Storytelling", "Historical Source Analysis", "Field Trips"],
+                    specialties: ["Islamic History", "History of Civilizations", "Contemporary History"]
+                }
+            },
+            'philosophy': {
+                id: 'philosophy_teacher',
+                ar: {
+                    name: "د. نها الفكر",
+                    age: 55,
+                    subject: "الفلسفة",
+                    experience: "30 سنة",
+                    education: "دكتوراه في الفلسفة",
+                    achievements: "مؤلفة كتب في الفلسفة الإسلامية والفكر النقدي",
+                    teachingMethods: ["الحوار السقراطي", "التفكير النقدي", "المناظرات الفلسفية"],
+                    specialties: ["الفلسفة الإسلامية", "الفلسفة الغربية", "المنطق"]
+                },
+                en: {
+                    name: "Dr. Noha Al-Fikr",
+                    age: 55,
+                    subject: "Philosophy",
+                    experience: "30 years",
+                    education: "PhD in Philosophy",
+                    achievements: "Author of books on Islamic philosophy and critical thinking",
+                    teachingMethods: ["Socratic Dialogue", "Critical Thinking", "Philosophical Debates"],
+                    specialties: ["Islamic Philosophy", "Western Philosophy", "Logic"]
+                }
+            }
+        };
+        
+        // بيانات العناصر (يمكن استبدالها بتحميل من ملف JSON خارجي لاحقاً)
+        const elementsData = {
+            student1: {
+                ar: {
+                    name: "أحمد محمد ",
+                    age: 15,
+                    grade: "الصف الأول",
+                    subjects: ["الرياضيات", "العلوم", "اللغة العربية"],
+                    hobbies: "القراءة والرسم",
+                    achievements: "المركز الأول في مسابقة العلوم",
+                    learningStyle: "بصري",
+                    strengths: "التفكير المنطقي، حل المشكلات",
+                    weaknesses: "التعبير الشفهي، العمل الجماعي",
+                    personality: "انطوائي، تحليلي",
+                    attendance: 95,
+                    engagement: 80,
+                    performance: {
+                        current: 85,
+                        trend: [78, 80, 82, 85],
+                        prediction: 88
+                    },
+                    attention: {
+                        current: 75,
+                        history: [65, 70, 75, 75, 80],
+                        areas: ["الرياضيات", "العلوم"]
+                    },
+                    health: {
+                        vision: "جيدة",
+                        hearing: "ممتازة",
+                        ergonomics: "بحاجة لتحسين وضعية الجلوس"
+                    }
+                },
+                en: {
+                    name: "Ahmed Mohamed",
+                    age: 15,
+                    grade: "First Grade",
+                    subjects: ["Mathematics", "Science", "Arabic Language"],
+                    hobbies: "Reading and Drawing",
+                    achievements: "First place in Science Competition",
+                    learningStyle: "Visual",
+                    strengths: "Logical thinking, Problem solving",
+                    weaknesses: "Verbal expression, Teamwork",
+                    personality: "Introverted, Analytical",
+                    attendance: 95,
+                    engagement: 80,
+                    performance: {
+                        current: 85,
+                        trend: [78, 80, 82, 85],
+                        prediction: 88
+                    },
+                    attention: {
+                        current: 75,
+                        history: [65, 70, 75, 75, 80],
+                        areas: ["Mathematics", "Science"]
+                    },
+                    health: {
+                        vision: "Good",
+                        hearing: "Excellent",
+                        ergonomics: "Needs improvement in sitting posture"
+                    }
+                }
+            },
+            student2: {
+                ar: {
+                    name: "سما سالم ",
+                    age: 16,
+                    grade: "الصف الأول",
+                    subjects: ["الفيزياء", "الكيمياء", "اللغة الإنجليزية"],
+                    hobbies: "السباحة وكرة السلة",
+                    achievements: "عضو في فريق المدرسة للسباحة",
+                    learningStyle: "حركي",
+                    strengths: "التواصل، المهارات الاجتماعية",
+                    weaknesses: "التركيز لفترات طويلة",
+                    personality: "انبساطي، اجتماعي",
+                    attendance: 98,
+                    engagement: 90,
+                    performance: {
+                        current: 82,
+                        trend: [75, 78, 80, 82],
+                        prediction: 85
+                    },
+                    attention: {
+                        current: 85,
+                        history: [75, 80, 85, 85, 90],
+                        areas: ["اللغة الإنجليزية", "الفيزياء"]
+                    },
+                    health: {
+                        vision: "تحتاج لنظارات",
+                        hearing: "جيدة",
+                        ergonomics: "جيدة"
+                    }
+                },
+                en: {
+                    name: "Sama salem",
+                    age: 16,
+                    grade: "First Grade",
+                    subjects: ["Physics", "Chemistry", "English Language"],
+                    hobbies: "Swimming and Basketball",
+                    achievements: "Member of the school swimming team",
+                    learningStyle: "Kinesthetic",
+                    strengths: "Communication, Social skills",
+                    weaknesses: "Long-term focus",
+                    personality: "Extroverted, Social",
+                    attendance: 98,
+                    engagement: 90,
+                    performance: {
+                        current: 82,
+                        trend: [75, 78, 80, 82],
+                        prediction: 85
+                    },
+                    attention: {
+                        current: 85,
+                        history: [75, 80, 85, 85, 90],
+                        areas: ["English Language", "Physics"]
+                    },
+                    health: {
+                        vision: "Needs glasses",
+                        hearing: "Good",
+                        ergonomics: "Good"
+                    }
+                }
+            },
+            student3: {
+                ar: {
+                    name: "حسين يحي ",
+                    age: 15,
+                    grade: "الصف الأول",
+                    subjects: ["التاريخ", "الجغرافيا", "الرياضيات"],
+                    hobbies: "كرة القدم والشطرنج",
+                    achievements: "بطل المدرسة في الشطرنج",
+                    learningStyle: "منطقي",
+                    strengths: "التفكير الاستراتيجي، الذاكرة",
+                    weaknesses: "الكتابة الإبداعية",
+                    personality: "هادئ، متأمل",
+                    attendance: 90,
+                    engagement: 75,
+                    performance: {
+                        current: 88,
+                        trend: [85, 86, 87, 88],
+                        prediction: 90
+                    },
+                    attention: {
+                        current: 80,
+                        history: [75, 75, 80, 80, 85],
+                        areas: ["التاريخ", "الرياضيات"]
+                    },
+                    health: {
+                        vision: "ممتازة",
+                        hearing: "ممتازة",
+                        ergonomics: "جيدة"
+                    }
+                },
+                en: {
+                    name: "Hussien Yehya",
+                    age: 15,
+                    grade: "First Grade",
+                    subjects: ["History", "Geography", "Mathematics"],
+                    hobbies: "Football and Chess",
+                    achievements: "School chess champion",
+                    learningStyle: "Logical",
+                    strengths: "Strategic thinking, Memory",
+                    weaknesses: "Creative writing",
+                    personality: "Calm, Reflective",
+                    attendance: 90,
+                    engagement: 75,
+                    performance: {
+                        current: 88,
+                        trend: [85, 86, 87, 88],
+                        prediction: 90
+                    },
+                    attention: {
+                        current: 80,
+                        history: [75, 75, 80, 80, 85],
+                        areas: ["History", "Mathematics"]
+                    },
+                    health: {
+                        vision: "Excellent",
+                        hearing: "Excellent",
+                        ergonomics: "Good"
+                    }
+                }
+            },
+            student4: {
+                ar: {
+                    name: "ألاء السيد ",
+                    age: 16,
+                    grade: "الصف الثاني",
+                    subjects: ["الأحياء", "الكيمياء", "الفيزياء"],
+                    hobbies: "العزف على البيانو والرسم",
+                    achievements: "عرض فني في معرض المدرسة",
+                    learningStyle: "سمعي",
+                    strengths: "الإبداع، الفنون",
+                    weaknesses: "المواد العلمية",
+                    personality: "فني، حساس",
+                    attendance: 92,
+                    engagement: 85,
+                    performance: {
+                        current: 75,
+                        trend: [70, 72, 73, 75],
+                        prediction: 78
+                    },
+                    attention: {
+                        current: 70,
+                        history: [65, 65, 70, 70, 75],
+                        areas: ["الأحياء"]
+                    },
+                    health: {
+                        vision: "جيدة",
+                        hearing: "جيدة",
+                        ergonomics: "بحاجة لتحسين وضعية الجلوس"
+                    }
+                },
+                en: {
+                    name: "Alaa Elsayed",
+                    age: 16,
+                    grade: "Second Grade",
+                    subjects: ["Biology", "Chemistry", "Physics"],
+                    hobbies: "Piano playing and Drawing",
+                    achievements: "Art exhibition at school",
+                    learningStyle: "Auditory",
+                    strengths: "Creativity, Arts",
+                    weaknesses: "Scientific subjects",
+                    personality: "Artistic, Sensitive",
+                    attendance: 92,
+                    engagement: 85,
+                    performance: {
+                        current: 75,
+                        trend: [70, 72, 73, 75],
+                        prediction: 78
+                    },
+                    attention: {
+                        current: 70,
+                        history: [65, 65, 70, 70, 75],
+                        areas: ["Biology"]
+                    },
+                    health: {
+                        vision: "Good",
+                        hearing: "Good",
+                        ergonomics: "Needs improvement in sitting posture"
+                    }
+                }
+            },
+            student5: {
+                ar: {
+                    name: "احمد نيمو ",
+                    age: 15,
+                    grade: "الصف الثاني",
+                    subjects: ["الرياضيات", "الفيزياء", "الحاسوب"],
+                    hobbies: "البرمجة وألعاب الفيديو",
+                    achievements: "تطوير تطبيق للهاتف المحمول",
+                    learningStyle: "منطقي",
+                    strengths: "البرمجة، حل المشكلات التقنية",
+                    weaknesses: "المواد الأدبية",
+                    personality: "تحليلي، مبتكر",
+                    attendance: 88,
+                    engagement: 95,
+                    performance: {
+                        current: 90,
+                        trend: [85, 87, 88, 90],
+                        prediction: 92
+                    },
+                    attention: {
+                        current: 90,
+                        history: [85, 85, 90, 90, 95],
+                        areas: ["الحاسوب", "الرياضيات", "الفيزياء"]
+                    },
+                    health: {
+                        vision: "يحتاج لنظارات",
+                        hearing: "ممتازة",
+                        ergonomics: "جيدة"
+                    }
+                },
+                en: {
+                    name: "Ahmed Nimo",
+                    age: 15,
+                    grade: "Second Grade",
+                    subjects: ["Mathematics", "Physics", "Computer Science"],
+                    hobbies: "Programming and Video Games",
+                    achievements: "Developed a mobile application",
+                    learningStyle: "Logical",
+                    strengths: "Programming, Technical problem solving",
+                    weaknesses: "Literary subjects",
+                    personality: "Analytical, Innovative",
+                    attendance: 88,
+                    engagement: 95,
+                    performance: {
+                        current: 90,
+                        trend: [85, 87, 88, 90],
+                        prediction: 92
+                    },
+                    attention: {
+                        current: 90,
+                        history: [85, 85, 90, 90, 95],
+                        areas: ["Computer Science", "Mathematics", "Physics"]
+                    },
+                    health: {
+                        vision: "Needs glasses",
+                        hearing: "Excellent",
+                        ergonomics: "Good"
+                    }
+                }
+            },
+            student6: {
+                ar: {
+                    name: "ملك",
+                    age: 16,
+                    grade: "الصف الثاني",
+                    subjects: ["اللغة العربية", "اللغة الإنجليزية", "التاريخ"],
+                    hobbies: "الكتابة والقراءة",
+                    achievements: "نشر قصة قصيرة في مجلة المدرسة",
+                    learningStyle: "لفظي",
+                    strengths: "اللغات، التعبير الكتابي",
+                    weaknesses: "الرياضيات المتقدمة",
+                    personality: "إبداعي، اجتماعي",
+                    attendance: 96,
+                    engagement: 88,
+                    performance: {
+                        current: 85,
+                        trend: [80, 82, 84, 85],
+                        prediction: 87
+                    },
+                    attention: {
+                        current: 85,
+                        history: [80, 80, 85, 85, 90],
+                        areas: ["اللغة العربية", "اللغة الإنجليزية"]
+                    },
+                    health: {
+                        vision: "جيدة",
+                        hearing: "جيدة",
+                        ergonomics: "ممتازة"
+                    }
+                },
+                en: {
+                    name: "Malak",
+                    age: 16,
+                    grade: "Second Grade",
+                    subjects: ["Arabic Language", "English Language", "History"],
+                    hobbies: "Writing and Reading",
+                    achievements: "Published a short story in the school magazine",
+                    learningStyle: "Verbal",
+                    strengths: "Languages, Written expression",
+                    weaknesses: "Advanced mathematics",
+                    personality: "Creative, Social",
+                    attendance: 96,
+                    engagement: 88,
+                    performance: {
+                        current: 85,
+                        trend: [80, 82, 84, 85],
+                        prediction: 87
+                    },
+                    attention: {
+                        current: 85,
+                        history: [80, 80, 85, 85, 90],
+                        areas: ["Arabic Language", "English Language"]
+                    },
+                    health: {
+                        vision: "Good",
+                        hearing: "Good",
+                        ergonomics: "Excellent"
+                    }
+                }
+            },
+            student7: {
+                ar: {
+                    name: "مهند تامر",
+                    age: 15,
+                    grade: "الصف الثالث",
+                    subjects: ["الرياضيات", "الفيزياء", "الكيمياء"],
+                    hobbies: "كرة السلة والسباحة",
+                    achievements: "كابتن فريق كرة السلة",
+                    learningStyle: "اجتماعي",
+                    strengths: "القيادة، العمل الجماعي",
+                    weaknesses: "الدراسة المنفردة",
+                    personality: "قيادي، حماسي",
+                    attendance: 94,
+                    engagement: 92,
+                    performance: {
+                        current: 78,
+                        trend: [72, 74, 76, 78],
+                        prediction: 80
+                    },
+                    attention: {
+                        current: 75,
+                        history: [70, 70, 75, 75, 80],
+                        areas: ["الرياضيات"]
+                    },
+                    health: {
+                        vision: "ممتازة",
+                        hearing: "ممتازة",
+                        ergonomics: "جيدة"
+                    }
+                },
+                en: {
+                    name: "mohaned tamer",
+                    age: 15,
+                    grade: "Third Grade",
+                    subjects: ["Mathematics", "Physics", "Chemistry"],
+                    hobbies: "Basketball and Swimming",
+                    achievements: "Captain of the basketball team",
+                    learningStyle: "Social",
+                    strengths: "Leadership, Teamwork",
+                    weaknesses: "Individual study",
+                    personality: "Leader, Enthusiastic",
+                    attendance: 94,
+                    engagement: 92,
+                    performance: {
+                        current: 78,
+                        trend: [72, 74, 76, 78],
+                        prediction: 80
+                    },
+                    attention: {
+                        current: 75,
+                        history: [70, 70, 75, 75, 80],
+                        areas: ["Mathematics"]
+                    },
+                    health: {
+                        vision: "Excellent",
+                        hearing: "Excellent",
+                        ergonomics: "Good"
+                    }
+                }
+            },
+            student8: {
+                ar: {
+                    name: "حبيبة طلال",
+                    age: 16,
+                    grade: "الصف الثالث",
+                    subjects: ["الأحياء", "الكيمياء", "اللغة الإنجليزية"],
+                    hobbies: "التصوير والرسم",
+                    achievements: "جائزة أفضل مشروع علمي",
+                    learningStyle: "بصري",
+                    strengths: "البحث العلمي، التوثيق",
+                    weaknesses: "الارتجال والتحدث أمام الجمهور",
+                    personality: "منهجي، دقيق",
+                    attendance: 97,
+                    engagement: 80,
+                    performance: {
+                        current: 92,
+                        trend: [88, 89, 90, 92],
+                        prediction: 94
+                    },
+                    attention: {
+                        current: 85,
+                        history: [80, 80, 85, 85, 90],
+                        areas: ["الأحياء", "الكيمياء"]
+                    },
+                    health: {
+                        vision: "جيدة",
+                        hearing: "جيدة",
+                        ergonomics: "ممتازة"
+                    }
+                },
+                en: {
+                    name: "Habiba Talal",
+                    age: 16,
+                    grade: "Third Grade",
+                    subjects: ["Biology", "Chemistry", "English Language"],
+                    hobbies: "Photography and Drawing",
+                    achievements: "Best scientific project award",
+                    learningStyle: "Visual",
+                    strengths: "Scientific research, Documentation",
+                    weaknesses: "Improvisation and public speaking",
+                    personality: "Methodical, Precise",
+                    attendance: 97,
+                    engagement: 80,
+                    performance: {
+                        current: 92,
+                        trend: [88, 89, 90, 92],
+                        prediction: 94
+                    },
+                    attention: {
+                        current: 85,
+                        history: [80, 80, 85, 85, 90],
+                        areas: ["Biology", "Chemistry"]
+                    },
+                    health: {
+                        vision: "Good",
+                        hearing: "Good",
+                        ergonomics: "Excellent"
+                    }
+                }
+            },
+            student9: {
+                ar: {
+                    name: "يوسف صياد",
+                    age: 15,
+                    grade: "الصف الثالث",
+                    subjects: ["التاريخ", "الجغرافيا", "اللغة العربية"],
+                    hobbies: "القراءة والكتابة",
+                    achievements: "مشاركة في مسابقة الخطابة",
+                    learningStyle: "لفظي",
+                    strengths: "الخطابة، تحليل النصوص",
+                    weaknesses: "المواد العلمية",
+                    personality: "تأملي، فلسفي",
+                    attendance: 91,
+                    engagement: 78,
+                    performance: {
+                        current: 83,
+                        trend: [78, 80, 82, 83],
+                        prediction: 85
+                    },
+                    attention: {
+                        current: 80,
+                        history: [75, 75, 80, 80, 85],
+                        areas: ["التاريخ", "اللغة العربية"]
+                    },
+                    health: {
+                        vision: "جيدة",
+                        hearing: "جيدة",
+                        ergonomics: "بحاجة لتحسين وضعية الجلوس"
+                    }
+                },
+                en: {
+                    name: "Yousef Sayad",
+                    age: 15,
+                    grade: "Third Grade",
+                    subjects: ["History", "Geography", "Arabic Language"],
+                    hobbies: "Reading and Writing",
+                    achievements: "Participation in speech competition",
+                    learningStyle: "Verbal",
+                    strengths: "Public speaking, Text analysis",
+                    weaknesses: "Scientific subjects",
+                    personality: "Reflective, Philosophical",
+                    attendance: 91,
+                    engagement: 78,
+                    performance: {
+                        current: 83,
+                        trend: [78, 80, 82, 83],
+                        prediction: 85
+                    },
+                    attention: {
+                        current: 80,
+                        history: [75, 75, 80, 80, 85],
+                        areas: ["History", "Arabic Language"]
+                    },
+                    health: {
+                        vision: "Good",
+                        hearing: "Good",
+                        ergonomics: "Needs improvement in sitting posture"
+                    }
+                }
+            },
+            teacher: {
+                ar: {
+                    name: "د. ايمن محمد",
+                    age: 42,
+                    subject: "الرياضيات",
+                    experience: "15 سنة",
+                    education: "دكتوراه في الرياضيات التطبيقية",
+                    achievements: "نشر 5 أبحاث علمية ومؤلف كتاب في الرياضيات",
+                    teachingMethods: ["التعلم النشط", "حل المشكلات", "التعلم التعاوني"],
+                    specialties: ["الجبر", "التفاضل والتكامل", "الإحصاء"],
+                    performance: {
+                        studentSatisfaction: 92,
+                        peerReview: 88,
+                        researchOutput: 85
+                    }
+                },
+                en: {
+                    name: "Dr. Ayman Mohamed",
+                    age: 42,
+                    subject: "Mathematics",
+                    experience: "15 years",
+                    education: "PhD in Applied Mathematics",
+                    achievements: "Published 5 scientific papers and authored a mathematics book",
+                    teachingMethods: ["Active Learning", "Problem Solving", "Cooperative Learning"],
+                    specialties: ["Algebra", "Calculus", "Statistics"],
+                    performance: {
+                        studentSatisfaction: 92,
+                        peerReview: 88,
+                        researchOutput: 85
+                    }
+                }
+            },
+            board: {
+                ar: {
+                    type: "سبورة ذكية تفاعلية",
+                    dimensions: "200 × 120 سم",
+                    features: ["شاشة لمس", "اتصال بالإنترنت", "عرض الوسائط المتعددة"],
+                    installed: "2022",
+                    manufacturer: "شركة التقنيات التعليمية المتطورة",
+                    status: {
+                        power: "متصل",
+                        network: "متصل",
+                        calibration: "مضبوطة",
+                        lastMaintenance: "2023-06-15"
+                    }
+                },
+                en: {
+                    type: "Interactive Smart Board",
+                    dimensions: "200 × 120 cm",
+                    features: ["Touch Screen", "Internet Connection", "Multimedia Display"],
+                    installed: "2022",
+                    manufacturer: "Advanced Educational Technology Company",
+                    status: {
+                        power: "Connected",
+                        network: "Connected",
+                        calibration: "Calibrated",
+                        lastMaintenance: "2023-06-15"
+                    }
+                }
+            },
+            subjects: {
+                ar: {
+                    arabic: "اللغة العربية",
+                    english: "اللغة الإنجليزية",
+                    math: "الرياضيات",
+                    science: "العلوم",
+                    history: "التاريخ",
+                    philosophy: "الفلسفة"
+                },
+                en: {
+                    arabic: "Arabic",
+                    english: "English",
+                    math: "Mathematics",
+                    science: "Science",
+                    history: "History",
+                    philosophy: "Philosophy"
+                }
+            },
+            classroom: {
+                ar: {
+                    id: "A101",
+                    capacity: 30,
+                    area: "50 متر مربع",
+                    sensors: {
+                        temperature: {
+                            current: 24,
+                            optimal: 22,
+                            history: [23, 23.5, 24, 24, 24],
+                            unit: "°C"
+                        },
+                        humidity: {
+                            current: 40,
+                            optimal: 45,
+                            history: [38, 39, 40, 40, 41],
+                            unit: "%"
+                        },
+                        light: {
+                            current: 650,
+                            optimal: 700,
+                            history: [600, 620, 650, 650, 660],
+                            unit: "لوكس"
+                        },
+                        noise: {
+                            current: 45,
+                            optimal: 40,
+                            history: [42, 43, 45, 45, 46],
+                            unit: "ديسيبل"
+                        },
+                        co2: {
+                            current: 600,
+                            optimal: 500,
+                            history: [550, 570, 600, 600, 610],
+                            unit: "جزء في المليون"
+                        },
+                        airQuality: {
+                            current: "جيدة",
+                            history: ["جيدة", "جيدة", "جيدة", "جيدة", "جيدة"]
+                        }
+                    },
+                    schedule: {
+                        current: "الرياضيات",
+                        next: "العلوم",
+                        day: "الاثنين",
+                        timeRemaining: "25 دقيقة"
+                    },
+                    maintenance: {
+                        lastCleaning: "2023-09-10",
+                        nextInspection: "2023-10-15",
+                        issues: []
+                    }
+                },
+                en: {
+                    id: "A101",
+                    capacity: 30,
+                    area: "50 square meters",
+                    sensors: {
+                        temperature: {
+                            current: 24,
+                            optimal: 22,
+                            history: [23, 23.5, 24, 24, 24],
+                            unit: "°C"
+                        },
+                        humidity: {
+                            current: 40,
+                            optimal: 45,
+                            history: [38, 39, 40, 40, 41],
+                            unit: "%"
+                        },
+                        light: {
+                            current: 650,
+                            optimal: 700,
+                            history: [600, 620, 650, 650, 660],
+                            unit: "lux"
+                        },
+                        noise: {
+                            current: 45,
+                            optimal: 40,
+                            history: [42, 43, 45, 45, 46],
+                            unit: "dB"
+                        },
+                        co2: {
+                            current: 600,
+                            optimal: 500,
+                            history: [550, 570, 600, 600, 610],
+                            unit: "ppm"
+                        },
+                        airQuality: {
+                            current: "Good",
+                            history: ["Good", "Good", "Good", "Good", "Good"]
+                        }
+                    },
+                    schedule: {
+                        current: "Mathematics",
+                        next: "Science",
+                        day: "Monday",
+                        timeRemaining: "25 minutes"
+                    },
+                    maintenance: {
+                        lastCleaning: "2023-09-10",
+                        nextInspection: "2023-10-15",
+                        issues: []
+                    }
+                }
+            }
+        };
+
+        // بيانات توصيات الذكاء الاصطناعي
+        const aiRecommendations = {
+            ar: {
+                بصري: {
+                    description: "يتعلم بشكل أفضل من خلال الصور والرسوم البيانية والعروض المرئية.",
+                    methods: [
+                        "استخدام الخرائط الذهنية والرسوم البيانية",
+                        "عرض المعلومات بصرياً باستخدام الألوان والأشكال",
+                        "استخدام الفيديوهات التعليمية",
+                        "تشجيع استخدام الرسومات التوضيحية في الملاحظات"
+                    ]
+                },
+                سمعي: {
+                    description: "يتعلم بشكل أفضل من خلال الاستماع والمناقشة والحوار.",
+                    methods: [
+                        "استخدام المناقشات الصفية والحوارات",
+                        "تسجيل المحاضرات للاستماع إليها لاحقاً",
+                        "قراءة النصوص بصوت عالٍ",
+                        "استخدام الموسيقى والإيقاع في التعلم"
+                    ]
+                },
+                حركي: {
+                    description: "يتعلم بشكل أفضل من خلال الحركة والتجربة العملية.",
+                    methods: [
+                        "استخدام الأنشطة العملية والتجارب",
+                        "تشجيع الحركة أثناء التعلم",
+                        "استخدام لعب الأدوار والتمثيل",
+                        "تقسيم جلسات الدراسة إلى فترات قصيرة مع فواصل نشطة"
+                    ]
+                },
+                منطقي: {
+                    description: "يتعلم بشكل أفضل من خلال المنطق والتحليل والأنماط.",
+                    methods: [
+                        "تقديم المعلومات بطريقة منظمة ومنطقية",
+                        "استخدام الألغاز والألعاب المنطقية",
+                        "تشجيع التفكير النقدي وحل المشكلات",
+                        "ربط المعلومات الجديدة بالمفاهيم المعروفة"
+                    ]
+                },
+                لفظي: {
+                    description: "يتعلم بشكل أفضل من خلال الكلمات والنصوص والكتابة.",
+                    methods: [
+                        "تشجيع القراءة والكتابة",
+                        "استخدام الملخصات والتلخيص",
+                        "مناقشة المفاهيم شفهياً",
+                        "تسجيل الملاحظات وإعادة صياغتها"
+                    ]
+                },
+                اجتماعي: {
+                    description: "يتعلم بشكل أفضل من خلال التفاعل مع الآخرين والعمل الجماعي.",
+                    methods: [
+                        "استخدام التعلم التعاوني ومجموعات الدراسة",
+                        "تشجيع المناقشات والمشاريع الجماعية",
+                        "استخدام لعب الأدوار والمحاكاة",
+                        "تبادل الأفكار والتعليم للأقران"
+                    ]
+                }
+            },
+            en: {
+                Visual: {
+                    description: "Learns best through images, diagrams, and visual presentations.",
+                    methods: [
+                        "Use mind maps and charts",
+                        "Present information visually using colors and shapes",
+                        "Use educational videos",
+                        "Encourage the use of illustrations in notes"
+                    ]
+                },
+                Auditory: {
+                    description: "Learns best through listening, discussion, and dialogue.",
+                    methods: [
+                        "Use classroom discussions and dialogues",
+                        "Record lectures for later listening",
+                        "Read texts aloud",
+                        "Use music and rhythm in learning"
+                    ]
+                },
+                Kinesthetic: {
+                    description: "Learns best through movement and hands-on experience.",
+                    methods: [
+                        "Use practical activities and experiments",
+                        "Encourage movement during learning",
+                        "Use role-playing and acting",
+                        "Divide study sessions into short periods with active breaks"
+                    ]
+                },
+                Logical: {
+                    description: "Learns best through logic, analysis, and patterns.",
+                    methods: [
+                        "Present information in an organized and logical manner",
+                        "Use puzzles and logic games",
+                        "Encourage critical thinking and problem-solving",
+                        "Connect new information to known concepts"
+                    ]
+                },
+                Verbal: {
+                    description: "Learns best through words, texts, and writing.",
+                    methods: [
+                        "Encourage reading and writing",
+                        "Use summaries and paraphrasing",
+                        "Discuss concepts verbally",
+                        "Take notes and rephrase them"
+                    ]
+                },
+                Social: {
+                    description: "Learns best through interaction with others and teamwork.",
+                    methods: [
+                        "Use cooperative learning and study groups",
+                        "Encourage discussions and group projects",
+                        "Use role-playing and simulation",
+                        "Exchange ideas and peer teaching"
+                    ]
+                }
+            }
+        };
+
+        // توصيات طرق تدريس المواد
+        const subjectTeachingMethods = {
+            ar: {
+                "اللغة العربية": {
+                    methods: [
+                        {
+                            title: "التعلم النشط",
+                            description: "استخدام القراءة الجهرية، المناقشات الأدبية، وتحليل النصوص بشكل تفاعلي."
+                        },
+                        {
+                            title: "الخرائط الذهنية",
+                            description: "استخدام الخرائط الذهنية لتوضيح قواعد النحو والبلاغة وربط المفاهيم."
+                        },
+                        {
+                            title: "التعبير الإبداعي",
+                            description: "تشجيع كتابة القصص والشعر والمقالات لتنمية مهارات التعبير."
+                        }
+                    ]
+                },
+                "اللغة الإنجليزية": {
+                    methods: [
+                        {
+                            title: "الغمر اللغوي",
+                            description: "استخدام اللغة الإنجليزية بشكل حصري في الفصل مع الأنشطة التفاعلية."
+                        },
+                        {
+                            title: "الوسائط المتعددة",
+                            description: "استخدام الأفلام والأغاني والبودكاست لتحسين مهارات الاستماع والنطق."
+                        },
+                        {
+                            title: "التواصل الوظيفي",
+                            description: "التركيز على المواقف الحياتية والمحادثات العملية لتعزيز التواصل."
+                        }
+                    ]
+                },
+                "الرياضيات": {
+                    methods: [
+                        {
+                            title: "حل المشكلات",
+                            description: "تقديم مسائل واقعية تتطلب التفكير النقدي وتطبيق المفاهيم الرياضية."
+                        },
+                        {
+                            title: "النمذجة الرياضية",
+                            description: "استخدام النماذج البصرية والتمثيلات المادية لتوضيح المفاهيم المجردة."
+                        },
+                        {
+                            title: "التعلم التدريجي",
+                            description: "تقسيم المفاهيم المعقدة إلى خطوات صغيرة مع التدريب المستمر."
+                        }
+                    ]
+                },
+                "العلوم": {
+                    methods: [
+                        {
+                            title: "التجريب العملي",
+                            description: "إجراء التجارب والأنشطة العملية لاكتشاف المفاهيم العلمية."
+                        },
+                        {
+                            title: "الاستقصاء العلمي",
+                            description: "تشجيع طرح الأسئلة وتصميم التجارب واستخلاص النتائج."
+                        },
+                        {
+                            title: "الربط بالواقع",
+                            description: "ربط المفاهيم العلمية بالظواهر اليومية والتطبيقات التكنولوجية."
+                        }
+                    ]
+                },
+                "التاريخ": {
+                    methods: [
+                        {
+                            title: "السرد القصصي",
+                            description: "استخدام القصص والروايات التاريخية لجعل الأحداث أكثر حيوية."
+                        },
+                        {
+                            title: "تحليل المصادر",
+                            description: "دراسة الوثائق والصور التاريخية وتحليلها بشكل نقدي."
+                        },
+                        {
+                            title: "الخط الزمني",
+                            description: "استخدام الخطوط الزمنية البصرية لفهم تسلسل الأحداث والعلاقات بينها."
+                        }
+                    ]
+                },
+                "الفلسفة": {
+                    methods: [
+                        {
+                            title: "الحوار السقراطي",
+                            description: "استخدام الأسئلة المفتوحة والنقاش لتعميق التفكير وتحليل المفاهيم."
+                        },
+                        {
+                            title: "تحليل النصوص",
+                            description: "قراءة وتحليل النصوص الفلسفية الأصلية ومناقشة الأفكار الرئيسية."
+                        },
+                        {
+                            title: "المناظرات الفلسفية",
+                            description: "تنظيم مناظرات حول القضايا الفلسفية لتطوير مهارات الحجاج والتفكير النقدي."
+                        }
+                    ]
+                }
+            },
+            en: {
+                "Arabic Language": {
+                    methods: [
+                        {
+                            title: "Active Learning",
+                            description: "Use reading aloud, literary discussions, and interactive text analysis."
+                        },
+                        {
+                            title: "Mind Mapping",
+                            description: "Use mind maps to clarify grammar rules, rhetoric, and connect concepts."
+                        },
+                        {
+                            title: "Creative Expression",
+                            description: "Encourage writing stories, poetry, and essays to develop expression skills."
+                        }
+                    ]
+                },
+                "English Language": {
+                    methods: [
+                        {
+                            title: "Language Immersion",
+                            description: "Use English exclusively in the classroom with interactive activities."
+                        },
+                        {
+                            title: "Multimedia",
+                            description: "Use films, songs, and podcasts to improve listening and pronunciation skills."
+                        },
+                        {
+                            title: "Functional Communication",
+                            description: "Focus on real-life situations and practical conversations to enhance communication."
+                        }
+                    ]
+                },
+                "Mathematics": {
+                    methods: [
+                        {
+                            title: "Problem Solving",
+                            description: "Present real problems that require critical thinking and application of mathematical concepts."
+                        },
+                        {
+                            title: "Mathematical Modeling",
+                            description: "Use visual models and physical representations to clarify abstract concepts."
+                        },
+                        {
+                            title: "Incremental Learning",
+                            description: "Break down complex concepts into small steps with continuous practice."
+                        }
+                    ]
+                },
+                "Science": {
+                    methods: [
+                        {
+                            title: "Practical Experimentation",
+                            description: "Conduct experiments and practical activities to discover scientific concepts."
+                        },
+                        {
+                            title: "Scientific Inquiry",
+                            description: "Encourage asking questions, designing experiments, and drawing conclusions."
+                        },
+                        {
+                            title: "Real-world Connections",
+                            description: "Connect scientific concepts to everyday phenomena and technological applications."
+                        }
+                    ]
+                },
+                "History": {
+                    methods: [
+                        {
+                            title: "Storytelling",
+                            description: "Use stories and historical narratives to make events more vivid."
+                        },
+                        {
+                            title: "Source Analysis",
+                            description: "Study and critically analyze historical documents and images."
+                        },
+                        {
+                            title: "Timeline",
+                            description: "Use visual timelines to understand the sequence of events and relationships between them."
+                        }
+                    ]
+                },
+                "Philosophy": {
+                    methods: [
+                        {
+                            title: "Socratic Dialogue",
+                            description: "Use open-ended questions and discussion to deepen thinking and analyze concepts."
+                        },
+                        {
+                            title: "Text Analysis",
+                            description: "Read and analyze original philosophical texts and discuss key ideas."
+                        },
+                        {
+                            title: "Philosophical Debates",
+                            description: "Organize debates on philosophical issues to develop argumentation and critical thinking skills."
+                        }
+                    ]
+                }
+            }
+        };
+
+        // بيانات التوأمة الرقمية
+        const digitalTwinData = {
+            currentTime: "10:30:00",
+            timeMode: "current", // past, current, future
+            sensors: {
+                past: {
+                    temperature: 22,
+                    humidity: 38,
+                    light: 600,
+                    noise: 42,
+                    airQuality: "جيدة"
+                },
+                current: {
+                    temperature: 24,
+                    humidity: 40,
+                    light: 650,
+                    noise: 45,
+                    airQuality: "جيدة"
+                },
+                future: {
+                    temperature: 25,
+                    humidity: 42,
+                    light: 670,
+                    noise: 48,
+                    airQuality: "متوسطة"
+                }
+            },
+            students: {
+                past: {
+                    attendance: 8,
+                    engagement: 80,
+                    performance: 75
+                },
+                current: {
+                    attendance: 9,
+                    engagement: 85,
+                    performance: 78
+                },
+                future: {
+                    attendance: 9,
+                    engagement: 88,
+                    performance: 82
+                }
+            },
+            comfort: {
+                past: 85,
+                current: 92,
+                future: 88
+            }
+        };
+
+        // متغيرات Three.js
+        let scene, camera, renderer, controls;
+        let raycaster, mouse;
+        let classroom = {}; // كائن لتخزين جميع عناصر الفصل الدراسي
+        let bookTooltip;
+        let aiActive = false;
+        let twinActive = false;
+        let currentTeacher = 'math'; // المدرس الحالي (الرياضيات كافتراضي)
+        let bookLabels = []; // لتخزين تسميات الكتب
+
+        // تهيئة المشهد
+        function init() {
+            // إنشاء المشهد
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f0f0);
+
+            // إضافة إضاءة
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+            scene.add(directionalLight);
+
+            // إعداد الكاميرا
+            const aspect = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+            camera.position.set(0, 5, 15);
+
+            // إعداد المُصيِّر (Renderer)
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            document.getElementById('scene-container').appendChild(renderer.domElement);
+
+            // إضافة التحكم بالكاميرا
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 5;
+            controls.maxDistance = 30;
+            controls.maxPolarAngle = Math.PI / 2;
+
+            // إعداد Raycaster للتفاعل
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            // إعداد tooltip للكتب
+            bookTooltip = document.getElementById('book-tooltip');
+
+            // إنشاء الفصل الدراسي
+            createClassroom();
+
+            // إضافة مستمع لحدث النقر
+            window.addEventListener('click', onMouseClick, false);
+            window.addEventListener('resize', onWindowResize, false);
+            window.addEventListener('mousemove', onMouseMove, false);
+
+            // بدء حلقة الرسم
+            animate();
+
+            // إخفاء شاشة التحميل بعد إنشاء المشهد
+            setTimeout(() => {
+                document.querySelector('.loading-screen').style.display = 'none';
+            }, 1500);
+
+            // إعداد زر تفعيل الذكاء الاصطناعي
+            setupAIToggle();
+            
+            // إعداد زر تفعيل التوأمة الرقمية
+            setupDigitalTwinToggle();
+            
+            // إعداد أزرار التحكم بالوقت
+            setupTimeControls();
+            
+            // إعداد أزرار مراقبة البيانات
+            setupMonitoringButtons();
+            
+            // إعداد زر تغيير اللغة
+            setupLanguageToggle();
+            
+            // إعداد زر العودة
+            setupBackButton();
+            
+            // تحديث النصوص حسب اللغة الحالية
+            updateLanguage();
+        }
+        // إعداد زر العودة
+        function setupBackButton() {
+            document.getElementById('back-btn').addEventListener('click', function() {
+                window.location.href = 'teacher-dashboard.html';
+            });
+        }
+
+        // إعداد زر تغيير اللغة
+        function setupLanguageToggle() {
+            const languageToggle = document.getElementById('language-toggle');
+            
+            languageToggle.addEventListener('click', function() {
+                // تبديل اللغة
+                currentLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+                
+                // تحديث اللغة في التخزين المحلي
+                localStorage.setItem('currentLanguage', currentLanguage);
+                
+                // تحديث اتجاه الصفحة
+                document.body.className = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+                
+                // تحديث نص الزر
+                this.textContent = this.getAttribute(`data-${currentLanguage}`);
+                
+                // تحديث جميع النصوص
+                updateLanguage();
+                
+                // تحديث تسميات الكتب
+                updateBookLabels();
+            });
+        }
+
+        // تحديث النصوص حسب اللغة الحالية
+        function updateLanguage() {
+            document.querySelectorAll('[data-ar]').forEach(element => {
+                if (element.hasAttribute(`data-${currentLanguage}`)) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.placeholder = element.getAttribute(`data-${currentLanguage}`);
+                    } else {
+                        element.textContent = element.getAttribute(`data-${currentLanguage}`);
+                    }
+                }
+            });
+            
+            // تحديث العناصر ذات الحالات المتعددة
+            updateToggleButtonText('ai-toggle', aiActive);
+            updateToggleButtonText('twin-toggle', twinActive);
+            
+            // تحديث عرض الوقت
+            updateTimeLabel();
+            
+            // تحديث قيم أجهزة الاستشعار
+            updateSensorDisplay();
+        }
+
+        // تحديث نص زر التبديل
+        function updateToggleButtonText(elementId, isActive) {
+            const element = document.getElementById(elementId);
+            const textElement = document.getElementById(`${elementId}-text`);
+            if (textElement) {
+                const state = isActive ? 'active' : 'inactive';
+                textElement.textContent = element.getAttribute(`data-${currentLanguage}-${state}`);
+            }
+        }
+
+        // تحديث تسميات الكتب
+        function updateBookLabels() {
+            // إزالة التسميات القديمة
+            bookLabels.forEach(label => {
+                if (label.element && label.element.parentNode) {
+                    label.element.parentNode.removeChild(label.element);
+                }
+            });
+            bookLabels = [];
+            
+            // إنشاء تسميات جديدة
+            const subjects = elementsData.subjects[currentLanguage];
+            const subjectKeys = Object.keys(subjects);
+            
+            subjectKeys.forEach((key, index) => {
+                const bookPosition = classroom[`book_${key}`].position;
+                createBookLabel(bookPosition.x, bookPosition.y, bookPosition.z, subjects[key]);
+            });
+        }
+
+        // تحديث عرض الوقت
+        function updateTimeLabel() {
+            const timeLabel = document.getElementById('time-label');
+            if (timeLabel) {
+                timeLabel.textContent = timeLabel.getAttribute(`data-${currentLanguage}-${digitalTwinData.timeMode}`);
+            }
+        }
+
+        // إعداد زر تفعيل الذكاء الاصطناعي
+        function setupAIToggle() {
+            const aiToggle = document.getElementById('ai-toggle');
+            const aiPanel = document.getElementById('ai-panel');
+            
+            aiToggle.addEventListener('click', function() {
+                aiActive = !aiActive;
+                
+                if (aiActive) {
+                    aiToggle.classList.add('active');
+                    aiPanel.classList.add('active');
+                } else {
+                    aiToggle.classList.remove('active');
+                    aiPanel.classList.remove('active');
+                }
+                
+                updateToggleButtonText('ai-toggle', aiActive);
+            });
+        }
+
+        // إعداد زر تفعيل التوأمة الرقمية
+        function setupDigitalTwinToggle() {
+            const twinToggle = document.getElementById('twin-toggle');
+            const digitalTwinPanel = document.getElementById('digital-twin-panel');
+            const timeControls = document.getElementById('time-controls');
+            const sensorData = document.getElementById('sensor-data');
+            
+            twinToggle.addEventListener('click', function() {
+                twinActive = !twinActive;
+                
+                if (twinActive) {
+                    twinToggle.classList.add('active');
+                    digitalTwinPanel.classList.add('active');
+                    timeControls.classList.add('active');
+                    updateDigitalTwinData();
+                } else {
+                    twinToggle.classList.remove('active');
+                    digitalTwinPanel.classList.remove('active');
+                    timeControls.classList.remove('active');
+                    sensorData.classList.remove('active');
+                }
+                
+                updateToggleButtonText('twin-toggle', twinActive);
+            });
+        }
+
+        // إعداد أزرار التحكم بالوقت
+        function setupTimeControls() {
+            const pastBtn = document.getElementById('time-past');
+            const nowBtn = document.getElementById('time-now');
+            const futureBtn = document.getElementById('time-future');
+            const timeLabel = document.getElementById('time-label');
+            
+            pastBtn.addEventListener('click', function() {
+                digitalTwinData.timeMode = 'past';
+                updateTimeLabel();
+                updateDigitalTwinData();
+                updateSensorDisplay();
+                updateKPIs();
+            });
+            
+            nowBtn.addEventListener('click', function() {
+                digitalTwinData.timeMode = 'current';
+                updateTimeLabel();
+                updateDigitalTwinData();
+                updateSensorDisplay();
+                updateKPIs();
+            });
+            
+            futureBtn.addEventListener('click', function() {
+                digitalTwinData.timeMode = 'future';
+                updateTimeLabel();
+                updateDigitalTwinData();
+                updateSensorDisplay();
+                updateKPIs();
+            });
+        }
+
+        // إعداد أزرار مراقبة البيانات
+        function setupMonitoringButtons() {
+            const tempBtn = document.getElementById('monitor-temp');
+            const lightBtn = document.getElementById('monitor-light');
+            const attendanceBtn = document.getElementById('monitor-attendance');
+            const engagementBtn = document.getElementById('monitor-engagement');
+            const sensorData = document.getElementById('sensor-data');
+            
+            tempBtn.addEventListener('click', function() {
+                sensorData.classList.add('active');
+                updateSensorDisplay();
+                updateTwinDataDisplay('temperature');
+            });
+            
+            lightBtn.addEventListener('click', function() {
+                sensorData.classList.add('active');
+                updateSensorDisplay();
+                updateTwinDataDisplay('light');
+            });
+            
+            attendanceBtn.addEventListener('click', function() {
+                sensorData.classList.remove('active');
+                updateTwinDataDisplay('attendance');
+            });
+            
+            engagementBtn.addEventListener('click', function() {
+                sensorData.classList.remove('active');
+                updateTwinDataDisplay('engagement');
+            });
+        }
+
+        // تحديث عرض بيانات التوأمة الرقمية
+        function updateTwinDataDisplay(dataType) {
+            const twinData = document.getElementById('twin-data');
+            const timeMode = digitalTwinData.timeMode;
+            let content = '';
+            
+            switch(dataType) {
+                case 'temperature':
+                    content = `
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('درجة الحرارة الحالية:', 'Current Temperature:')}</span>
+                            <span class="twin-data-value">${digitalTwinData.sensors[timeMode].temperature}°C</span>
+                        </div>
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('الدرجة المثالية:', 'Optimal Temperature:')}</span>
+                            <span class="twin-data-value">22°C</span>
+                        </div>
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('التوصية:', 'Recommendation:')}</span>
+                            <span class="twin-data-value">${getTranslatedText(
+                                digitalTwinData.sensors[timeMode].temperature > 24 ? 'تخفيض درجة الحرارة' : 'درجة الحرارة مناسبة',
+                                digitalTwinData.sensors[timeMode].temperature > 24 ? 'Reduce temperature' : 'Temperature is suitable'
+                            )}</span>
+                        </div>
+                    `;
+                    break;
+                case 'light':
+                    const lightUnit = currentLanguage === 'ar' ? 'لوكس' : 'lux';
+                    content = `
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('مستوى الإضاءة الحالي:', 'Current Light Level:')}</span>
+                            <span class="twin-data-value">${digitalTwinData.sensors[timeMode].light} ${lightUnit}</span>
+                        </div>
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('المستوى المثالي:', 'Optimal Level:')}</span>
+                            <span class="twin-data-value">700 ${lightUnit}</span>
+                        </div>
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('التوصية:', 'Recommendation:')}</span>
+                            <span class="twin-data-value">${getTranslatedText(
+                                digitalTwinData.sensors[timeMode].light < 600 ? 'زيادة الإضاءة' : 'مستوى الإضاءة مناسب',
+                                digitalTwinData.sensors[timeMode].light < 600 ? 'Increase lighting' : 'Light level is suitable'
+                            )}</span>
+                        </div>
+                    `;
+                    break;
+                case 'attendance':
+                    content = `
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('عدد الطلاب الحاضرين:', 'Students Present:')}</span>
+                            <span class="twin-data-value">${digitalTwinData.students[timeMode].attendance}/9</span>
+                        </div>
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('نسبة الحضور:', 'Attendance Rate:')}</span>
+                            <span class="twin-data-value">${Math.round(digitalTwinData.students[timeMode].attendance / 9 * 100)}%</span>
+                        </div>
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('اتجاه الحضور:', 'Attendance Trend:')}</span>
+                            <span class="twin-data-value">${getTranslatedText(
+                                digitalTwinData.students.past.attendance <= digitalTwinData.students.current.attendance ? 'تحسن' : 'تراجع',
+                                digitalTwinData.students.past.attendance <= digitalTwinData.students.current.attendance ? 'Improving' : 'Declining'
+                            )}</span>
+                        </div>
+                    `;
+                    break;
+                case 'engagement':
+                    content = `
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('مستوى تفاعل الطلاب:', 'Student Engagement Level:')}</span>
+                            <span class="twin-data-value">${digitalTwinData.students[timeMode].engagement}%</span>
+                        </div>
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('المستوى المثالي:', 'Optimal Level:')}</span>
+                            <span class="twin-data-value">90%</span>
+                        </div>
+                        <div class="twin-data-row">
+                            <span class="twin-data-label">${getTranslatedText('التوصية:', 'Recommendation:')}</span>
+                            <span class="twin-data-value">${getTranslatedText(
+                                digitalTwinData.students[timeMode].engagement < 80 ? 'استخدام أساليب تدريس أكثر تفاعلية' : 'مستوى التفاعل جيد',
+                                digitalTwinData.students[timeMode].engagement < 80 ? 'Use more interactive teaching methods' : 'Engagement level is good'
+                            )}</span>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            twinData.innerHTML = content;
+        }
+
+        // الحصول على النص المترجم
+        function getTranslatedText(arText, enText) {
+            return currentLanguage === 'ar' ? arText : enText;
+        }
+
+        // تحديث بيانات التوأمة الرقمية
+        function updateDigitalTwinData() {
+            if (!twinActive) return;
+            
+            // تحديث بيانات أجهزة الاستشعار في لوحة البيانات
+            updateSensorDisplay();
+            
+            // تحديث مؤشرات الأداء الرئيسية
+            updateKPIs();
+        }
+
+        // تحديث عرض بيانات أجهزة الاستشعار
+        function updateSensorDisplay() {
+            const timeMode = digitalTwinData.timeMode;
+            const sensorData = digitalTwinData.sensors[timeMode];
+            
+            document.getElementById('temp-value').textContent = `${sensorData.temperature}°C`;
+            document.getElementById('light-value').textContent = `${sensorData.light} ${currentLanguage === 'ar' ? 'لوكس' : 'lux'}`;
+            document.getElementById('noise-value').textContent = `${sensorData.noise} ${currentLanguage === 'ar' ? 'ديسيبل' : 'dB'}`;
+            
+            // تحديث جودة الهواء حسب اللغة
+            const airQualityElement = document.getElementById('air-value');
+            let airQualityText;
+            
+            if (sensorData.airQuality === 'جيدة' || sensorData.airQuality === 'Good') {
+                airQualityText = airQualityElement.getAttribute(`data-${currentLanguage}-good`);
+            } else if (sensorData.airQuality === 'متوسطة' || sensorData.airQuality === 'Medium') {
+                airQualityText = airQualityElement.getAttribute(`data-${currentLanguage}-medium`);
+            } else {
+                airQualityText = airQualityElement.getAttribute(`data-${currentLanguage}-bad`);
+            }
+            
+            airQualityElement.textContent = airQualityText;
+            document.getElementById('humidity-value').textContent = `${sensorData.humidity}%`;
+            
+            // تحديث حالة الإنذار لدرجة الحرارة
+            if (sensorData.temperature > 26) {
+                document.getElementById('temp-value').className = 'sensor-value error';
+            } else if (sensorData.temperature > 24) {
+                document.getElementById('temp-value').className = 'sensor-value warning';
+            } else {
+                document.getElementById('temp-value').className = 'sensor-value';
+            }
+            
+            // تحديث حالة الإنذار للضوضاء
+            if (sensorData.noise > 55) {
+                document.getElementById('noise-value').className = 'sensor-value error';
+            } else if (sensorData.noise > 45) {
+                document.getElementById('noise-value').className = 'sensor-value warning';
+            } else {
+                document.getElementById('noise-value').className = 'sensor-value';
+            }
+        }
+
+        // تحديث مؤشرات الأداء الرئيسية
+        function updateKPIs() {
+            const timeMode = digitalTwinData.timeMode;
+            
+            document.getElementById('engagement-kpi').textContent = `${digitalTwinData.students[timeMode].engagement}%`;
+            document.getElementById('attendance-kpi').textContent = `${Math.round(digitalTwinData.students[timeMode].attendance / 9 * 100)}%`;
+            document.getElementById('performance-kpi').textContent = `${digitalTwinData.students[timeMode].performance}%`;
+            document.getElementById('comfort-kpi').textContent = `${digitalTwinData.comfort[timeMode]}%`;
+        }
+
+        // إنشاء الفصل الدراسي
+        function createClassroom() {
+            // إنشاء الأرضية
+            const floorGeometry = new THREE.PlaneGeometry(20, 15);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xd3d3d3,
+                roughness: 0.8
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // إنشاء السبورة
+            createBoard();
+
+            // إنشاء المكتبة (بحجم أصغر وبعيدة عن السبورة)
+            createLibrary();
+
+            // إنشاء منصة المدرس
+            createTeacherPlatform();
+
+            // إنشاء مكتب المدرس
+            createTeacherDesk();
+
+            // إنشاء المدرس
+            createTeacher();
+
+            // إنشاء مقاعد الطلاب والطلاب
+            createStudentsAndDesks();
+            
+            // إنشاء أجهزة الاستشعار
+            createSensors();
+        }
+
+        // إنشاء السبورة
+        function createBoard() {
+            // إطار السبورة
+            const boardFrameGeometry = new THREE.BoxGeometry(10, 4, 0.1);
+            const boardFrameMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+            const boardFrame = new THREE.Mesh(boardFrameGeometry, boardFrameMaterial);
+            boardFrame.position.set(0, 4, -7.3);
+            boardFrame.castShadow = true;
+            scene.add(boardFrame);
+
+            // السبورة نفسها
+            const boardGeometry = new THREE.BoxGeometry(9.5, 3.5, 0.05);
+            const boardMaterial = new THREE.MeshStandardMaterial({ color: 0x005000 });
+            const board = new THREE.Mesh(boardGeometry, boardMaterial);
+            board.position.set(0, 4, -7.2);
+            board.userData = { id: 'board', type: 'board' };
+            classroom.board = board;
+            scene.add(board);
+        }
+
+        // إنشاء المكتبة (بحجم أصغر وبعيدة عن السبورة)
+        function createLibrary() {
+            // خزانة المكتبة
+            const bookshelfGeometry = new THREE.BoxGeometry(3, 4, 0.4);
+            const bookshelfMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+            const bookshelf = new THREE.Mesh(bookshelfGeometry, bookshelfMaterial);
+            bookshelf.position.set(8, 2, -5); // تغيير الموقع ليكون في زاوية الفصل بعيداً عن السبورة
+            bookshelf.castShadow = true;
+            scene.add(bookshelf);
+
+            // إنشاء الرفوف
+            const shelfGeometry = new THREE.BoxGeometry(2.8, 0.1, 0.35);
+            const shelfMaterial = new THREE.MeshStandardMaterial({ color: 0x6d4c41 });
+            
+            // إنشاء 6 رفوف للكتب
+            for (let i = 0; i < 6; i++) {
+                const shelf = new THREE.Mesh(shelfGeometry, shelfMaterial);
+                shelf.position.set(8, 0.4 + i * 0.6, -4.9);
+                shelf.castShadow = true;
+                scene.add(shelf);
+            }
+            
+            // إنشاء كتب المواد
+            createSubjectBooks();
+        }
+
+        // إنشاء كتب المواد
+        function createSubjectBooks() {
+            const subjectKeys = ['arabic', 'english', 'math', 'science', 'history', 'philosophy'];
+            const bookColors = [
+                0xf44336, // أحمر
+                0x2196f3, // أزرق
+                0x4caf50, // أخضر
+                0xff9800, // برتقالي
+                0x9c27b0, // أرجواني
+                0x795548  // بني
+            ];
+            
+            // إنشاء كتاب لكل مادة
+            subjectKeys.forEach((subject, index) => {
+                const y = 0.4 + index * 0.6; // ارتفاع الرف
+                createSubjectBook(8, y + 0.3, -4.9, subject, bookColors[index]);
+                
+                // إنشاء تسمية للكتاب
+                const subjectName = elementsData.subjects[currentLanguage][subject];
+                createBookLabel(8, y + 0.3, -4.9, subjectName);
+            });
+        }
+
+        // إنشاء كتاب مادة واحدة
+        function createSubjectBook(x, y, z, subject, color) {
+            const bookGeometry = new THREE.BoxGeometry(1.5, 0.5, 0.3);
+            const bookMaterial = new THREE.MeshStandardMaterial({ color: color });
+            const book = new THREE.Mesh(bookGeometry, bookMaterial);
+            
+            book.position.set(x, y, z);
+            book.castShadow = true;
+            book.userData = { 
+                id: `subject_${subject}`,
+                type: 'subject_book',
+                subject: subject
+            };
+            
+            classroom[`book_${subject}`] = book;
+            scene.add(book);
+        }
+
+        // إنشاء تسمية للكتاب
+        function createBookLabel(x, y, z, text) {
+            const labelElement = document.createElement('div');
+            labelElement.className = 'book-label';
+            labelElement.textContent = text;
+            document.body.appendChild(labelElement);
+            
+            // تخزين العنصر والموقع لتحديثه لاحقاً
+            bookLabels.push({
+                element: labelElement,
+                position: new THREE.Vector3(x, y, z)
+            });
+        }
+
+        // تحديث مواقع تسميات الكتب في كل إطار
+        function updateBookLabelsPositions() {
+            bookLabels.forEach(label => {
+                if (label.element) {
+                    // تحويل موقع ثلاثي الأبعاد إلى موقع على الشاشة
+                    const position = label.position.clone();
+                    position.project(camera);
+                    
+                    // تحويل الإحداثيات المسقطة إلى إحداثيات البكسل
+                    const x = (position.x * 0.5 + 0.5) * window.innerWidth;
+                    const y = (-position.y * 0.5 + 0.5) * window.innerHeight;
+                    
+                    // تحديث موقع التسمية
+                    label.element.style.left = `${x}px`;
+                    label.element.style.top = `${y}px`;
+                    
+                    // إخفاء التسمية إذا كانت خلف الكاميرا
+                    if (position.z > 1) {
+                        label.element.style.display = 'none';
+                    } else {
+                        label.element.style.display = 'block';
+                    }
+                }
+            });
+        }
+
+        // إنشاء منصة المدرس
+        function createTeacherPlatform() {
+            const platformGeometry = new THREE.BoxGeometry(10, 0.3, 3);
+            const platformMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+            const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+            platform.position.set(0, 0.15, -5.5);
+            platform.receiveShadow = true;
+            scene.add(platform);
+        }
+
+        // إنشاء مكتب المدرس
+        function createTeacherDesk() {
+            // سطح المكتب
+            const deskTopGeometry = new THREE.BoxGeometry(3, 0.1, 1.5);
+            const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+            const deskTop = new THREE.Mesh(deskTopGeometry, deskMaterial);
+            deskTop.position.set(0, 0.9, -4.5);
+            deskTop.castShadow = true;
+            deskTop.receiveShadow = true;
+            scene.add(deskTop);
+
+            // أرجل المكتب
+            const legGeometry = new THREE.BoxGeometry(0.1, 0.8, 0.1);
+            
+            const legPositions = [
+                [-1.4, 0.4, -5.2],
+                [1.4, 0.4, -5.2],
+                [-1.4, 0.4, -3.8],
+                [1.4, 0.4, -3.8]
+            ];
+            
+            legPositions.forEach(pos => {
+                const leg = new THREE.Mesh(legGeometry, deskMaterial);
+                leg.position.set(...pos);
+                leg.castShadow = true;
+                scene.add(leg);
+            });
+        }
+
+        // إنشاء المدرس
+        function createTeacher() {
+            // إنشاء مدرس المادة الحالية
+            createTeacherModel(currentTeacher);
+        }
+
+        // إنشاء نموذج المدرس
+        function createTeacherModel(subject) {
+            // إزالة المدرس السابق إذا وجد
+            if (classroom.teacher) {
+                scene.remove(classroom.teacher);
+            }
+            
+            // جسم المدرس
+            const bodyGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.2, 8);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: getTeacherColor(subject) });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.position.set(0, 1.9, -4.5);
+            body.castShadow = true;
+            
+            // رأس المدرس
+            const headGeometry = new THREE.SphereGeometry(0.25, 16, 16);
+            const headMaterial = new THREE.MeshStandardMaterial({ color: 0xf5d0a9 });
+            const head = new THREE.Mesh(headGeometry, headMaterial);
+            head.position.set(0, 2.7, -4.5);
+            head.castShadow = true;
+
+            // ذراع المدرس اليمنى
+            const armGeometry = new THREE.BoxGeometry(0.1, 0.7, 0.1);
+            const armMaterial = new THREE.MeshStandardMaterial({ color: bodyMaterial.color });
+            
+            const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+            rightArm.position.set(0.4, 2.1, -4.5);
+            rightArm.castShadow = true;
+
+            // ذراع المدرس اليسرى
+            const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+            leftArm.position.set(-0.4, 2.1, -4.5);
+            leftArm.castShadow = true;
+
+            // ساق المدرس اليمنى
+            const legGeometry = new THREE.BoxGeometry(0.15, 0.8, 0.15);
+            const legMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            
+            const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+            rightLeg.position.set(0.2, 1.1, -4.5);
+            rightLeg.castShadow = true;
+
+            // ساق المدرس اليسرى
+            const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+            leftLeg.position.set(-0.2, 1.1, -4.5);
+            leftLeg.castShadow = true;
+
+            // إنشاء كائن المدرس الرئيسي للتفاعل
+            const teacherGroup = new THREE.Group();
+            teacherGroup.add(body, head, rightArm, leftArm, rightLeg, leftLeg);
+            teacherGroup.userData = { id: teachersData[subject].id, type: 'teacher', subject: subject };
+            classroom.teacher = teacherGroup;
+            scene.add(teacherGroup);
+        }
+
+        // الحصول على لون المدرس حسب المادة
+        function getTeacherColor(subject) {
+            const colors = {
+                'arabic': 0x8d6e63,    // بني فاتح
+                'english': 0x3f51b5,   // أزرق داكن
+                'math': 0x1560bd,      // أزرق متوسط
+                'science': 0x00897b,   // أخضر مزرق
+                'history': 0x6d4c41,   // بني داكن
+                'philosophy': 0x5e35b1 // بنفسجي
+            };
+            
+            return colors[subject] || 0x1560bd;
+        }
+
+        // تغيير المدرس
+        function changeTeacher(subject) {
+            if (currentTeacher !== subject) {
+                currentTeacher = subject;
+                createTeacherModel(subject);
+            }
+        }
+
+        // إنشاء مقاعد الطلاب والطلاب
+        function createStudentsAndDesks() {
+            // مصفوفة مواقع المقاعد (3 صفوف × 3 أعمدة)
+            const positions = [
+                // الصف الأول
+                [-4, 0, -1.5],
+                [0, 0, -1.5],
+                [4, 0, -1.5],
+                // الصف الثاني
+                [-4, 0, 1.5],
+                [0, 0, 1.5],
+                [4, 0, 1.5],
+                // الصف الثالث
+                [-4, 0, 4.5],
+                [0, 0, 4.5],
+                [4, 0, 4.5]
+            ];
+
+            // إنشاء المقاعد والطلاب
+            for (let i = 0; i < 9; i++) {
+                const [x, y, z] = positions[i];
+                createStudentDesk(x, y, z, i + 1);
+            }
+        }
+
+        // إنشاء مقعد طالب وطالب
+        function createStudentDesk(x, y, z, studentNumber) {
+            // سطح المقعد
+            const deskTopGeometry = new THREE.BoxGeometry(1.5, 0.1, 1);
+            const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+            const deskTop = new THREE.Mesh(deskTopGeometry, deskMaterial);
+            deskTop.position.set(x, y + 0.7, z);
+            deskTop.castShadow = true;
+            deskTop.receiveShadow = true;
+            scene.add(deskTop);
+
+            // أرجل المقعد
+            const legGeometry = new THREE.BoxGeometry(0.08, 0.7, 0.08);
+            
+            const legPositions = [
+                [x - 0.7, y + 0.35, z - 0.45],
+                [x + 0.7, y + 0.35, z - 0.45],
+                [x - 0.7, y + 0.35, z + 0.45],
+                [x + 0.7, y + 0.35, z + 0.45]
+            ];
+            
+            legPositions.forEach(pos => {
+                const leg = new THREE.Mesh(legGeometry, deskMaterial);
+                leg.position.set(...pos);
+                leg.castShadow = true;
+                scene.add(leg);
+            });
+
+            // كرسي الطالب
+            const chairSeatGeometry = new THREE.BoxGeometry(0.8, 0.1, 0.8);
+            const chairMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+            const chairSeat = new THREE.Mesh(chairSeatGeometry, chairMaterial);
+            chairSeat.position.set(x, y + 0.5, z + 0.9);
+            chairSeat.castShadow = true;
+            chairSeat.receiveShadow = true;
+            scene.add(chairSeat);
+
+            // ظهر الكرسي
+            const chairBackGeometry = new THREE.BoxGeometry(0.8, 0.6, 0.1);
+            const chairBack = new THREE.Mesh(chairBackGeometry, chairMaterial);
+            chairBack.position.set(x, y + 0.85, z + 1.3);
+            chairBack.castShadow = true;
+            scene.add(chairBack);
+
+            // أرجل الكرسي
+            const chairLegGeometry = new THREE.BoxGeometry(0.08, 0.5, 0.08);
+            
+            const chairLegPositions = [
+                [x - 0.35, y + 0.25, z + 0.65],
+                [x + 0.35, y + 0.25, z + 0.65],
+                [x - 0.35, y + 0.25, z + 1.15],
+                [x + 0.35, y + 0.25, z + 1.15]
+            ];
+            
+            chairLegPositions.forEach(pos => {
+                const chairLeg = new THREE.Mesh(chairLegGeometry, chairMaterial);
+                chairLeg.position.set(...pos);
+                chairLeg.castShadow = true;
+                scene.add(chairLeg);
+            });
+
+            // إنشاء الطالب
+            createStudent(x, y, z, studentNumber);
+        }
+
+        // إنشاء طالب
+        function createStudent(x, y, z, studentNumber) {
+            // جسم الطالب
+            const bodyGeometry = new THREE.CylinderGeometry(0.25, 0.25, 0.8, 8);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ 
+                color: getRandomColor() 
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.position.set(x, y + 1.4, z + 0.9);
+            body.castShadow = true;
+            scene.add(body);
+
+            // رأس الطالب
+            const headGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+            const headMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xf5d0a9 
+            });
+            const head = new THREE.Mesh(headGeometry, headMaterial);
+            head.position.set(x, y + 2, z + 0.9);
+            head.castShadow = true;
+            scene.add(head);
+
+            // ذراع الطالب اليمنى
+            const armGeometry = new THREE.BoxGeometry(0.08, 0.5, 0.08);
+            const armMaterial = new THREE.MeshStandardMaterial({ 
+                color: bodyMaterial.color 
+            });
+            
+            const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+            rightArm.position.set(x + 0.3, y + 1.5, z + 0.7);
+            rightArm.rotation.z = -Math.PI / 6;
+            rightArm.castShadow = true;
+            scene.add(rightArm);
+
+            // ذراع الطالب اليسرى
+            const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+            leftArm.position.set(x - 0.3, y + 1.5, z + 0.7);
+            leftArm.rotation.z = Math.PI / 6;
+            leftArm.castShadow = true;
+            scene.add(leftArm);
+
+            // إنشاء كائن الطالب الرئيسي للتفاعل
+            const studentGroup = new THREE.Group();
+            studentGroup.add(body, head, rightArm, leftArm);
+            studentGroup.userData = { id: `student${studentNumber}`, type: 'student' };
+            classroom[`student${studentNumber}`] = studentGroup;
+            scene.add(studentGroup);
+        }
+
+        // إنشاء أجهزة الاستشعار
+        function createSensors() {
+            // جهاز استشعار درجة الحرارة
+            const tempSensorGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.1);
+            const tempSensorMaterial = new THREE.MeshStandardMaterial({ color: 0xff5722 });
+            const tempSensor = new THREE.Mesh(tempSensorGeometry, tempSensorMaterial);
+            tempSensor.position.set(-9.5, 6, -3);
+            tempSensor.castShadow = true;
+            tempSensor.userData = { id: 'tempSensor', type: 'sensor' };
+            scene.add(tempSensor);
+            
+            // جهاز استشعار الإضاءة
+            const lightSensorGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.1);
+            const lightSensorMaterial = new THREE.MeshStandardMaterial({ color: 0xffeb3b });
+            const lightSensor = new THREE.Mesh(lightSensorGeometry, lightSensorMaterial);
+            lightSensor.position.set(-9.5, 6, 0);
+            lightSensor.castShadow = true;
+            lightSensor.userData = { id: 'lightSensor', type: 'sensor' };
+            scene.add(lightSensor);
+            
+            // جهاز استشعار الضوضاء
+            const noiseSensorGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.1);
+            const noiseSensorMaterial = new THREE.MeshStandardMaterial({ color: 0x2196f3 });
+            const noiseSensor = new THREE.Mesh(noiseSensorGeometry, noiseSensorMaterial);
+            noiseSensor.position.set(-9.5, 6, 3);
+            noiseSensor.castShadow = true;
+            noiseSensor.userData = { id: 'noiseSensor', type: 'sensor' };
+            scene.add(noiseSensor);
+            
+            // جهاز استشعار جودة الهواء
+            const airSensorGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.1);
+            const airSensorMaterial = new THREE.MeshStandardMaterial({ color: 0x4caf50 });
+            const airSensor = new THREE.Mesh(airSensorGeometry, airSensorMaterial);
+            airSensor.position.set(9.5, 6, 0);
+            airSensor.castShadow = true;
+            airSensor.userData = { id: 'airSensor', type: 'sensor' };
+            scene.add(airSensor);
+        }
+
+        // الحصول على لون عشوائي للطلاب
+        function getRandomColor() {
+            const colors = [
+                0xff6347, // أحمر فاتح
+                0x4682b4, // أزرق فولاذي
+                0x32cd32, // أخضر ليموني
+                0xffa500, // برتقالي
+                0x9370db, // أرجواني متوسط
+                0x20b2aa, // أخضر بحري فاتح
+                0xcd5c5c, // أحمر هندي
+                0x6495ed, // أزرق قرنفلي
+                0xdaa520  // ذهبي غامق
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // معالجة حدث النقر بالماوس
+        function onMouseClick(event) {
+            // تحويل إحداثيات الماوس إلى إحداثيات قياسية (-1 إلى 1)
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+            // تحديث الشعاع
+            raycaster.setFromCamera(mouse, camera);
+
+            // الحصول على الكائنات التي تتقاطع مع الشعاع
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            if (intersects.length > 0) {
+                // البحث عن الكائن الأول الذي له معرف
+                let selectedObject = null;
+                
+                for (let i = 0; i < intersects.length; i++) {
+                    // البحث عن الكائن الأصلي أو أحد الكائنات الأب
+                    let obj = intersects[i].object;
+                    while (obj) {
+                        if (obj.userData && obj.userData.id) {
+                            selectedObject = obj;
+                            break;
+                        }
+                        obj = obj.parent;
+                    }
+                    
+                    if (selectedObject) break;
+                }
+                
+                if (selectedObject) {
+                    const id = selectedObject.userData.id;
+                    const type = selectedObject.userData.type;
+                    
+                    // التعامل مع أجهزة الاستشعار
+                    if (type === 'sensor') {
+                        showSensorInfo(id);
+                        return;
+                    }
+                    
+                    // التعامل مع كتب المواد
+                    if (type === 'subject_book') {
+                        const subject = selectedObject.userData.subject;
+                        changeTeacher(subject);
+                        showSubjectInfo(subject);
+                        return;
+                    }
+                    
+                    // إذا كان الكائن هو طالب وكان الذكاء الاصطناعي مفعل
+                    if (id.startsWith('student') && aiActive) {
+                        showAIRecommendations(id);
+                    } else {
+                        showElementInfo(id);
+                    }
+                }
+            }
+        }
+
+        // عرض معلومات المادة
+        function showSubjectInfo(subject) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            
+            const subjectName = elementsData.subjects[currentLanguage][subject];
+            const teacherData = teachersData[subject][currentLanguage];
+            
+            modalTitle.textContent = getTranslatedText('مادة: ', 'Subject: ') + subjectName;
+            
+            let content = `
+                <div class="info-row">
+                    <span class="info-label">${getTranslatedText('المدرس:', 'Teacher:')}</span>
+                    <span class="info-value">${teacherData.name}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">${getTranslatedText('المؤهل العلمي:', 'Education:')}</span>
+                    <span class="info-value">${teacherData.education}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">${getTranslatedText('الخبرة:', 'Experience:')}</span>
+                    <span class="info-value">${teacherData.experience}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">${getTranslatedText('أساليب التدريس:', 'Teaching Methods:')}</span>
+                    <span class="info-value">${teacherData.teachingMethods.join(', ')}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">${getTranslatedText('التخصصات:', 'Specialties:')}</span>
+                    <span class="info-value">${teacherData.specialties.join(', ')}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">${getTranslatedText('الإنجازات:', 'Achievements:')}</span>
+                    <span class="info-value">${teacherData.achievements}</span>
+                </div>
+            `;
+            
+            modalBody.innerHTML = content;
+            modal.style.display = 'flex';
+        }
+
+        // عرض معلومات جهاز الاستشعار
+        function showSensorInfo(sensorId) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            
+            let title, content;
+            
+            switch(sensorId) {
+                case 'tempSensor':
+                    title = getTranslatedText('جهاز استشعار درجة الحرارة', 'Temperature Sensor');
+                    content = `
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('القراءة الحالية:', 'Current Reading:')}</span>
+                            <span class="info-value">${digitalTwinData.sensors[digitalTwinData.timeMode].temperature}°C</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('النطاق المثالي:', 'Optimal Range:')}</span>
+                            <span class="info-value">20-24°C</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('الدقة:', 'Accuracy:')}</span>
+                            <span class="info-value">±0.5°C</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('آخر معايرة:', 'Last Calibration:')}</span>
+                            <span class="info-value">2023-08-15</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('الحالة:', 'Status:')}</span>
+                            <span class="info-value">${getTranslatedText('يعمل بشكل طبيعي', 'Operating normally')}</span>
+                        </div>
+                    `;
+                    break;
+                case 'lightSensor':
+                    title = getTranslatedText('جهاز استشعار الإضاءة', 'Light Sensor');
+                    const lightUnit = currentLanguage === 'ar' ? 'لوكس' : 'lux';
+                    content = `
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('القراءة الحالية:', 'Current Reading:')}</span>
+                            <span class="info-value">${digitalTwinData.sensors[digitalTwinData.timeMode].light} ${lightUnit}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('النطاق المثالي:', 'Optimal Range:')}</span>
+                            <span class="info-value">500-700 ${lightUnit}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('الدقة:', 'Accuracy:')}</span>
+                            <span class="info-value">±20 ${lightUnit}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('آخر معايرة:', 'Last Calibration:')}</span>
+                            <span class="info-value">2023-09-01</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('الحالة:', 'Status:')}</span>
+                            <span class="info-value">${getTranslatedText('يعمل بشكل طبيعي', 'Operating normally')}</span>
+                        </div>
+                    `;
+                    break;
+                case 'noiseSensor':
+                    title = getTranslatedText('جهاز استشعار الضوضاء', 'Noise Sensor');
+                    const noiseUnit = currentLanguage === 'ar' ? 'ديسيبل' : 'dB';
+                    content = `
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('القراءة الحالية:', 'Current Reading:')}</span>
+                            <span class="info-value">${digitalTwinData.sensors[digitalTwinData.timeMode].noise} ${noiseUnit}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('النطاق المثالي:', 'Optimal Range:')}</span>
+                            <span class="info-value">35-45 ${noiseUnit}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('الدقة:', 'Accuracy:')}</span>
+                            <span class="info-value">±2 ${noiseUnit}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('آخر معايرة:', 'Last Calibration:')}</span>
+                            <span class="info-value">2023-07-20</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('الحالة:', 'Status:')}</span>
+                            <span class="info-value">${getTranslatedText('يعمل بشكل طبيعي', 'Operating normally')}</span>
+                        </div>
+                    `;
+                    break;
+                case 'airSensor':
+                    title = getTranslatedText('جهاز استشعار جودة الهواء', 'Air Quality Sensor');
+                    const airQuality = currentLanguage === 'ar' ? 
+                        digitalTwinData.sensors[digitalTwinData.timeMode].airQuality : 
+                        (digitalTwinData.sensors[digitalTwinData.timeMode].airQuality === 'جيدة' ? 'Good' : 
+                        (digitalTwinData.sensors[digitalTwinData.timeMode].airQuality === 'متوسطة' ? 'Medium' : 'Poor'));
+                    
+                    content = `
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('القراءة الحالية:', 'Current Reading:')}</span>
+                            <span class="info-value">${airQuality}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('مستوى ثاني أكسيد الكربون:', 'CO2 Level:')}</span>
+                            <span class="info-value">600 ${getTranslatedText('جزء في المليون', 'ppm')}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('النطاق المثالي:', 'Optimal Range:')}</span>
+                            <span class="info-value">< 800 ${getTranslatedText('جزء في المليون', 'ppm')}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('آخر معايرة:', 'Last Calibration:')}</span>
+                            <span class="info-value">2023-08-10</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">${getTranslatedText('الحالة:', 'Status:')}</span>
+                            <span class="info-value">${getTranslatedText('يعمل بشكل طبيعي', 'Operating normally')}</span>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            modalTitle.textContent = title;
+            modalBody.innerHTML = content;
+            modal.style.display = 'flex';
+        }
+
+        // معالجة حركة الماوس لعرض tooltip للكتب
+        function onMouseMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            let bookFound = false;
+
+            if (intersects.length > 0) {
+                for (let i = 0; i < intersects.length; i++) {
+                    let obj = intersects[i].object;
+                    while (obj) {
+                        if (obj.userData && obj.userData.type === 'subject_book') {
+                            const subject = obj.userData.subject;
+                            const subjectName = elementsData.subjects[currentLanguage][subject];
+                            
+                            bookTooltip.textContent = subjectName;
+                            bookTooltip.style.display = 'block';
+                            bookTooltip.style.left = event.clientX + 10 + 'px';
+                            bookTooltip.style.top = event.clientY + 10 + 'px';
+                            bookFound = true;
+                            break;
+                        }
+                        obj = obj.parent;
+                    }
+                    if (bookFound) break;
+                }
+            }
+
+            if (!bookFound) {
+                bookTooltip.style.display = 'none';
+            }
+        }
+
+        // عرض معلومات العنصر المحدد
+        function showElementInfo(elementId) {
+            // التعامل مع معرفات المدرسين الخاصة بالمواد
+            if (elementId.includes('_teacher')) {
+                const subject = elementId.split('_')[0];
+                showSubjectInfo(subject);
+                return;
+            }
+            
+            let data;
+            
+            // المدرس الحالي
+            if (elementId === 'teacher') {
+                data = teachersData[currentTeacher][currentLanguage];
+            } else {
+                // الطلاب والعناصر الأخرى
+                const baseElementId = elementId.split('_')[0]; // للتعامل مع معرفات مثل subject_book
+                data = elementsData[baseElementId] ? elementsData[baseElementId][currentLanguage] : null;
+            }
+            
+            if (!data) return;
+
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            // تعيين العنوان حسب نوع العنصر
+            if (elementId === 'teacher') {
+                modalTitle.textContent = `${getTranslatedText('المدرس:', 'Teacher:')} ${data.name}`;
+            } else if (elementId === 'board') {
+                modalTitle.textContent = getTranslatedText('السبورة', 'Board');
+            } else if (elementId.startsWith('student')) {
+                modalTitle.textContent = `${getTranslatedText('الطالب:', 'Student:')} ${data.name}`;
+            }
+
+            // إنشاء محتوى النافذة المنبثقة
+            let content = '';
+
+            if (elementId === 'teacher') {
+                content = `
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('العمر:', 'Age:')}</span>
+                        <span class="info-value">${data.age} ${getTranslatedText('سنة', 'years')}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('المادة:', 'Subject:')}</span>
+                        <span class="info-value">${data.subject}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الخبرة:', 'Experience:')}</span>
+                        <span class="info-value">${data.experience}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('المؤهل العلمي:', 'Education:')}</span>
+                        <span class="info-value">${data.education}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الإنجازات:', 'Achievements:')}</span>
+                        <span class="info-value">${data.achievements}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('أساليب التدريس:', 'Teaching Methods:')}</span>
+                        <span class="info-value">${data.teachingMethods.join(', ')}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('التخصصات:', 'Specialties:')}</span>
+                        <span class="info-value">${data.specialties.join(', ')}</span>
+                    </div>
+                `;
+            } else if (elementId === 'board') {
+                content = `
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('النوع:', 'Type:')}</span>
+                        <span class="info-value">${data.type}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الأبعاد:', 'Dimensions:')}</span>
+                        <span class="info-value">${data.dimensions}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('المميزات:', 'Features:')}</span>
+                        <span class="info-value">${data.features.join(', ')}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('تاريخ التركيب:', 'Installation Date:')}</span>
+                        <span class="info-value">${data.installed}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الشركة المصنعة:', 'Manufacturer:')}</span>
+                        <span class="info-value">${data.manufacturer}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('حالة التشغيل:', 'Operation Status:')}</span>
+                        <span class="info-value">${getTranslatedText('الطاقة:', 'Power:')} ${data.status.power}</span>
+                        <span class="info-value">${getTranslatedText('الشبكة:', 'Network:')} ${data.status.network}</span>
+                        <span class="info-value">${getTranslatedText('المعايرة:', 'Calibration:')} ${data.status.calibration}</span>
+                        <span class="info-value">${getTranslatedText('آخر صيانة:', 'Last Maintenance:')} ${data.status.lastMaintenance}</span>
+                    </div>
+                `;
+            } else if (elementId.startsWith('student')) {
+                content = `
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('العمر:', 'Age:')}</span>
+                        <span class="info-value">${data.age} ${getTranslatedText('سنة', 'years')}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الصف:', 'Grade:')}</span>
+                        <span class="info-value">${data.grade}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('المواد:', 'Subjects:')}</span>
+                        <span class="info-value">${data.subjects.join(', ')}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الهوايات:', 'Hobbies:')}</span>
+                        <span class="info-value">${data.hobbies}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الإنجازات:', 'Achievements:')}</span>
+                        <span class="info-value">${data.achievements}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('أسلوب التعلم:', 'Learning Style:')}</span>
+                        <span class="info-value">${data.learningStyle}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('نقاط القوة:', 'Strengths:')}</span>
+                        <span class="info-value">${data.strengths}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('نقاط الضعف:', 'Weaknesses:')}</span>
+                        <span class="info-value">${data.weaknesses}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الشخصية:', 'Personality:')}</span>
+                        <span class="info-value">${data.personality}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('نسبة الحضور:', 'Attendance Rate:')}</span>
+                        <span class="info-value">${data.attendance}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('مستوى التفاعل:', 'Engagement Level:')}</span>
+                        <span class="info-value">${data.engagement}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الأداء الحالي:', 'Current Performance:')}</span>
+                        <span class="info-value">${data.performance.current}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('التوقعات المستقبلية:', 'Future Predictions:')}</span>
+                        <span class="info-value">${data.performance.prediction}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">${getTranslatedText('الصحة والسلامة:', 'Health and Safety:')}</span>
+                        <span class="info-value">${getTranslatedText('الرؤية:', 'Vision:')} ${data.health.vision}</span>
+                        <span class="info-value">${getTranslatedText('السمع:', 'Hearing:')} ${data.health.hearing}</span>
+                        <span class="info-value">${getTranslatedText('وضعية الجلوس:', 'Sitting Posture:')} ${data.health.ergonomics}</span>
+                    </div>
+                `;
+            }
+
+            modalBody.innerHTML = content;
+            modal.style.display = 'flex';
+        }
+
+        // عرض توصيات الذكاء الاصطناعي للطالب
+        function showAIRecommendations(studentId) {
+            const studentData = elementsData[studentId][currentLanguage];
+            if (!studentData) return;
+
+            const aiContent = document.getElementById('ai-content');
+            
+            // الحصول على أسلوب التعلم المناسب للغة الحالية
+            let learningStyle = studentData.learningStyle;
+            if (currentLanguage === 'en') {
+                // تحويل أسلوب التعلم من العربية إلى الإنجليزية
+                const styleMap = {
+                    'بصري': 'Visual',
+                    'سمعي': 'Auditory',
+                    'حركي': 'Kinesthetic',
+                    'منطقي': 'Logical',
+                    'لفظي': 'Verbal',
+                    'اجتماعي': 'Social'
+                };
+                learningStyle = styleMap[learningStyle] || learningStyle;
+            }
+            
+            const aiRecommendation = aiRecommendations[currentLanguage][learningStyle];
+
+            let content = `
+                <div class="ai-recommendation">
+                    <h4>${getTranslatedText('تحليل بيانات الطالب:', 'Student Data Analysis:')} ${studentData.name}</h4>
+                    <p>${getTranslatedText('أسلوب التعلم:', 'Learning Style:')} <strong>${learningStyle}</strong></p>
+                    <p>${aiRecommendation.description}</p>
+                    
+                    <h4 style="margin-top: 10px;">${getTranslatedText('الطرق المقترحة للتدريس:', 'Suggested Teaching Methods:')}</h4>
+                    <ul>
+            `;
+
+            aiRecommendation.methods.forEach(method => {
+                content += `<li>${method}</li>`;
+            });
+
+            content += `
+                    </ul>
+                </div>
+                
+                <div class="ai-subject-recommendation">
+                    <h4>${getTranslatedText('توصيات لتدريس المواد المفضلة للطالب:', 'Recommendations for Teaching Student\'s Preferred Subjects:')}</h4>
+            `;
+
+            // إضافة توصيات لكل مادة من مواد الطالب
+            studentData.subjects.forEach(subject => {
+                const subjectMethods = getSubjectMethods(subject);
+                if (subjectMethods) {
+                    content += `
+                        <div class="subject-method">
+                            <h5>${subject}</h5>
+                    `;
+                    
+                    subjectMethods.methods.forEach(method => {
+                        content += `
+                            <p><strong>${method.title}:</strong> ${method.description}</p>
+                        `;
+                    });
+                    
+                    content += `</div>`;
+                }
+            });
+            
+            // إضافة تحليل الأداء والتوقعات المستقبلية
+            content += `
+                <div class="ai-recommendation" style="margin-top: 15px;">
+                    <h4>${getTranslatedText('تحليل الأداء والتوقعات:', 'Performance Analysis and Predictions:')}</h4>
+                    <p>${getTranslatedText('الأداء الحالي:', 'Current Performance:')} <strong>${studentData.performance.current}%</strong></p>
+                    <p>${getTranslatedText('التوقعات المستقبلية:', 'Future Predictions:')} <strong>${studentData.performance.prediction}%</strong></p>
+                    <p>${getTranslatedText('اتجاه الأداء:', 'Performance Trend:')} <strong>${getTranslatedText(
+                        studentData.performance.trend[3] >= studentData.performance.trend[0] ? 'تحسن' : 'تراجع',
+                        studentData.performance.trend[3] >= studentData.performance.trend[0] ? 'Improving' : 'Declining'
+                    )}</strong></p>
+                    
+                    <h4 style="margin-top: 10px;">${getTranslatedText('مجالات التركيز:', 'Focus Areas:')}</h4>
+                    <ul>
+            `;
+            
+            studentData.attention.areas.forEach(area => {
+                content += `<li>${area}</li>`;
+            });
+            
+            content += `
+                    </ul>
+                    
+                    <h4 style="margin-top: 10px;">${getTranslatedText('توصيات للتحسين:', 'Recommendations for Improvement:')}</h4>
+                    <ul>
+                        <li>${getTranslatedText('تطبيق أساليب التدريس المناسبة لنمط التعلم', 'Apply teaching methods suitable for learning style')} ${learningStyle}</li>
+                        <li>${getTranslatedText('التركيز على تعزيز نقاط القوة:', 'Focus on strengthening strengths:')} ${studentData.strengths}</li>
+                        <li>${getTranslatedText('معالجة نقاط الضعف:', 'Address weaknesses:')} ${studentData.weaknesses}</li>
+                        <li>${getTranslatedText(
+                            studentData.health.ergonomics.includes('بحاجة') || studentData.health.ergonomics.includes('Needs') ? 
+                            'تحسين وضعية الجلوس للطالب' : 'الحفاظ على وضعية الجلوس الجيدة',
+                            studentData.health.ergonomics.includes('بحاجة') || studentData.health.ergonomics.includes('Needs') ? 
+                            'Improve student\'s sitting posture' : 'Maintain good sitting posture'
+                        )}</li>
+                    </ul>
+                </div>
+            `;
+
+            content += `</div>`;
+            aiContent.innerHTML = content;
+        }
+
+        // الحصول على طرق تدريس المادة
+        function getSubjectMethods(subject) {
+            // البحث عن المادة في قائمة المواد
+            for (const key in subjectTeachingMethods[currentLanguage]) {
+                if (subject.includes(key) || key.includes(subject)) {
+                    return subjectTeachingMethods[currentLanguage][key];
+                }
+            }
+            return null;
+        }
+
+        // معالجة تغيير حجم النافذة
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // حلقة الرسم
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            
+            // تحديث مواقع تسميات الكتب
+            updateBookLabelsPositions();
+            
+            renderer.render(scene, camera);
+        }
+
+        // إغلاق النافذة المنبثقة
+        document.querySelector('.close-btn').addEventListener('click', function() {
+            document.getElementById('modal').style.display = 'none';
+        });
+
+        // إغلاق النافذة المنبثقة عند النقر خارجها
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // بدء التطبيق
+        init();
+    </script>
+</body>
+</html>
