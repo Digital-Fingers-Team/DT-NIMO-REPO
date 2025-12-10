@@ -111,7 +111,7 @@
         margin-bottom: 20px;
       }
 
-      .logo-container {
+     .logo-container {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -121,7 +121,6 @@
       .logo {
         width: 70px;
         height: 70px;
-        background: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -129,9 +128,11 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       }
 
-      .logo svg {
-        width: 140px;
-        height: auto;
+ 
+      .logo img {
+        width:140px;
+        object-fit: contain;
+        display: block;
       }
 
       .logo-text {
@@ -550,8 +551,6 @@
             <div class="logo">
               <img
                 src="logo.png"
-                width="210px"
-                style="margin-bottom: 20px"
                 alt="logo"
               />
             </div>

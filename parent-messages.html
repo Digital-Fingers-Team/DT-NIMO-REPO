@@ -309,11 +309,19 @@
         display: flex;
         flex-direction: column;
       }
+      body.dark-mode .contacts-panel {
+        background: rgba(10, 10, 20, 0.2);
+        border-inline-end: 1px solid rgba(255, 255, 255, 0.12);
+      }
       .contacts-header {
         padding: 14px 16px;
         font-weight: 700;
         color: var(--primary);
         border-bottom: 1px solid #e6eaf0;
+      }
+      body.dark-mode .contacts-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--dark);
       }
       .contacts-list {
         overflow: auto;
@@ -329,8 +337,14 @@
       .contact-item:hover {
         background: #eef3ff;
       }
+      body.dark-mode .contact-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
       .contact-item.active {
         background: #e6eeff;
+      }
+      body.dark-mode .contact-item.active {
+        background: rgba(255, 255, 255, 0.12);
       }
       .avatar {
         width: 36px;
@@ -357,10 +371,18 @@
         color: white;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
       }
-
+      body.dark-mode .model-select {
+        background: rgba(255, 255, 255, 0.15);
+        color: var(--dark);
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+      }
       .model-select option {
         background: white;
         color: var(--text);
+      }
+      body.dark-mode .model-select option {
+        background: var(--light);
+        color: var(--dark);
       }
 
       .chat-panel {
@@ -376,6 +398,10 @@
         gap: 8px;
         font-weight: 700;
         color: var(--text);
+      }
+      body.dark-mode .chat-top {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--dark);
       }
       .chat-messages {
         flex: 1;
@@ -794,6 +820,14 @@
           "darkMode",
           document.body.classList.contains("dark-mode")
         );
+        updateDarkModeText();
+        const icons = document.querySelectorAll(
+          "#dark-mode-toggle i, #sidebar-dark-mode-toggle i"
+        );
+        const isDark = document.body.classList.contains("dark-mode");
+        icons.forEach((icon) => {
+          icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+        });
       }
 
       darkModeToggle.addEventListener("click", toggleDarkMode);
@@ -823,6 +857,7 @@
           updateLanguage("ar");
           localStorage.setItem("language", "ar");
         }
+        updateDarkModeText();
       });
 
       if (localStorage.getItem("language") === "en") {
@@ -832,6 +867,34 @@
         document.documentElement.dir = "ltr";
         updateLanguage("en");
       }
+
+      function updateDarkModeText() {
+        const lang = localStorage.getItem("language") || "ar";
+        const isDark = document.body.classList.contains("dark-mode");
+        const text =
+          lang === "ar"
+            ? isDark
+              ? "الوضع الفاتح"
+              : "الوضع الداكن"
+            : isDark
+            ? "Light Mode"
+            : "Dark Mode";
+        const headerTextEl = document.getElementById("header-dark-mode-text");
+        const sidebarTextEl = document.getElementById("dark-mode-text");
+        if (headerTextEl) headerTextEl.textContent = text;
+        if (sidebarTextEl) sidebarTextEl.textContent = text;
+      }
+
+      updateDarkModeText();
+      (function () {
+        const icons = document.querySelectorAll(
+          "#dark-mode-toggle i, #sidebar-dark-mode-toggle i"
+        );
+        const isDark = document.body.classList.contains("dark-mode");
+        icons.forEach((icon) => {
+          icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+        });
+      })();
 
       const chatMessages = document.getElementById("chatMessages");
       const userInput = document.getElementById("message-input");

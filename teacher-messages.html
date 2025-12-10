@@ -121,7 +121,6 @@
       .logo {
         width: 70px;
         height: 70px;
-        background: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -129,9 +128,10 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       }
 
-      .logo svg {
+      .logo img {
         width: 140px;
-        height: auto;
+        object-fit: contain;
+        display: block;
       }
 
       .logo-text {
@@ -397,11 +397,19 @@
         display: flex;
         flex-direction: column;
       }
+      body.dark-mode .contacts-panel {
+        background: rgba(10, 10, 20, 0.2);
+        border-inline-end: 1px solid rgba(255, 255, 255, 0.12);
+      }
       .contacts-header {
         padding: 14px 16px;
         font-weight: 700;
         color: var(--primary);
         border-bottom: 1px solid #e6eaf0;
+      }
+      body.dark-mode .contacts-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--dark);
       }
       .contacts-list {
         overflow: auto;
@@ -417,8 +425,14 @@
       .contact-item:hover {
         background: #eef3ff;
       }
+      body.dark-mode .contact-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
       .contact-item.active {
         background: #e6eeff;
+      }
+      body.dark-mode .contact-item.active {
+        background: rgba(255, 255, 255, 0.12);
       }
       .avatar {
         width: 36px;
@@ -445,10 +459,19 @@
         color: white;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
       }
+      body.dark-mode .model-select {
+        background: rgba(255, 255, 255, 0.15);
+        color: var(--dark);
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+      }
 
       .model-select option {
         background: white;
         color: var(--text);
+      }
+      body.dark-mode .model-select option {
+        background: var(--light);
+        color: var(--dark);
       }
 
       .chat-panel {
@@ -464,6 +487,10 @@
         gap: 8px;
         font-weight: 700;
         color: var(--text);
+      }
+      body.dark-mode .chat-top {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--dark);
       }
       .chat-messages {
         flex: 1;
@@ -682,18 +709,13 @@
         <div class="sidebar-header">
           <div class="logo-container">
             <div class="logo">
-              <img
-                src="logo.png"
-                width="210px"
-                style="margin-bottom: 20px"
-                alt="logo"
-              />
+              <img src="logo.png" alt="Logo" />
             </div>
           </div>
           <div class="logo-text">DT Edu</div>
           <div class="user-info">
             <div class="user-name" id="user-name">أحمد المعلم</div>
-            <div class="user-type" id="user-type">مدرس</div>
+            <div class="user-type" id="user-type">معلم رياضيات</div>
           </div>
         </div>
 
@@ -730,8 +752,8 @@
           </li>
           <li class="menu-item active">
             <a href="teacher-messages.html">
-              <i class="fas fa-robot"></i>
-              <span id="menu-messages">شات بوت</span>
+              <i class="fas fa-comments"></i>
+              <span id="menu-messages">الرسائل</span>
             </a>
           </li>
           <li class="menu-item">
@@ -765,13 +787,13 @@
         <div class="header">
           <h1 id="header-title">شات بوت - مساعد الذكاء الاصطناعي</h1>
           <div class="header-actions">
-            <button class="clear-chat-btn" onclick="clearChat()">
-              <i class="fas fa-trash"></i>
-              <span id="clear-text">مسح المحادثة</span>
-            </button>
             <button id="header-dark-mode-toggle" class="dark-mode-toggle">
               <i class="fas fa-moon"></i>
               <span id="dark-mode-btn-text">الوضع الداكن</span>
+            </button>
+            <button class="clear-chat-btn" onclick="clearChat()">
+              <i class="fas fa-trash"></i>
+              <span id="clear-text">مسح المحادثة</span>
             </button>
             <button id="back-btn" class="back-btn" onclick="goBack()">
               <i class="fas fa-arrow-right"></i>

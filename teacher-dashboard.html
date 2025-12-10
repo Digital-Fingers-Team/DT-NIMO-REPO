@@ -130,7 +130,6 @@
       .logo {
         width: 80px;
         height: 80px;
-        background: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -1652,7 +1651,6 @@
             <a href="teacher-messages.html">
               <i class="fas fa-comments"></i>
               <span id="menu-messages">الرسائل</span>
-              <span class="notification-badge">5</span>
             </a>
           </li>
           <li class="menu-item">
@@ -1666,7 +1664,7 @@
         <div class="sidebar-footer">
           <ul class="sidebar-menu">
             <li class="menu-item">
-              <a href="#" id="sidebar-dark-mode-toggle">
+              <a href="#" id="sidebar-dark-mode-toggle" style="display: none">
                 <i class="fas fa-moon"></i>
                 <span id="dark-mode-text">الوضع الداكن</span>
               </a>
@@ -1691,7 +1689,11 @@
             </div>
           </div>
           <div class="header-actions">
-            <button class="dark-mode-toggle" id="header-dark-mode-toggle">
+            <button
+              class="dark-mode-toggle"
+              id="header-dark-mode-toggle"
+              style="display: none"
+            >
               <i class="fas fa-moon"></i>
               <span id="dark-mode-btn-text">الوضع الداكن</span>
             </button>
