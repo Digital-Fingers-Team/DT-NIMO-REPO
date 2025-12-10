@@ -1,861 +1,1239 @@
 <!-- the following is the completed code for DTES/parent-grades.html:  -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>الدرجات والتقييمات - DT Edu</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="db.js"></script>
     <style>
-        :root {
-            --primary: #4a6cf7;
-            --primary-dark: #3a56d4;
-            --secondary: #6c5ce7;
-            --accent: #00b894;
-            --light: #f8f9fa;
-            --dark: #2d3436;
-            --text: #333;
-            --text-light: #666;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-            --sidebar-width: 260px;
-        }
+      :root {
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
+        --accent: #00b894;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --text: #333;
+        --text-light: #666;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --sidebar-width: 260px;
+      }
 
-        .dark-mode {
-            --light: #1a1a2e;
-            --dark: #f8f9fa;
-            --text: #e6e6e6;
-            --text-light: #b0b0b0;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
+      .dark-mode {
+        --light: #1a1a2e;
+        --dark: #f8f9fa;
+        --text: #e6e6e6;
+        --text-light: #b0b0b0;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', 'Segoe UI', sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Tajawal", "Segoe UI", sans-serif;
+      }
 
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
-            transition: var(--transition);
-        }
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+        transition: var(--transition);
+      }
 
-        body.dark-mode {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-        }
+      body.dark-mode {
+        background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+      }
 
-        body.rtl { direction: rtl; }
-        body.ltr { direction: ltr; }
+      body.rtl {
+        direction: rtl;
+      }
+      body.ltr {
+        direction: ltr;
+      }
 
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
 
+      .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(
+          180deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 20px 0;
+        box-shadow: var(--shadow);
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        transition: var(--transition);
+        z-index: 100;
+      }
+
+      body.rtl .sidebar {
+        right: 0;
+      }
+      body.ltr .sidebar {
+        left: 0;
+      }
+      body.rtl .main-content {
+        margin-right: var(--sidebar-width);
+      }
+      body.ltr .main-content {
+        margin-left: var(--sidebar-width);
+        margin-right: 0;
+      }
+
+      .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .logo img {
+        width: 140px;
+        object-fit: contain;
+        display: block;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, white, #e1f0fa);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .user-info {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .user-name {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .user-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0 15px;
+      }
+
+      .menu-item {
+        margin-bottom: 8px;
+        border-radius: 10px;
+      }
+
+      .menu-item a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .menu-item a:hover,
+      .menu-item.active a {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      body.rtl .menu-item a:hover,
+      body.rtl .menu-item.active a {
+        transform: translateX(-5px);
+      }
+      body.ltr .menu-item a:hover,
+      body.ltr .menu-item.active a {
+        transform: translateX(5px);
+      }
+
+      .menu-item i {
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      body.rtl .menu-item i {
+        margin-left: 10px;
+      }
+      body.ltr .menu-item i {
+        margin-right: 10px;
+      }
+
+      .sidebar-footer {
+        padding: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 20px;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      .header {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .header {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .header h1 {
+        color: var(--primary);
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .dark-mode-toggle,
+      .logout-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dark-mode-toggle {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .dark-mode-toggle:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      .logout-btn {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      .logout-btn:hover {
+        background: rgba(231, 76, 60, 0.2);
+      }
+
+      .children-selector {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+      }
+
+      body.dark-mode .children-selector {
+        background: var(--light);
+      }
+
+      .children-tabs {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .child-tab {
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: 2px solid var(--primary);
+        background: transparent;
+        color: var(--primary);
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .child-tab:hover,
+      .child-tab.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      .stats-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 30px;
+        margin-bottom: 25px;
+        text-align: center;
+      }
+
+      body.dark-mode .stats-card {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .gpa-display {
+        font-size: 72px;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+      }
+
+      .gpa-label {
+        font-size: 20px;
+        color: var(--text-light);
+        font-weight: 600;
+      }
+
+      .grades-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .subject-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .subject-card {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .subject-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .subject-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .subject-name {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .subject-grade {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--primary);
+      }
+
+      .grade-details {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .grade-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        background: rgba(74, 108, 247, 0.05);
+        border-radius: 8px;
+      }
+
+      body.dark-mode .grade-row {
+        background: rgba(74, 108, 247, 0.15);
+      }
+
+      .grade-row-label {
+        color: var(--text-light);
+        font-weight: 600;
+      }
+
+      .grade-row-value {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .chart-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        margin-bottom: 25px;
+      }
+
+      body.dark-mode .chart-card {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .card-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .chart-container {
+        height: 300px;
+        position: relative;
+      }
+
+      .badge {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .badge-excellent {
+        background: rgba(0, 184, 148, 0.1);
+        color: #00b894;
+      }
+      .badge-good {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+      .badge-average {
+        background: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+      }
+      .badge-poor {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      @media (max-width: 992px) {
         .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: var(--shadow);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            transition: var(--transition);
-            z-index: 100;
+          width: 80px;
         }
-
-        body.rtl .sidebar { right: 0; }
-        body.ltr .sidebar { left: 0; }
-        body.rtl .main-content { margin-right: var(--sidebar-width); }
-        body.ltr .main-content { margin-left: var(--sidebar-width); margin-right: 0; }
-
-        .sidebar-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 20px;
+        .sidebar-header .logo-text,
+        .user-info,
+        .menu-item span {
+          display: none;
         }
-
-        .logo {
-            width: 70px;
-            height: 70px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px;
+        body.rtl .main-content {
+          margin-right: 80px;
         }
-
-        .logo svg { width: 50px; height: 50px; }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, white, #e1f0fa);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        body.ltr .main-content {
+          margin-left: 80px;
         }
-
-        .user-info {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .user-name {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .user-type {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0 15px;
-        }
-
-        .menu-item {
-            margin-bottom: 8px;
-            border-radius: 10px;
-        }
-
         .menu-item a {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
+          justify-content: center;
+          padding: 15px;
         }
-
-        .menu-item a:hover,
-        .menu-item.active a {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        body.rtl .menu-item a:hover,
-        body.rtl .menu-item.active a { transform: translateX(-5px); }
-        body.ltr .menu-item a:hover,
-        body.ltr .menu-item.active a { transform: translateX(5px); }
-
         .menu-item i {
-            font-size: 18px;
-            width: 24px;
-            text-align: center;
+          margin: 0;
+          font-size: 20px;
         }
+      }
 
-        body.rtl .menu-item i { margin-left: 10px; }
-        body.ltr .menu-item i { margin-right: 10px; }
-
-        .sidebar-footer {
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: 20px;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            transition: var(--transition);
-        }
-
-        .header {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
-        }
-
-        body.dark-mode .header {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .header h1 {
-            color: var(--primary);
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .dark-mode-toggle,
-        .logout-btn {
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dark-mode-toggle {
-            background: rgba(74, 108, 247, 0.1);
-            color: var(--primary);
-        }
-
-        .dark-mode-toggle:hover {
-            background: rgba(74, 108, 247, 0.2);
-        }
-
-        .logout-btn {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-        }
-
-        .logout-btn:hover {
-            background: rgba(231, 76, 60, 0.2);
-        }
-
-        .children-selector {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        body.dark-mode .children-selector {
-            background: var(--light);
-        }
-
-        .children-tabs {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .child-tab {
-            padding: 12px 20px;
-            border-radius: 10px;
-            border: 2px solid var(--primary);
-            background: transparent;
-            color: var(--primary);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .child-tab:hover,
-        .child-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .stats-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 30px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        body.dark-mode .stats-card {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .gpa-display {
-            font-size: 72px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-        }
-
-        .gpa-label {
-            font-size: 20px;
-            color: var(--text-light);
-            font-weight: 600;
-        }
-
+      @media (max-width: 768px) {
         .grades-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+          grid-template-columns: 1fr;
         }
-
-        .subject-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 25px;
-            transition: var(--transition);
+        .header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
         }
-
-        body.dark-mode .subject-card {
-            background: var(--light);
-            color: var(--dark);
+        .gpa-display {
+          font-size: 48px;
         }
+      }
 
-        .subject-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      @media (max-width: 576px) {
+        .main-content {
+          padding: 15px;
         }
-
-        .subject-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        .sidebar {
+          width: 70px;
         }
-
-        .subject-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text);
+        body.rtl .main-content {
+          margin-right: 70px;
         }
-
-        .subject-grade {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--primary);
+        body.ltr .main-content {
+          margin-left: 70px;
         }
-
-        .grade-details {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .grade-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: rgba(74, 108, 247, 0.05);
-            border-radius: 8px;
-        }
-
-        body.dark-mode .grade-row {
-            background: rgba(74, 108, 247, 0.15);
-        }
-
-        .grade-row-label {
-            color: var(--text-light);
-            font-weight: 600;
-        }
-
-        .grade-row-value {
-            color: var(--text);
-            font-weight: 700;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 25px;
-            margin-bottom: 25px;
-        }
-
-        body.dark-mode .chart-card {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chart-container {
-            height: 300px;
-            position: relative;
-        }
-
-        .badge {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge-excellent { background: rgba(0, 184, 148, 0.1); color: #00b894; }
-        .badge-good { background: rgba(74, 108, 247, 0.1); color: var(--primary); }
-        .badge-average { background: rgba(243, 156, 18, 0.1); color: #f39c12; }
-        .badge-poor { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
-
-        @media (max-width: 992px) {
-            .sidebar { width: 80px; }
-            .sidebar-header .logo-text,
-            .user-info,
-            .menu-item span { display: none; }
-            body.rtl .main-content { margin-right: 80px; }
-            body.ltr .main-content { margin-left: 80px; }
-            .menu-item a {
-                justify-content: center;
-                padding: 15px;
-            }
-            .menu-item i {
-                margin: 0;
-                font-size: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .grades-grid { grid-template-columns: 1fr; }
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .gpa-display {
-                font-size: 48px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .main-content { padding: 15px; }
-            .sidebar { width: 70px; }
-            body.rtl .main-content { margin-right: 70px; }
-            body.ltr .main-content { margin-left: 70px; }
-        }
+      }
     </style>
-</head>
-<body class="rtl">
+  </head>
+  <body class="rtl">
     <div class="dashboard-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#4a6cf7"/>
-                                <stop offset="100%" stop-color="#00b894"/>
-                            </linearGradient>
-                        </defs>
-                        <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
-                        <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
-                        <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
-                        <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
-                        <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
-                    </svg>
-                </div>
-                <div class="logo-text">DT Edu</div>
-                <div class="user-info">
-                    <div class="user-name" id="user-name">ولي الأمر</div>
-                    <div class="user-type" id="user-type">Parent</div>
-                </div>
-            </div>
-
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="parent-dashboard.html">
-                        <i class="fas fa-home"></i>
-                        <span id="menu-dashboard">لوحة التحكم</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-children.html">
-                        <i class="fas fa-child"></i>
-                        <span id="menu-children">الأبناء</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-attendance.html">
-                        <i class="fas fa-calendar-check"></i>
-                        <span id="menu-attendance">الحضور والغياب</span>
-                    </a>
-                </li>
-                <li class="menu-item active">
-                    <a href="parent-grades.html">
-                        <i class="fas fa-chart-line"></i>
-                        <span id="menu-grades">الدرجات والتقييمات</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-messages.html">
-                        <i class="fas fa-comments"></i>
-                        <span id="menu-messages">الرسائل</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-payments.html">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span id="menu-payments">المدفوعات</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span id="menu-settings">الإعدادات</span>
-                    </a>
-                </li>
-            </ul>
-
-            <div class="sidebar-footer">
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="#" id="sidebar-dark-mode-toggle">
-                            <i class="fas fa-moon"></i>
-                            <span id="dark-mode-text">الوضع الداكن</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" id="sidebar-language-toggle">
-                            <i class="fas fa-language"></i>
-                            <span id="language-text">English</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="index.html">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span id="logout-text">تسجيل الخروج</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <img src="logo.png" alt="Logo" />
+          </div>
+          <div class="logo-text">DT Edu</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">ولي الأمر</div>
+            <div class="user-type" id="user-type">Parent</div>
+          </div>
         </div>
 
-        <div class="main-content">
-            <div class="header">
-                <h1 id="page-title">الدرجات والتقييمات</h1>
-                <div class="header-actions">
-                    <button class="dark-mode-toggle" id="dark-mode-toggle">
-                        <i class="fas fa-moon"></i>
-                        <span id="header-dark-mode-text">الوضع الداكن</span>
-                    </button>
-                    <button class="logout-btn" onclick="window.location.href='index.html'">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span id="header-logout-text">تسجيل الخروج</span>
-                    </button>
-                </div>
-            </div>
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="parent-dashboard.html">
+              <i class="fas fa-home"></i>
+              <span id="menu-dashboard">لوحة التحكم</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-children.html">
+              <i class="fas fa-child"></i>
+              <span id="menu-children">الأبناء</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-homework.html">
+              <i class="fas fa-clipboard-list"></i>
+              <span id="menu-homework">الواجبات المنزلية</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-calendar.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-calendar">الجدول والفعاليات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-attendance.html">
+              <i class="fas fa-calendar-check"></i>
+              <span id="menu-attendance">الحضور والغياب</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="parent-grades.html">
+              <i class="fas fa-chart-line"></i>
+              <span id="menu-grades">الدرجات والتقييمات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-messages.html">
+              <i class="fas fa-comments"></i>
+              <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-payments.html">
+              <i class="fas fa-money-bill-wave"></i>
+              <span id="menu-payments">المدفوعات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-reports.html">
+              <i class="fas fa-file-alt"></i>
+              <span id="menu-reports">التقارير</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-settings.html">
+              <i class="fas fa-cog"></i>
+              <span id="menu-settings">الإعدادات</span>
+            </a>
+          </li>
+        </ul>
 
-            <div class="children-selector">
-                <h3 id="select-child-title" style="margin-bottom: 15px; color: var(--text);">اختر الابن/الابنة:</h3>
-                <div class="children-tabs">
-                    <button class="child-tab active">
-                        <i class="fas fa-user"></i>
-                        <span>أحمد محمد</span>
-                    </button>
-                    <button class="child-tab">
-                        <i class="fas fa-user"></i>
-                        <span>فاطمة محمد</span>
-                    </button>
-                    <button class="child-tab">
-                        <i class="fas fa-user"></i>
-                        <span>عمر محمد</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="stats-card">
-                <div class="gpa-display">88%</div>
-                <div class="gpa-label" id="gpa-label">المعدل العام</div>
-            </div>
-
-            <div class="grades-grid">
-                <div class="subject-card">
-                    <div class="subject-header">
-                        <div class="subject-name" id="math-title">الرياضيات</div>
-                        <div class="subject-grade">95</div>
-                    </div>
-                    <div class="grade-details">
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="exam-label-1">الاختبار الأول</span>
-                            <span class="grade-row-value">48/50</span>
-                        </div>
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="homework-label-1">الواجبات</span>
-                            <span class="grade-row-value">28/30</span>
-                        </div>
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="participation-label-1">المشاركة</span>
-                            <span class="grade-row-value">19/20</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="subject-card">
-                    <div class="subject-header">
-                        <div class="subject-name" id="science-title">العلوم</div>
-                        <div class="subject-grade">92</div>
-                    </div>
-                    <div class="grade-details">
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="exam-label-2">الاختبار الأول</span>
-                            <span class="grade-row-value">46/50</span>
-                        </div>
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="homework-label-2">الواجبات</span>
-                            <span class="grade-row-value">27/30</span>
-                        </div>
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="participation-label-2">المشاركة</span>
-                            <span class="grade-row-value">19/20</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="subject-card">
-                    <div class="subject-header">
-                        <div class="subject-name" id="arabic-title">اللغة العربية</div>
-                        <div class="subject-grade">85</div>
-                    </div>
-                    <div class="grade-details">
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="exam-label-3">الاختبار الأول</span>
-                            <span class="grade-row-value">42/50</span>
-                        </div>
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="homework-label-3">الواجبات</span>
-                            <span class="grade-row-value">26/30</span>
-                        </div>
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="participation-label-3">المشاركة</span>
-                            <span class="grade-row-value">17/20</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="subject-card">
-                    <div class="subject-header">
-                        <div class="subject-name" id="english-title">اللغة الإنجليزية</div>
-                        <div class="subject-grade">90</div>
-                    </div>
-                    <div class="grade-details">
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="exam-label-4">الاختبار الأول</span>
-                            <span class="grade-row-value">45/50</span>
-                        </div>
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="homework-label-4">الواجبات</span>
-                            <span class="grade-row-value">27/30</span>
-                        </div>
-                        <div class="grade-row">
-                            <span class="grade-row-label" id="participation-label-4">المشاركة</span>
-                            <span class="grade-row-value">18/20</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <h2 class="card-title">
-                    <i class="fas fa-chart-bar"></i>
-                    <span id="performance-chart-title">الأداء الأكاديمي</span>
-                </h2>
-                <div class="chart-container">
-                    <canvas id="performanceChart"></canvas>
-                </div>
-            </div>
+        <div class="sidebar-footer">
+          <ul class="sidebar-menu">
+            <li class="menu-item">
+              <a href="#" id="sidebar-dark-mode-toggle">
+                <i class="fas fa-moon"></i>
+                <span id="dark-mode-text">الوضع الداكن</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" id="sidebar-language-toggle">
+                <i class="fas fa-language"></i>
+                <span id="language-text">English</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="index.html">
+                <i class="fas fa-sign-out-alt"></i>
+                <span id="logout-text">تسجيل الخروج</span>
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
+
+      <div class="main-content">
+        <div class="header">
+          <h1 id="page-title">الدرجات والتقييمات</h1>
+          <div class="header-actions">
+            <button class="dark-mode-toggle" id="dark-mode-toggle">
+              <i class="fas fa-moon"></i>
+              <span id="header-dark-mode-text">الوضع الداكن</span>
+            </button>
+            <button
+              class="logout-btn"
+              onclick="window.location.href='index.html'"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+              <span id="header-logout-text">تسجيل الخروج</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="children-selector">
+          <h3
+            id="select-child-title"
+            style="margin-bottom: 15px; color: var(--text)"
+          >
+            اختر الابن/الابنة:
+          </h3>
+          <div class="children-tabs">
+            <button class="child-tab active" data-child="أحمد محمد">
+              <i class="fas fa-user"></i>
+              <span>أحمد محمد</span>
+            </button>
+            <button class="child-tab" data-child="فاطمة محمد">
+              <i class="fas fa-user"></i>
+              <span>فاطمة محمد</span>
+            </button>
+            <button class="child-tab" data-child="عمر محمد">
+              <i class="fas fa-user"></i>
+              <span>عمر محمد</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-card">
+          <div class="gpa-display" id="gpa-value">88%</div>
+          <div class="gpa-label" id="gpa-label">المعدل العام</div>
+        </div>
+
+        <div class="grades-grid">
+          <div class="subject-card">
+            <div class="subject-header">
+              <div class="subject-name" id="math-title">الرياضيات</div>
+              <div class="subject-grade" id="math-grade-value">95</div>
+            </div>
+            <div class="grade-details">
+              <div class="grade-row">
+                <span class="grade-row-label" id="exam-label-1"
+                  >الاختبار الأول</span
+                >
+                <span class="grade-row-value" id="exam-value-1">48/50</span>
+              </div>
+              <div class="grade-row">
+                <span class="grade-row-label" id="homework-label-1"
+                  >الواجبات</span
+                >
+                <span class="grade-row-value" id="homework-value-1">28/30</span>
+              </div>
+              <div class="grade-row">
+                <span class="grade-row-label" id="participation-label-1"
+                  >المشاركة</span
+                >
+                <span class="grade-row-value" id="participation-value-1"
+                  >19/20</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="subject-card">
+            <div class="subject-header">
+              <div class="subject-name" id="science-title">العلوم</div>
+              <div class="subject-grade" id="science-grade-value">92</div>
+            </div>
+            <div class="grade-details">
+              <div class="grade-row">
+                <span class="grade-row-label" id="exam-label-2"
+                  >الاختبار الأول</span
+                >
+                <span class="grade-row-value" id="exam-value-2">46/50</span>
+              </div>
+              <div class="grade-row">
+                <span class="grade-row-label" id="homework-label-2"
+                  >الواجبات</span
+                >
+                <span class="grade-row-value" id="homework-value-2">27/30</span>
+              </div>
+              <div class="grade-row">
+                <span class="grade-row-label" id="participation-label-2"
+                  >المشاركة</span
+                >
+                <span class="grade-row-value" id="participation-value-2"
+                  >19/20</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="subject-card">
+            <div class="subject-header">
+              <div class="subject-name" id="arabic-title">اللغة العربية</div>
+              <div class="subject-grade" id="arabic-grade-value">85</div>
+            </div>
+            <div class="grade-details">
+              <div class="grade-row">
+                <span class="grade-row-label" id="exam-label-3"
+                  >الاختبار الأول</span
+                >
+                <span class="grade-row-value" id="exam-value-3">42/50</span>
+              </div>
+              <div class="grade-row">
+                <span class="grade-row-label" id="homework-label-3"
+                  >الواجبات</span
+                >
+                <span class="grade-row-value" id="homework-value-3">26/30</span>
+              </div>
+              <div class="grade-row">
+                <span class="grade-row-label" id="participation-label-3"
+                  >المشاركة</span
+                >
+                <span class="grade-row-value" id="participation-value-3"
+                  >17/20</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="subject-card">
+            <div class="subject-header">
+              <div class="subject-name" id="english-title">
+                اللغة الإنجليزية
+              </div>
+              <div class="subject-grade" id="english-grade-value">90</div>
+            </div>
+            <div class="grade-details">
+              <div class="grade-row">
+                <span class="grade-row-label" id="exam-label-4"
+                  >الاختبار الأول</span
+                >
+                <span class="grade-row-value" id="exam-value-4">45/50</span>
+              </div>
+              <div class="grade-row">
+                <span class="grade-row-label" id="homework-label-4"
+                  >الواجبات</span
+                >
+                <span class="grade-row-value" id="homework-value-4">27/30</span>
+              </div>
+              <div class="grade-row">
+                <span class="grade-row-label" id="participation-label-4"
+                  >المشاركة</span
+                >
+                <span class="grade-row-value" id="participation-value-4"
+                  >18/20</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h2 class="card-title">
+            <i class="fas fa-chart-bar"></i>
+            <span id="performance-chart-title">الأداء الأكاديمي</span>
+          </h2>
+          <div class="chart-container">
+            <canvas id="performanceChart"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        const translations = {
-            ar: {
-                pageTitle: 'الدرجات والتقييمات',
-                userType: 'ولي أمر',
-                menuDashboard: 'لوحة التحكم',
-                menuChildren: 'الأبناء',
-                menuAttendance: 'الحضور والغياب',
-                menuGrades: 'الدرجات والتقييمات',
-                menuMessages: 'الرسائل',
-                menuPayments: 'المدفوعات',
-                menuSettings: 'الإعدادات',
-                darkModeText: 'الوضع الداكن',
-                languageText: 'English',
-                logoutText: 'تسجيل الخروج',
-                selectChildTitle: 'اختر الابن/الابنة:',
-                gpaLabel: 'المعدل العام',
-                mathTitle: 'الرياضيات',
-                scienceTitle: 'العلوم',
-                arabicTitle: 'اللغة العربية',
-                englishTitle: 'اللغة الإنجليزية',
-                examLabel: 'الاختبار الأول',
-                homeworkLabel: 'الواجبات',
-                participationLabel: 'المشاركة',
-                performanceChartTitle: 'الأداء الأكاديمي'
+      const translations = {
+        ar: {
+          pageTitle: "الدرجات والتقييمات",
+          userType: "ولي أمر",
+          menuDashboard: "لوحة التحكم",
+          menuChildren: "الأبناء",
+          menuHomework: "الواجبات المنزلية",
+          menuCalendar: "الجدول والفعاليات",
+          menuAttendance: "الحضور والغياب",
+          menuGrades: "الدرجات والتقييمات",
+          menuMessages: "الرسائل",
+          menuPayments: "المدفوعات",
+          menuReports: "التقارير",
+          menuSettings: "الإعدادات",
+          darkModeText: "الوضع الداكن",
+          languageText: "English",
+          logoutText: "تسجيل الخروج",
+          selectChildTitle: "اختر الابن/الابنة:",
+          gpaLabel: "المعدل العام",
+          mathTitle: "الرياضيات",
+          scienceTitle: "العلوم",
+          arabicTitle: "اللغة العربية",
+          englishTitle: "اللغة الإنجليزية",
+          examLabel: "الاختبار الأول",
+          homeworkLabel: "الواجبات",
+          participationLabel: "المشاركة",
+          performanceChartTitle: "الأداء الأكاديمي",
+        },
+        en: {
+          pageTitle: "Grades & Assessments",
+          userType: "Parent",
+          menuDashboard: "Dashboard",
+          menuChildren: "Children",
+          menuHomework: "Homework",
+          menuCalendar: "Schedule & Events",
+          menuAttendance: "Attendance",
+          menuGrades: "Grades",
+          menuMessages: "Messages",
+          menuPayments: "Payments",
+          menuReports: "Reports",
+          menuSettings: "Settings",
+          darkModeText: "Dark Mode",
+          languageText: "العربية",
+          logoutText: "Logout",
+          selectChildTitle: "Select Child:",
+          gpaLabel: "GPA",
+          mathTitle: "Mathematics",
+          scienceTitle: "Science",
+          arabicTitle: "Arabic Language",
+          englishTitle: "English Language",
+          examLabel: "First Exam",
+          homeworkLabel: "Homework",
+          participationLabel: "Participation",
+          performanceChartTitle: "Academic Performance",
+        },
+      };
+
+      let performanceChart;
+      let currentChild = "أحمد محمد";
+
+      function updateLanguage(lang) {
+        const t = translations[lang];
+        document.getElementById("page-title").textContent = t.pageTitle;
+        document.getElementById("user-type").textContent = t.userType;
+        document.getElementById("menu-dashboard").textContent = t.menuDashboard;
+        document.getElementById("menu-children").textContent = t.menuChildren;
+        document.getElementById("menu-homework").textContent = t.menuHomework;
+        document.getElementById("menu-calendar").textContent = t.menuCalendar;
+        document.getElementById("menu-attendance").textContent =
+          t.menuAttendance;
+        document.getElementById("menu-grades").textContent = t.menuGrades;
+        document.getElementById("menu-messages").textContent = t.menuMessages;
+        document.getElementById("menu-payments").textContent = t.menuPayments;
+        document.getElementById("menu-reports").textContent = t.menuReports;
+        document.getElementById("menu-settings").textContent = t.menuSettings;
+        document.getElementById("dark-mode-text").textContent = t.darkModeText;
+        document.getElementById("header-dark-mode-text").textContent =
+          t.darkModeText;
+        document.getElementById("language-text").textContent = t.languageText;
+        document.getElementById("logout-text").textContent = t.logoutText;
+        document.getElementById("header-logout-text").textContent =
+          t.logoutText;
+        document.getElementById("select-child-title").textContent =
+          t.selectChildTitle;
+        document.getElementById("gpa-label").textContent = t.gpaLabel;
+        document.getElementById("math-title").textContent = t.mathTitle;
+        document.getElementById("science-title").textContent = t.scienceTitle;
+        document.getElementById("arabic-title").textContent = t.arabicTitle;
+        document.getElementById("english-title").textContent = t.englishTitle;
+        document.getElementById("exam-label-1").textContent = t.examLabel;
+        document.getElementById("exam-label-2").textContent = t.examLabel;
+        document.getElementById("exam-label-3").textContent = t.examLabel;
+        document.getElementById("exam-label-4").textContent = t.examLabel;
+        document.getElementById("homework-label-1").textContent =
+          t.homeworkLabel;
+        document.getElementById("homework-label-2").textContent =
+          t.homeworkLabel;
+        document.getElementById("homework-label-3").textContent =
+          t.homeworkLabel;
+        document.getElementById("homework-label-4").textContent =
+          t.homeworkLabel;
+        document.getElementById("participation-label-1").textContent =
+          t.participationLabel;
+        document.getElementById("participation-label-2").textContent =
+          t.participationLabel;
+        document.getElementById("participation-label-3").textContent =
+          t.participationLabel;
+        document.getElementById("participation-label-4").textContent =
+          t.participationLabel;
+        document.getElementById("performance-chart-title").textContent =
+          t.performanceChartTitle;
+        if (performanceChart) {
+          performanceChart.data.labels = [
+            t.mathTitle,
+            t.scienceTitle,
+            t.arabicTitle,
+            t.englishTitle,
+          ];
+          performanceChart.update();
+        }
+      }
+
+      const darkModeToggle = document.getElementById("dark-mode-toggle");
+      const sidebarDarkModeToggle = document.getElementById(
+        "sidebar-dark-mode-toggle"
+      );
+
+      function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem(
+          "darkMode",
+          document.body.classList.contains("dark-mode")
+        );
+      }
+
+      darkModeToggle.addEventListener("click", toggleDarkMode);
+      sidebarDarkModeToggle.addEventListener("click", toggleDarkMode);
+
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+      }
+
+      const languageToggle = document.getElementById("sidebar-language-toggle");
+
+      languageToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        const isRTL = document.body.classList.contains("rtl");
+        if (isRTL) {
+          document.body.classList.remove("rtl");
+          document.body.classList.add("ltr");
+          document.documentElement.lang = "en";
+          document.documentElement.dir = "ltr";
+          updateLanguage("en");
+          localStorage.setItem("language", "en");
+        } else {
+          document.body.classList.remove("ltr");
+          document.body.classList.add("rtl");
+          document.documentElement.lang = "ar";
+          document.documentElement.dir = "rtl";
+          updateLanguage("ar");
+          localStorage.setItem("language", "ar");
+        }
+      });
+
+      if (localStorage.getItem("language") === "en") {
+        document.body.classList.remove("rtl");
+        document.body.classList.add("ltr");
+        document.documentElement.lang = "en";
+        document.documentElement.dir = "ltr";
+        updateLanguage("en");
+      }
+
+      const childTabs = document.querySelectorAll(".child-tab");
+      function updateChildData(childName) {
+        const data = childrenData[childName];
+        if (!data) return;
+        document.getElementById("gpa-value").textContent = data.gpa;
+        document.getElementById("math-grade-value").textContent =
+          data.subjects.math.total;
+        document.getElementById("science-grade-value").textContent =
+          data.subjects.science.total;
+        document.getElementById("arabic-grade-value").textContent =
+          data.subjects.arabic.total;
+        document.getElementById("english-grade-value").textContent =
+          data.subjects.english.total;
+        document.getElementById("exam-value-1").textContent =
+          data.subjects.math.breakdown.exam;
+        document.getElementById("homework-value-1").textContent =
+          data.subjects.math.breakdown.homework;
+        document.getElementById("participation-value-1").textContent =
+          data.subjects.math.breakdown.participation;
+        document.getElementById("exam-value-2").textContent =
+          data.subjects.science.breakdown.exam;
+        document.getElementById("homework-value-2").textContent =
+          data.subjects.science.breakdown.homework;
+        document.getElementById("participation-value-2").textContent =
+          data.subjects.science.breakdown.participation;
+        document.getElementById("exam-value-3").textContent =
+          data.subjects.arabic.breakdown.exam;
+        document.getElementById("homework-value-3").textContent =
+          data.subjects.arabic.breakdown.homework;
+        document.getElementById("participation-value-3").textContent =
+          data.subjects.arabic.breakdown.participation;
+        document.getElementById("exam-value-4").textContent =
+          data.subjects.english.breakdown.exam;
+        document.getElementById("homework-value-4").textContent =
+          data.subjects.english.breakdown.homework;
+        document.getElementById("participation-value-4").textContent =
+          data.subjects.english.breakdown.participation;
+        if (performanceChart) {
+          performanceChart.data.datasets[0].data = [
+            data.subjects.math.total,
+            data.subjects.science.total,
+            data.subjects.arabic.total,
+            data.subjects.english.total,
+          ];
+          performanceChart.update();
+        }
+      }
+      childTabs.forEach((tab) => {
+        tab.addEventListener("click", function () {
+          childTabs.forEach((t) => t.classList.remove("active"));
+          this.classList.add("active");
+          currentChild = this.getAttribute("data-child");
+          loadGradesDataFor(currentChild);
+        });
+      });
+
+      const ctx = document.getElementById("performanceChart");
+      performanceChart = new Chart(ctx.getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: ["الرياضيات", "العلوم", "العربية", "الإنجليزية"],
+          datasets: [
+            {
+              label: "الدرجات",
+              data: [95, 92, 85, 90],
+              backgroundColor: [
+                "rgba(74, 108, 247, 0.8)",
+                "rgba(0, 184, 148, 0.8)",
+                "rgba(243, 156, 18, 0.8)",
+                "rgba(108, 92, 231, 0.8)",
+              ],
+              borderRadius: 8,
             },
-            en: {
-                pageTitle: 'Grades & Assessments',
-                userType: 'Parent',
-                menuDashboard: 'Dashboard',
-                menuChildren: 'Children',
-                menuAttendance: 'Attendance',
-                menuGrades: 'Grades',
-                menuMessages: 'Messages',
-                menuPayments: 'Payments',
-                menuSettings: 'Settings',
-                darkModeText: 'Dark Mode',
-                languageText: 'العربية',
-                logoutText: 'Logout',
-                selectChildTitle: 'Select Child:',
-                gpaLabel: 'GPA',
-                mathTitle: 'Mathematics',
-                scienceTitle: 'Science',
-                arabicTitle: 'Arabic Language',
-                englishTitle: 'English Language',
-                examLabel: 'First Exam',
-                homeworkLabel: 'Homework',
-                participationLabel: 'Participation',
-                performanceChartTitle: 'Academic Performance'
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false,
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+            },
+          },
+        },
+      });
+      const childrenData = {
+        "أحمد محمد": {
+          gpa: "88%",
+          subjects: {
+            math: {
+              total: 95,
+              breakdown: {
+                exam: "48/50",
+                homework: "28/30",
+                participation: "19/20",
+              },
+            },
+            science: {
+              total: 92,
+              breakdown: {
+                exam: "46/50",
+                homework: "27/30",
+                participation: "19/20",
+              },
+            },
+            arabic: {
+              total: 85,
+              breakdown: {
+                exam: "42/50",
+                homework: "26/30",
+                participation: "17/20",
+              },
+            },
+            english: {
+              total: 90,
+              breakdown: {
+                exam: "45/50",
+                homework: "27/30",
+                participation: "18/20",
+              },
+            },
+          },
+        },
+        "فاطمة محمد": {
+          gpa: "93%",
+          subjects: {
+            math: {
+              total: 97,
+              breakdown: {
+                exam: "49/50",
+                homework: "29/30",
+                participation: "19/20",
+              },
+            },
+            science: {
+              total: 94,
+              breakdown: {
+                exam: "47/50",
+                homework: "28/30",
+                participation: "19/20",
+              },
+            },
+            arabic: {
+              total: 91,
+              breakdown: {
+                exam: "45/50",
+                homework: "27/30",
+                participation: "19/20",
+              },
+            },
+            english: {
+              total: 96,
+              breakdown: {
+                exam: "48/50",
+                homework: "28/30",
+                participation: "20/20",
+              },
+            },
+          },
+        },
+        "عمر محمد": {
+          gpa: "80%",
+          subjects: {
+            math: {
+              total: 82,
+              breakdown: {
+                exam: "41/50",
+                homework: "24/30",
+                participation: "17/20",
+              },
+            },
+            science: {
+              total: 78,
+              breakdown: {
+                exam: "39/50",
+                homework: "23/30",
+                participation: "16/20",
+              },
+            },
+            arabic: {
+              total: 80,
+              breakdown: {
+                exam: "40/50",
+                homework: "24/30",
+                participation: "16/20",
+              },
+            },
+            english: {
+              total: 85,
+              breakdown: {
+                exam: "43/50",
+                homework: "25/30",
+                participation: "17/20",
+              },
+            },
+          },
+        },
+      };
+
+      let dbReady = false;
+      async function ensureDBOpen() {
+        if (!dbReady && window.db) {
+          await db.open();
+          dbReady = true;
+        }
+      }
+
+      async function seedGradesIfEmpty() {
+        await ensureDBOpen();
+        const cnt = await db.gradesSubjects.count();
+        if (cnt === 0) {
+          for (const [name, data] of Object.entries(childrenData)) {
+            await db.gradesGpa.put({ childName: name, gpa: data.gpa || "0%" });
+            const subjects = data.subjects || {};
+            for (const key of Object.keys(subjects)) {
+              const s = subjects[key];
+              await db.gradesSubjects.add({
+                childName: name,
+                key,
+                total: s.total || 0,
+                exam: (s.breakdown && s.breakdown.exam) || "",
+                homework: (s.breakdown && s.breakdown.homework) || "",
+                participation: (s.breakdown && s.breakdown.participation) || "",
+              });
             }
+          }
+        }
+      }
+
+      async function loadGradesDataFor(childName) {
+        await seedGradesIfEmpty();
+        const gpaRow = await db.gradesGpa.get({ childName });
+        const rows = await db.gradesSubjects
+          .where("childName")
+          .equals(childName)
+          .toArray();
+        const subj = {};
+        rows.forEach((r) => {
+          subj[r.key] = {
+            total: r.total,
+            breakdown: {
+              exam: r.exam,
+              homework: r.homework,
+              participation: r.participation,
+            },
+          };
+        });
+        childrenData[childName] = {
+          gpa: (gpaRow && gpaRow.gpa) || "0%",
+          subjects: subj,
         };
-
-        function updateLanguage(lang) {
-            const t = translations[lang];
-            document.getElementById('page-title').textContent = t.pageTitle;
-            document.getElementById('user-type').textContent = t.userType;
-            document.getElementById('menu-dashboard').textContent = t.menuDashboard;
-            document.getElementById('menu-children').textContent = t.menuChildren;
-            document.getElementById('menu-attendance').textContent = t.menuAttendance;
-            document.getElementById('menu-grades').textContent = t.menuGrades;
-            document.getElementById('menu-messages').textContent = t.menuMessages;
-            document.getElementById('menu-payments').textContent = t.menuPayments;
-            document.getElementById('menu-settings').textContent = t.menuSettings;
-            document.getElementById('dark-mode-text').textContent = t.darkModeText;
-            document.getElementById('header-dark-mode-text').textContent = t.darkModeText;
-            document.getElementById('language-text').textContent = t.languageText;
-            document.getElementById('logout-text').textContent = t.logoutText;
-            document.getElementById('header-logout-text').textContent = t.logoutText;
-            document.getElementById('select-child-title').textContent = t.selectChildTitle;
-            document.getElementById('gpa-label').textContent = t.gpaLabel;
-            document.getElementById('math-title').textContent = t.mathTitle;
-            document.getElementById('science-title').textContent = t.scienceTitle;
-            document.getElementById('arabic-title').textContent = t.arabicTitle;
-            document.getElementById('english-title').textContent = t.englishTitle;
-            document.getElementById('exam-label-1').textContent = t.examLabel;
-            document.getElementById('exam-label-2').textContent = t.examLabel;
-            document.getElementById('exam-label-3').textContent = t.examLabel;
-            document.getElementById('exam-label-4').textContent = t.examLabel;
-            document.getElementById('homework-label-1').textContent = t.homeworkLabel;
-            document.getElementById('homework-label-2').textContent = t.homeworkLabel;
-            document.getElementById('homework-label-3').textContent = t.homeworkLabel;
-            document.getElementById('homework-label-4').textContent = t.homeworkLabel;
-            document.getElementById('participation-label-1').textContent = t.participationLabel;
-            document.getElementById('participation-label-2').textContent = t.participationLabel;
-            document.getElementById('participation-label-3').textContent = t.participationLabel;
-            document.getElementById('participation-label-4').textContent = t.participationLabel;
-            document.getElementById('performance-chart-title').textContent = t.performanceChartTitle;
-        }
-
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const sidebarDarkModeToggle = document.getElementById('sidebar-dark-mode-toggle');
-        
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-        }
-
-        darkModeToggle.addEventListener('click', toggleDarkMode);
-        sidebarDarkModeToggle.addEventListener('click', toggleDarkMode);
-
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
-
-        const languageToggle = document.getElementById('sidebar-language-toggle');
-
-        languageToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            const isRTL = document.body.classList.contains('rtl');
-            if (isRTL) {
-                document.body.classList.remove('rtl');
-                document.body.classList.add('ltr');
-                document.documentElement.lang = 'en';
-                document.documentElement.dir = 'ltr';
-                updateLanguage('en');
-                localStorage.setItem('language', 'en');
-            } else {
-                document.body.classList.remove('ltr');
-                document.body.classList.add('rtl');
-                document.documentElement.lang = 'ar';
-                document.documentElement.dir = 'rtl';
-                updateLanguage('ar');
-                localStorage.setItem('language', 'ar');
-            }
-        });
-
-        if (localStorage.getItem('language') === 'en') {
-            document.body.classList.remove('rtl');
-            document.body.classList.add('ltr');
-            document.documentElement.lang = 'en';
-            document.documentElement.dir = 'ltr';
-            updateLanguage('en');
-        }
-
-        const childTabs = document.querySelectorAll('.child-tab');
-        childTabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                childTabs.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        const ctx = document.getElementById('performanceChart');
-        new Chart(ctx.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['الرياضيات', 'العلوم', 'العربية', 'الإنجليزية'],
-                datasets: [{
-                    label: 'الدرجات',
-                    data: [95, 92, 85, 90],
-                    backgroundColor: [
-                        'rgba(74, 108, 247, 0.8)',
-                        'rgba(0, 184, 148, 0.8)',
-                        'rgba(243, 156, 18, 0.8)',
-                        'rgba(108, 92, 231, 0.8)'
-                    ],
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100
-                    }
-                }
-            }
-        });
+        updateChildData(childName);
+      }
+      currentChild = document
+        .querySelector(".child-tab.active")
+        .getAttribute("data-child");
+      loadGradesDataFor(currentChild);
     </script>
-</body>
+  </body>
 </html>

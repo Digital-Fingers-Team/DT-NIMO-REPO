@@ -1,1217 +1,1594 @@
 <!-- the following is the completed code for DTES/parent-homework.html: -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>الواجبات المنزلية - DT Edu</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="db.js"></script>
     <style>
-        :root {
-            --primary: #4a6cf7;
-            --primary-dark: #3a56d4;
-            --secondary: #6c5ce7;
-            --accent: #00b894;
-            --light: #f8f9fa;
-            --dark: #2d3436;
-            --text: #333;
-            --text-light: #666;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-            --sidebar-width: 260px;
-        }
+      :root {
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
+        --accent: #00b894;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --text: #333;
+        --text-light: #666;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --sidebar-width: 260px;
+      }
 
-        .dark-mode {
-            --light: #1a1a2e;
-            --dark: #f8f9fa;
-            --text: #e6e6e6;
-            --text-light: #b0b0b0;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
+      .dark-mode {
+        --light: #1a1a2e;
+        --dark: #f8f9fa;
+        --text: #e6e6e6;
+        --text-light: #b0b0b0;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', 'Segoe UI', sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Tajawal", "Segoe UI", sans-serif;
+      }
 
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
-            transition: var(--transition);
-        }
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+        transition: var(--transition);
+      }
 
-        body.dark-mode {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-        }
+      body.dark-mode {
+        background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+      }
 
-        body.rtl { direction: rtl; }
-        body.ltr { direction: ltr; }
+      body.rtl {
+        direction: rtl;
+      }
+      body.ltr {
+        direction: ltr;
+      }
 
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
 
+      .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(
+          180deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 20px 0;
+        box-shadow: var(--shadow);
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        transition: var(--transition);
+        z-index: 100;
+      }
+
+      body.rtl .sidebar {
+        right: 0;
+      }
+      body.ltr .sidebar {
+        left: 0;
+      }
+      body.rtl .main-content {
+        margin-right: var(--sidebar-width);
+      }
+      body.ltr .main-content {
+        margin-left: var(--sidebar-width);
+        margin-right: 0;
+      }
+
+      .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .logo img {
+        width: 140px;
+        object-fit: contain;
+        display: block;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, white, #e1f0fa);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .user-info {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .user-name {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .user-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0 15px;
+      }
+
+      .menu-item {
+        margin-bottom: 8px;
+        border-radius: 10px;
+      }
+
+      .menu-item a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .menu-item a:hover,
+      .menu-item.active a {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      body.rtl .menu-item a:hover,
+      body.rtl .menu-item.active a {
+        transform: translateX(-5px);
+      }
+      body.ltr .menu-item a:hover,
+      body.ltr .menu-item.active a {
+        transform: translateX(5px);
+      }
+
+      .menu-item i {
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      body.rtl .menu-item i {
+        margin-left: 10px;
+      }
+      body.ltr .menu-item i {
+        margin-right: 10px;
+      }
+
+      .sidebar-footer {
+        padding: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 20px;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      .header {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .header {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .header h1 {
+        color: var(--primary);
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .dark-mode-toggle,
+      .logout-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dark-mode-toggle {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .dark-mode-toggle:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      .logout-btn {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      .logout-btn:hover {
+        background: rgba(231, 76, 60, 0.2);
+      }
+
+      .children-selector {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+      }
+
+      body.dark-mode .children-selector {
+        background: var(--light);
+      }
+
+      .children-tabs {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .child-tab {
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: 2px solid var(--primary);
+        background: transparent;
+        color: var(--primary);
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .child-tab:hover,
+      .child-tab.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      .filter-section {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      body.dark-mode .filter-section {
+        background: var(--light);
+      }
+
+      .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .filter-group label {
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .filter-group select {
+        padding: 8px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: #f8f9fa;
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .filter-group select {
+        background: var(--light);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        display: flex;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .stat-card {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+      }
+
+      body.rtl .stat-icon {
+        margin-left: 15px;
+      }
+      body.ltr .stat-icon {
+        margin-right: 15px;
+      }
+
+      .stat-info {
+        flex: 1;
+      }
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        color: var(--text-light);
+        font-size: 14px;
+      }
+
+      .homework-grid {
+        display: grid;
+        gap: 20px;
+      }
+
+      .homework-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        transition: var(--transition);
+        border-right: 5px solid;
+      }
+
+      body.dark-mode .homework-card {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .homework-card.pending {
+        border-right-color: #f39c12;
+      }
+
+      .homework-card.submitted {
+        border-right-color: #00b894;
+      }
+
+      .homework-card.overdue {
+        border-right-color: #e74c3c;
+      }
+
+      .homework-card.graded {
+        border-right-color: var(--primary);
+      }
+
+      body.ltr .homework-card {
+        border-right: none;
+        border-left: 5px solid;
+      }
+
+      .homework-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 15px;
+      }
+
+      .homework-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 5px;
+      }
+
+      .homework-subject {
+        color: var(--text-light);
+        font-size: 14px;
+      }
+
+      .homework-body {
+        margin-bottom: 15px;
+      }
+
+      .homework-description {
+        color: var(--text);
+        line-height: 1.6;
+        margin-bottom: 15px;
+      }
+
+      .homework-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-light);
+        font-size: 14px;
+      }
+
+      .meta-item i {
+        color: var(--primary);
+      }
+
+      .homework-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+      }
+
+      body.dark-mode .homework-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .badge {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .badge-pending {
+        background: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+      }
+      .badge-submitted {
+        background: rgba(0, 184, 148, 0.1);
+        color: #00b894;
+      }
+      .badge-overdue {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+      .badge-graded {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .view-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .view-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .grade-display {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 700px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 30px;
+        position: relative;
+      }
+
+      body.dark-mode .modal-content {
+        background-color: var(--light);
+        color: var(--dark);
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 20px;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-light);
+      }
+
+      body.rtl .close-btn {
+        left: 25px;
+      }
+      body.ltr .close-btn {
+        right: 25px;
+      }
+
+      .modal-title {
+        color: var(--primary);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        font-size: 24px;
+      }
+
+      body.dark-mode .modal-title {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .detail-section {
+        margin-bottom: 20px;
+      }
+
+      .detail-label {
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+
+      .detail-value {
+        color: var(--text-light);
+        line-height: 1.6;
+      }
+
+      .attachment-list {
+        list-style: none;
+        margin-top: 10px;
+      }
+
+      .attachment-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: rgba(74, 108, 247, 0.05);
+        border-radius: 8px;
+        margin-bottom: 8px;
+      }
+
+      .attachment-item i {
+        color: var(--primary);
+      }
+
+      @media (max-width: 992px) {
         .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: var(--shadow);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            transition: var(--transition);
-            z-index: 100;
+          width: 80px;
         }
-
-        body.rtl .sidebar { right: 0; }
-        body.ltr .sidebar { left: 0; }
-        body.rtl .main-content { margin-right: var(--sidebar-width); }
-        body.ltr .main-content { margin-left: var(--sidebar-width); margin-right: 0; }
-
-        .sidebar-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 20px;
+        .sidebar-header .logo-text,
+        .user-info,
+        .menu-item span {
+          display: none;
         }
-
-        .logo {
-            width: 70px;
-            height: 70px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px;
+        body.rtl .main-content {
+          margin-right: 80px;
         }
-
-        .logo svg { width: 50px; height: 50px; }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, white, #e1f0fa);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        body.ltr .main-content {
+          margin-left: 80px;
         }
-
-        .user-info {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .user-name {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .user-type {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0 15px;
-        }
-
-        .menu-item {
-            margin-bottom: 8px;
-            border-radius: 10px;
-        }
-
         .menu-item a {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
+          justify-content: center;
+          padding: 15px;
         }
-
-        .menu-item a:hover,
-        .menu-item.active a {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        body.rtl .menu-item a:hover,
-        body.rtl .menu-item.active a { transform: translateX(-5px); }
-        body.ltr .menu-item a:hover,
-        body.ltr .menu-item.active a { transform: translateX(5px); }
-
         .menu-item i {
-            font-size: 18px;
-            width: 24px;
-            text-align: center;
+          margin: 0;
+          font-size: 20px;
         }
+      }
 
-        body.rtl .menu-item i { margin-left: 10px; }
-        body.ltr .menu-item i { margin-right: 10px; }
-
-        .sidebar-footer {
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: 20px;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            transition: var(--transition);
-        }
-
-        .header {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
-        }
-
-        body.dark-mode .header {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .header h1 {
-            color: var(--primary);
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .dark-mode-toggle,
-        .logout-btn {
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dark-mode-toggle {
-            background: rgba(74, 108, 247, 0.1);
-            color: var(--primary);
-        }
-
-        .dark-mode-toggle:hover {
-            background: rgba(74, 108, 247, 0.2);
-        }
-
-        .logout-btn {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-        }
-
-        .logout-btn:hover {
-            background: rgba(231, 76, 60, 0.2);
-        }
-
-        .children-selector {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        body.dark-mode .children-selector {
-            background: var(--light);
-        }
-
-        .children-tabs {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .child-tab {
-            padding: 12px 20px;
-            border-radius: 10px;
-            border: 2px solid var(--primary);
-            background: transparent;
-            color: var(--primary);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .child-tab:hover,
-        .child-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .filter-section {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        body.dark-mode .filter-section {
-            background: var(--light);
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .filter-group label {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .filter-group select {
-            padding: 8px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: #f8f9fa;
-            color: var(--text);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        body.dark-mode .filter-group select {
-            background: var(--light);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
+      @media (max-width: 768px) {
         .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+          grid-template-columns: 1fr;
         }
-
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 25px;
-            display: flex;
-            align-items: center;
-            transition: var(--transition);
+        .header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
         }
-
-        body.dark-mode .stat-card {
-            background: var(--light);
-            color: var(--dark);
+        .filter-section {
+          flex-direction: column;
+          align-items: stretch;
         }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-        }
-
-        body.rtl .stat-icon { margin-left: 15px; }
-        body.ltr .stat-icon { margin-right: 15px; }
-
-        .stat-info {
-            flex: 1;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: var(--text-light);
-            font-size: 14px;
-        }
-
-        .homework-grid {
-            display: grid;
-            gap: 20px;
-        }
-
-        .homework-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 25px;
-            transition: var(--transition);
-            border-right: 5px solid;
-        }
-
-        body.dark-mode .homework-card {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .homework-card.pending {
-            border-right-color: #f39c12;
-        }
-
-        .homework-card.submitted {
-            border-right-color: #00b894;
-        }
-
-        .homework-card.overdue {
-            border-right-color: #e74c3c;
-        }
-
-        .homework-card.graded {
-            border-right-color: var(--primary);
-        }
-
-        body.ltr .homework-card {
-            border-right: none;
-            border-left: 5px solid;
-        }
-
-        .homework-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 15px;
-        }
-
-        .homework-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-
-        .homework-subject {
-            color: var(--text-light);
-            font-size: 14px;
-        }
-
-        .homework-body {
-            margin-bottom: 15px;
-        }
-
-        .homework-description {
-            color: var(--text);
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
-        .homework-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-light);
-            font-size: 14px;
-        }
-
-        .meta-item i {
-            color: var(--primary);
-        }
-
         .homework-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+          flex-direction: column;
+          gap: 10px;
+          align-items: stretch;
         }
+      }
 
-        body.dark-mode .homework-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+      @media (max-width: 576px) {
+        .main-content {
+          padding: 15px;
         }
-
-        .badge {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
+        .sidebar {
+          width: 70px;
         }
-
-        .badge-pending { background: rgba(243, 156, 18, 0.1); color: #f39c12; }
-        .badge-submitted { background: rgba(0, 184, 148, 0.1); color: #00b894; }
-        .badge-overdue { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
-        .badge-graded { background: rgba(74, 108, 247, 0.1); color: var(--primary); }
-
-        .view-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        body.rtl .main-content {
+          margin-right: 70px;
         }
-
-        .view-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
+        body.ltr .main-content {
+          margin-left: 70px;
         }
-
-        .grade-display {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 30px;
-            position: relative;
-        }
-
-        body.dark-mode .modal-content {
-            background-color: var(--light);
-            color: var(--dark);
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-light);
-        }
-
-        body.rtl .close-btn { left: 25px; }
-        body.ltr .close-btn { right: 25px; }
-
-        .modal-title {
-            color: var(--primary);
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            font-size: 24px;
-        }
-
-        body.dark-mode .modal-title {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .detail-section {
-            margin-bottom: 20px;
-        }
-
-        .detail-label {
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-
-        .detail-value {
-            color: var(--text-light);
-            line-height: 1.6;
-        }
-
-        .attachment-list {
-            list-style: none;
-            margin-top: 10px;
-        }
-
-        .attachment-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(74, 108, 247, 0.05);
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .attachment-item i {
-            color: var(--primary);
-        }
-
-        @media (max-width: 992px) {
-            .sidebar { width: 80px; }
-            .sidebar-header .logo-text,
-            .user-info,
-            .menu-item span { display: none; }
-            body.rtl .main-content { margin-right: 80px; }
-            body.ltr .main-content { margin-left: 80px; }
-            .menu-item a {
-                justify-content: center;
-                padding: 15px;
-            }
-            .menu-item i {
-                margin: 0;
-                font-size: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .stats-cards { grid-template-columns: 1fr; }
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .filter-section {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .homework-footer {
-                flex-direction: column;
-                gap: 10px;
-                align-items: stretch;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .main-content { padding: 15px; }
-            .sidebar { width: 70px; }
-            body.rtl .main-content { margin-right: 70px; }
-            body.ltr .main-content { margin-left: 70px; }
-        }
+      }
     </style>
-</head>
-<body class="rtl">
+  </head>
+  <body class="rtl">
     <div class="dashboard-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#4a6cf7"/>
-                                <stop offset="100%" stop-color="#00b894"/>
-                            </linearGradient>
-                        </defs>
-                        <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
-                        <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
-                        <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
-                        <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
-                        <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
-                    </svg>
-                </div>
-                <div class="logo-text">DT Edu</div>
-                <div class="user-info">
-                    <div class="user-name" id="user-name">ولي الأمر</div>
-                    <div class="user-type" id="user-type">Parent</div>
-                </div>
-            </div>
-
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="parent-dashboard.html">
-                        <i class="fas fa-home"></i>
-                        <span id="menu-dashboard">لوحة التحكم</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-children.html">
-                        <i class="fas fa-child"></i>
-                        <span id="menu-children">الأبناء</span>
-                    </a>
-                </li>
-                <li class="menu-item active">
-                    <a href="parent-homework.html">
-                        <i class="fas fa-clipboard-list"></i>
-                        <span id="menu-homework">الواجبات المنزلية</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-calendar.html">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span id="menu-calendar">الجدول والفعاليات</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-attendance.html">
-                        <i class="fas fa-calendar-check"></i>
-                        <span id="menu-attendance">الحضور والغياب</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-grades.html">
-                        <i class="fas fa-chart-line"></i>
-                        <span id="menu-grades">الدرجات والتقييمات</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-messages.html">
-                        <i class="fas fa-comments"></i>
-                        <span id="menu-messages">الرسائل</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-payments.html">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span id="menu-payments">المدفوعات</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-reports.html">
-                        <i class="fas fa-file-alt"></i>
-                        <span id="menu-reports">التقارير</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span id="menu-settings">الإعدادات</span>
-                    </a>
-                </li>
-            </ul>
-
-            <div class="sidebar-footer">
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="#" id="sidebar-dark-mode-toggle">
-                            <i class="fas fa-moon"></i>
-                            <span id="dark-mode-text">الوضع الداكن</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" id="sidebar-language-toggle">
-                            <i class="fas fa-language"></i>
-                            <span id="language-text">English</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="index.html">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span id="logout-text">تسجيل الخروج</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <img src="logo.png" alt="Logo" />
+          </div>
+          <div class="logo-text">DT Edu</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">ولي الأمر</div>
+            <div class="user-type" id="user-type">Parent</div>
+          </div>
         </div>
 
-        <div class="main-content">
-            <div class="header">
-                <h1 id="page-title">الواجبات المنزلية</h1>
-                <div class="header-actions">
-                    <button class="dark-mode-toggle" id="dark-mode-toggle">
-                        <i class="fas fa-moon"></i>
-                        <span id="header-dark-mode-text">الوضع الداكن</span>
-                    </button>
-                    <button class="logout-btn" onclick="window.location.href='index.html'">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span id="header-logout-text">تسجيل الخروج</span>
-                    </button>
-                </div>
-            </div>
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="parent-dashboard.html">
+              <i class="fas fa-home"></i>
+              <span id="menu-dashboard">لوحة التحكم</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-children.html">
+              <i class="fas fa-child"></i>
+              <span id="menu-children">الأبناء</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="parent-homework.html">
+              <i class="fas fa-clipboard-list"></i>
+              <span id="menu-homework">الواجبات المنزلية</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-calendar.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-calendar">الجدول والفعاليات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-attendance.html">
+              <i class="fas fa-calendar-check"></i>
+              <span id="menu-attendance">الحضور والغياب</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-grades.html">
+              <i class="fas fa-chart-line"></i>
+              <span id="menu-grades">الدرجات والتقييمات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-messages.html">
+              <i class="fas fa-comments"></i>
+              <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-payments.html">
+              <i class="fas fa-money-bill-wave"></i>
+              <span id="menu-payments">المدفوعات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-reports.html">
+              <i class="fas fa-file-alt"></i>
+              <span id="menu-reports">التقارير</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-settings.html">
+              <i class="fas fa-cog"></i>
+              <span id="menu-settings">الإعدادات</span>
+            </a>
+          </li>
+        </ul>
 
-            <div class="children-selector">
-                <h3 id="select-child-title" style="margin-bottom: 15px; color: var(--text);">اختر الابن/الابنة:</h3>
-                <div class="children-tabs">
-                    <button class="child-tab active">
-                        <i class="fas fa-user"></i>
-                        <span>أحمد محمد</span>
-                    </button>
-                    <button class="child-tab">
-                        <i class="fas fa-user"></i>
-                        <span>فاطمة محمد</span>
-                    </button>
-                    <button class="child-tab">
-                        <i class="fas fa-user"></i>
-                        <span>عمر محمد</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <div class="filter-group">
-                    <label id="filter-status-label">الحالة:</label>
-                    <select id="status-filter">
-                        <option value="all" id="filter-all">الكل</option>
-                        <option value="pending" id="filter-pending">قيد التنفيذ</option>
-                        <option value="submitted" id="filter-submitted">مقدم</option>
-                        <option value="graded" id="filter-graded">مصحح</option>
-                        <option value="overdue" id="filter-overdue">متأخر</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label id="filter-subject-label">المادة:</label>
-                    <select id="subject-filter">
-                        <option value="all" id="subject-all">جميع المواد</option>
-                        <option>الرياضيات</option>
-                        <option>العلوم</option>
-                        <option>اللغة العربية</option>
-                        <option>اللغة الإنجليزية</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="stats-cards">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-value">3</div>
-                        <div class="stat-label" id="pending-label">قيد التنفيذ</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #00b894, #00d2ff);">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-value">5</div>
-                        <div class="stat-label" id="submitted-label">مقدم</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-value">1</div>
-                        <div class="stat-label" id="overdue-label">متأخر</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #4a6cf7, #6c5ce7);">
-                        <i class="fas fa-percentage"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-value">88%</div>
-                        <div class="stat-label" id="completion-label">نسبة الإنجاز</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="homework-grid">
-                <div class="homework-card overdue">
-                    <div class="homework-header">
-                        <div>
-                            <div class="homework-title" id="hw-title-1">تمارين الجبر - الفصل الثالث</div>
-                            <div class="homework-subject" id="hw-subject-1">الرياضيات</div>
-                        </div>
-                    </div>
-                    <div class="homework-body">
-                        <div class="homework-description" id="hw-desc-1">
-                            حل جميع التمارين من صفحة 45 إلى صفحة 52. التركيز على المعادلات الخطية والمعادلات التربيعية.
-                        </div>
-                        <div class="homework-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-user-tie"></i>
-                                <span id="teacher-1">أ. محمد العلي</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-calendar"></i>
-                                <span id="assigned-1">تاريخ التكليف: 2024-10-25</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                <span id="due-1">الموعد النهائي: 2024-10-30</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="homework-footer">
-                        <span class="badge badge-overdue" id="status-overdue">متأخر</span>
-                        <button class="view-btn" onclick="viewHomework(1)">
-                            <i class="fas fa-eye"></i>
-                            <span id="view-details-1">عرض التفاصيل</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="homework-card pending">
-                    <div class="homework-header">
-                        <div>
-                            <div class="homework-title" id="hw-title-2">تقرير عن الخلية</div>
-                            <div class="homework-subject" id="hw-subject-2">العلوم</div>
-                        </div>
-                    </div>
-                    <div class="homework-body">
-                        <div class="homework-description" id="hw-desc-2">
-                            إعداد تقرير شامل عن أنواع الخلايا ووظائفها. يجب أن يتضمن التقرير رسومات توضيحية ومراجع علمية.
-                        </div>
-                        <div class="homework-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-user-tie"></i>
-                                <span id="teacher-2">أ. فاطمة الأحمد</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-calendar"></i>
-                                <span id="assigned-2">تاريخ التكليف: 2024-10-28</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                <span id="due-2">الموعد النهائي: 2024-11-05</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="homework-footer">
-                        <span class="badge badge-pending" id="status-pending">قيد التنفيذ</span>
-                        <button class="view-btn" onclick="viewHomework(2)">
-                            <i class="fas fa-eye"></i>
-                            <span id="view-details-2">عرض التفاصيل</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="homework-card submitted">
-                    <div class="homework-header">
-                        <div>
-                            <div class="homework-title" id="hw-title-3">مقال عن التراث العربي</div>
-                            <div class="homework-subject" id="hw-subject-3">اللغة العربية</div>
-                        </div>
-                    </div>
-                    <div class="homework-body">
-                        <div class="homework-description" id="hw-desc-3">
-                            كتابة مقال من 500 كلمة عن أهمية الحفاظ على التراث العربي والهوية الثقافية.
-                        </div>
-                        <div class="homework-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-user-tie"></i>
-                                <span id="teacher-3">أ. سارة المنصور</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-calendar"></i>
-                                <span id="assigned-3">تاريخ التكليف: 2024-10-20</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-check"></i>
-                                <span id="submitted-3">تم التقديم: 2024-10-27</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="homework-footer">
-                        <span class="badge badge-submitted" id="status-submitted">مقدم</span>
-                        <button class="view-btn" onclick="viewHomework(3)">
-                            <i class="fas fa-eye"></i>
-                            <span id="view-details-3">عرض التفاصيل</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="homework-card graded">
-                    <div class="homework-header">
-                        <div>
-                            <div class="homework-title" id="hw-title-4">Grammar Exercises - Unit 4</div>
-                            <div class="homework-subject" id="hw-subject-4">اللغة الإنجليزية</div>
-                        </div>
-                        <div class="grade-display">95/100</div>
-                    </div>
-                    <div class="homework-body">
-                        <div class="homework-description" id="hw-desc-4">
-                            Complete all exercises on pages 78-82. Focus on present perfect and past simple tenses.
-                        </div>
-                        <div class="homework-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-user-tie"></i>
-                                <span id="teacher-4">Ms. Sarah Johnson</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-star"></i>
-                                <span id="grade-4">الدرجة: 95/100</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-comment"></i>
-                                <span id="feedback-4">ممتاز! استمر بهذا الأداء</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="homework-footer">
-                        <span class="badge badge-graded" id="status-graded">مصحح</span>
-                        <button class="view-btn" onclick="viewHomework(4)">
-                            <i class="fas fa-eye"></i>
-                            <span id="view-details-4">عرض التفاصيل</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="sidebar-footer">
+          <ul class="sidebar-menu">
+            <li class="menu-item">
+              <a href="#" id="sidebar-dark-mode-toggle">
+                <i class="fas fa-moon"></i>
+                <span id="dark-mode-text">الوضع الداكن</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" id="sidebar-language-toggle">
+                <i class="fas fa-language"></i>
+                <span id="language-text">English</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="index.html">
+                <i class="fas fa-sign-out-alt"></i>
+                <span id="logout-text">تسجيل الخروج</span>
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
+
+      <div class="main-content">
+        <div class="header">
+          <h1 id="page-title">الواجبات المنزلية</h1>
+          <div class="header-actions">
+            <button class="dark-mode-toggle" id="dark-mode-toggle">
+              <i class="fas fa-moon"></i>
+              <span id="header-dark-mode-text">الوضع الداكن</span>
+            </button>
+            <button
+              class="logout-btn"
+              onclick="window.location.href='index.html'"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+              <span id="header-logout-text">تسجيل الخروج</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="children-selector">
+          <h3
+            id="select-child-title"
+            style="margin-bottom: 15px; color: var(--text)"
+          >
+            اختر الابن/الابنة:
+          </h3>
+          <div class="children-tabs">
+            <button class="child-tab active" data-child="child1">
+              <i class="fas fa-user"></i>
+              <span>أحمد محمد</span>
+            </button>
+            <button class="child-tab" data-child="child2">
+              <i class="fas fa-user"></i>
+              <span>فاطمة محمد</span>
+            </button>
+            <button class="child-tab" data-child="child3">
+              <i class="fas fa-user"></i>
+              <span>عمر محمد</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-group">
+            <label id="filter-status-label">الحالة:</label>
+            <select id="status-filter">
+              <option value="all" id="filter-all">الكل</option>
+              <option value="pending" id="filter-pending">قيد التنفيذ</option>
+              <option value="submitted" id="filter-submitted">مقدم</option>
+              <option value="graded" id="filter-graded">مصحح</option>
+              <option value="overdue" id="filter-overdue">متأخر</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label id="filter-subject-label">المادة:</label>
+            <select id="subject-filter">
+              <option value="all" id="subject-all">جميع المواد</option>
+              <option>الرياضيات</option>
+              <option>العلوم</option>
+              <option>اللغة العربية</option>
+              <option>اللغة الإنجليزية</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div
+              class="stat-icon"
+              style="background: linear-gradient(135deg, #f39c12, #e67e22)"
+            >
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="pending-count">3</div>
+              <div class="stat-label" id="pending-label">قيد التنفيذ</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div
+              class="stat-icon"
+              style="background: linear-gradient(135deg, #00b894, #00d2ff)"
+            >
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="submitted-count">5</div>
+              <div class="stat-label" id="submitted-label">مقدم</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div
+              class="stat-icon"
+              style="background: linear-gradient(135deg, #e74c3c, #c0392b)"
+            >
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="overdue-count">1</div>
+              <div class="stat-label" id="overdue-label">متأخر</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div
+              class="stat-icon"
+              style="background: linear-gradient(135deg, #4a6cf7, #6c5ce7)"
+            >
+              <i class="fas fa-percentage"></i>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="completion-rate">88%</div>
+              <div class="stat-label" id="completion-label">نسبة الإنجاز</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="homework-grid">
+          <div class="homework-card overdue">
+            <div class="homework-header">
+              <div>
+                <div class="homework-title" id="hw-title-1">
+                  تمارين الجبر - الفصل الثالث
+                </div>
+                <div class="homework-subject" id="hw-subject-1">الرياضيات</div>
+              </div>
+            </div>
+            <div class="homework-body">
+              <div class="homework-description" id="hw-desc-1">
+                حل جميع التمارين من صفحة 45 إلى صفحة 52. التركيز على المعادلات
+                الخطية والمعادلات التربيعية.
+              </div>
+              <div class="homework-meta">
+                <div class="meta-item">
+                  <i class="fas fa-user-tie"></i>
+                  <span id="teacher-1">أ. محمد العلي</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-calendar"></i>
+                  <span id="assigned-1">تاريخ التكليف: 2024-10-25</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-clock"></i>
+                  <span id="due-1">الموعد النهائي: 2024-10-30</span>
+                </div>
+              </div>
+            </div>
+            <div class="homework-footer">
+              <span class="badge badge-overdue" id="status-overdue">متأخر</span>
+              <button class="view-btn" onclick="viewHomework(1)">
+                <i class="fas fa-eye"></i>
+                <span id="view-details-1">عرض التفاصيل</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="homework-card pending">
+            <div class="homework-header">
+              <div>
+                <div class="homework-title" id="hw-title-2">
+                  تقرير عن الخلية
+                </div>
+                <div class="homework-subject" id="hw-subject-2">العلوم</div>
+              </div>
+            </div>
+            <div class="homework-body">
+              <div class="homework-description" id="hw-desc-2">
+                إعداد تقرير شامل عن أنواع الخلايا ووظائفها. يجب أن يتضمن التقرير
+                رسومات توضيحية ومراجع علمية.
+              </div>
+              <div class="homework-meta">
+                <div class="meta-item">
+                  <i class="fas fa-user-tie"></i>
+                  <span id="teacher-2">أ. فاطمة الأحمد</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-calendar"></i>
+                  <span id="assigned-2">تاريخ التكليف: 2024-10-28</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-clock"></i>
+                  <span id="due-2">الموعد النهائي: 2024-11-05</span>
+                </div>
+              </div>
+            </div>
+            <div class="homework-footer">
+              <span class="badge badge-pending" id="status-pending"
+                >قيد التنفيذ</span
+              >
+              <button class="view-btn" onclick="viewHomework(2)">
+                <i class="fas fa-eye"></i>
+                <span id="view-details-2">عرض التفاصيل</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="homework-card submitted">
+            <div class="homework-header">
+              <div>
+                <div class="homework-title" id="hw-title-3">
+                  مقال عن التراث العربي
+                </div>
+                <div class="homework-subject" id="hw-subject-3">
+                  اللغة العربية
+                </div>
+              </div>
+            </div>
+            <div class="homework-body">
+              <div class="homework-description" id="hw-desc-3">
+                كتابة مقال من 500 كلمة عن أهمية الحفاظ على التراث العربي والهوية
+                الثقافية.
+              </div>
+              <div class="homework-meta">
+                <div class="meta-item">
+                  <i class="fas fa-user-tie"></i>
+                  <span id="teacher-3">أ. سارة المنصور</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-calendar"></i>
+                  <span id="assigned-3">تاريخ التكليف: 2024-10-20</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-check"></i>
+                  <span id="submitted-3">تم التقديم: 2024-10-27</span>
+                </div>
+              </div>
+            </div>
+            <div class="homework-footer">
+              <span class="badge badge-submitted" id="status-submitted"
+                >مقدم</span
+              >
+              <button class="view-btn" onclick="viewHomework(3)">
+                <i class="fas fa-eye"></i>
+                <span id="view-details-3">عرض التفاصيل</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="homework-card graded">
+            <div class="homework-header">
+              <div>
+                <div class="homework-title" id="hw-title-4">
+                  Grammar Exercises - Unit 4
+                </div>
+                <div class="homework-subject" id="hw-subject-4">
+                  اللغة الإنجليزية
+                </div>
+              </div>
+              <div class="grade-display">95/100</div>
+            </div>
+            <div class="homework-body">
+              <div class="homework-description" id="hw-desc-4">
+                Complete all exercises on pages 78-82. Focus on present perfect
+                and past simple tenses.
+              </div>
+              <div class="homework-meta">
+                <div class="meta-item">
+                  <i class="fas fa-user-tie"></i>
+                  <span id="teacher-4">Ms. Sarah Johnson</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-star"></i>
+                  <span id="grade-4">الدرجة: 95/100</span>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-comment"></i>
+                  <span id="feedback-4">ممتاز! استمر بهذا الأداء</span>
+                </div>
+              </div>
+            </div>
+            <div class="homework-footer">
+              <span class="badge badge-graded" id="status-graded">مصحح</span>
+              <button class="view-btn" onclick="viewHomework(4)">
+                <i class="fas fa-eye"></i>
+                <span id="view-details-4">عرض التفاصيل</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="homeworkModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2 class="modal-title" id="modal-title">تفاصيل الواجب</h2>
-            
-            <div class="detail-section">
-                <div class="detail-label" id="detail-title-label">العنوان:</div>
-                <div class="detail-value" id="detail-title">تمارين الجبر - الفصل الثالث</div>
-            </div>
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2 class="modal-title" id="modal-title">تفاصيل الواجب</h2>
 
-            <div class="detail-section">
-                <div class="detail-label" id="detail-subject-label">المادة:</div>
-                <div class="detail-value" id="detail-subject">الرياضيات</div>
-            </div>
-
-            <div class="detail-section">
-                <div class="detail-label" id="detail-teacher-label">المعلم:</div>
-                <div class="detail-value" id="detail-teacher">أ. محمد العلي</div>
-            </div>
-
-            <div class="detail-section">
-                <div class="detail-label" id="detail-description-label">الوصف:</div>
-                <div class="detail-value" id="detail-description">
-                    حل جميع التمارين من صفحة 45 إلى صفحة 52. التركيز على المعادلات الخطية والمعادلات التربيعية. يجب إظهار جميع خطوات الحل.
-                </div>
-            </div>
-
-            <div class="detail-section">
-                <div class="detail-label" id="detail-attachments-label">المرفقات:</div>
-                <ul class="attachment-list">
-                    <li class="attachment-item">
-                        <i class="fas fa-file-pdf"></i>
-                        <span>تمارين_الجبر.pdf</span>
-                    </li>
-                    <li class="attachment-item">
-                        <i class="fas fa-file-word"></i>
-                        <span>ورقة_العمل.docx</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="detail-section">
-                <div class="detail-label" id="detail-dates-label">المواعيد:</div>
-                <div class="detail-value">
-                    <div><strong>تاريخ التكليف:</strong> 2024-10-25</div>
-                    <div><strong>الموعد النهائي:</strong> 2024-10-30</div>
-                </div>
-            </div>
+        <div class="detail-section">
+          <div class="detail-label" id="detail-title-label">العنوان:</div>
+          <div class="detail-value" id="detail-title">
+            تمارين الجبر - الفصل الثالث
+          </div>
         </div>
+
+        <div class="detail-section">
+          <div class="detail-label" id="detail-subject-label">المادة:</div>
+          <div class="detail-value" id="detail-subject">الرياضيات</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label" id="detail-teacher-label">المعلم:</div>
+          <div class="detail-value" id="detail-teacher">أ. محمد العلي</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label" id="detail-description-label">الوصف:</div>
+          <div class="detail-value" id="detail-description">
+            حل جميع التمارين من صفحة 45 إلى صفحة 52. التركيز على المعادلات
+            الخطية والمعادلات التربيعية. يجب إظهار جميع خطوات الحل.
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label" id="detail-attachments-label">
+            المرفقات:
+          </div>
+          <ul class="attachment-list" id="attachments-list">
+            <li class="attachment-item">
+              <i class="fas fa-file-pdf"></i>
+              <span>تمارين_الجبر.pdf</span>
+            </li>
+            <li class="attachment-item">
+              <i class="fas fa-file-word"></i>
+              <span>ورقة_العمل.docx</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label" id="detail-dates-label">المواعيد:</div>
+          <div class="detail-value">
+            <div id="detail-assigned"><strong>تاريخ التكليف:</strong> -</div>
+            <div id="detail-due"><strong>الموعد النهائي:</strong> -</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        const translations = {
-            ar: {
-                pageTitle: 'الواجبات المنزلية',
-                userType: 'ولي أمر',
-                menuDashboard: 'لوحة التحكم',
-                menuChildren: 'الأبناء',
-                menuHomework: 'الواجبات المنزلية',
-                menuCalendar: 'الجدول والفعاليات',
-                menuAttendance: 'الحضور والغياب',
-                menuGrades: 'الدرجات والتقييمات',
-                menuMessages: 'الرسائل',
-                menuPayments: 'المدفوعات',
-                menuReports: 'التقارير',
-                menuSettings: 'الإعدادات',
-                darkModeText: 'الوضع الداكن',
-                languageText: 'English',
-                logoutText: 'تسجيل الخروج',
-                selectChildTitle: 'اختر الابن/الابنة:',
-                filterStatusLabel: 'الحالة:',
-                filterAll: 'الكل',
-                filterPending: 'قيد التنفيذ',
-                filterSubmitted: 'مقدم',
-                filterGraded: 'مصحح',
-                filterOverdue: 'متأخر',
-                filterSubjectLabel: 'المادة:',
-                subjectAll: 'جميع المواد',
-                pendingLabel: 'قيد التنفيذ',
-                submittedLabel: 'مقدم',
-                overdueLabel: 'متأخر',
-                completionLabel: 'نسبة الإنجاز'
+      const translations = {
+        ar: {
+          pageTitle: "الواجبات المنزلية",
+          userType: "ولي أمر",
+          menuDashboard: "لوحة التحكم",
+          menuChildren: "الأبناء",
+          menuHomework: "الواجبات المنزلية",
+          menuCalendar: "الجدول والفعاليات",
+          menuAttendance: "الحضور والغياب",
+          menuGrades: "الدرجات والتقييمات",
+          menuMessages: "الرسائل",
+          menuPayments: "المدفوعات",
+          menuReports: "التقارير",
+          menuSettings: "الإعدادات",
+          darkModeText: "الوضع الداكن",
+          languageText: "English",
+          logoutText: "تسجيل الخروج",
+          selectChildTitle: "اختر الابن/الابنة:",
+          filterStatusLabel: "الحالة:",
+          filterAll: "الكل",
+          filterPending: "قيد التنفيذ",
+          filterSubmitted: "مقدم",
+          filterGraded: "مصحح",
+          filterOverdue: "متأخر",
+          filterSubjectLabel: "المادة:",
+          subjectAll: "جميع المواد",
+          pendingLabel: "قيد التنفيذ",
+          submittedLabel: "مقدم",
+          overdueLabel: "متأخر",
+          completionLabel: "نسبة الإنجاز",
+        },
+        en: {
+          pageTitle: "Homework",
+          userType: "Parent",
+          menuDashboard: "Dashboard",
+          menuChildren: "Children",
+          menuHomework: "Homework",
+          menuCalendar: "Schedule & Events",
+          menuAttendance: "Attendance",
+          menuGrades: "Grades",
+          menuMessages: "Messages",
+          menuPayments: "Payments",
+          menuReports: "Reports",
+          menuSettings: "Settings",
+          darkModeText: "Dark Mode",
+          languageText: "العربية",
+          logoutText: "Logout",
+          selectChildTitle: "Select Child:",
+          filterStatusLabel: "Status:",
+          filterAll: "All",
+          filterPending: "Pending",
+          filterSubmitted: "Submitted",
+          filterGraded: "Graded",
+          filterOverdue: "Overdue",
+          filterSubjectLabel: "Subject:",
+          subjectAll: "All Subjects",
+          pendingLabel: "Pending",
+          submittedLabel: "Submitted",
+          overdueLabel: "Overdue",
+          completionLabel: "Completion Rate",
+        },
+      };
+
+      function updateLanguage(lang) {
+        const t = translations[lang];
+        document.getElementById("page-title").textContent = t.pageTitle;
+        document.getElementById("user-type").textContent = t.userType;
+        document.getElementById("menu-dashboard").textContent = t.menuDashboard;
+        document.getElementById("menu-children").textContent = t.menuChildren;
+        document.getElementById("menu-homework").textContent = t.menuHomework;
+        document.getElementById("menu-calendar").textContent = t.menuCalendar;
+        document.getElementById("menu-attendance").textContent =
+          t.menuAttendance;
+        document.getElementById("menu-grades").textContent = t.menuGrades;
+        document.getElementById("menu-messages").textContent = t.menuMessages;
+        document.getElementById("menu-payments").textContent = t.menuPayments;
+        document.getElementById("menu-reports").textContent = t.menuReports;
+        document.getElementById("menu-settings").textContent = t.menuSettings;
+        document.getElementById("dark-mode-text").textContent = t.darkModeText;
+        document.getElementById("header-dark-mode-text").textContent =
+          t.darkModeText;
+        document.getElementById("language-text").textContent = t.languageText;
+        document.getElementById("logout-text").textContent = t.logoutText;
+        document.getElementById("header-logout-text").textContent =
+          t.logoutText;
+        document.getElementById("select-child-title").textContent =
+          t.selectChildTitle;
+        document.getElementById("filter-status-label").textContent =
+          t.filterStatusLabel;
+        document.getElementById("filter-subject-label").textContent =
+          t.filterSubjectLabel;
+        document.getElementById("pending-label").textContent = t.pendingLabel;
+        document.getElementById("submitted-label").textContent =
+          t.submittedLabel;
+        document.getElementById("overdue-label").textContent = t.overdueLabel;
+        document.getElementById("completion-label").textContent =
+          t.completionLabel;
+      }
+
+      const darkModeToggle = document.getElementById("dark-mode-toggle");
+      const sidebarDarkModeToggle = document.getElementById(
+        "sidebar-dark-mode-toggle"
+      );
+
+      function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem(
+          "darkMode",
+          document.body.classList.contains("dark-mode")
+        );
+      }
+
+      darkModeToggle.addEventListener("click", toggleDarkMode);
+      sidebarDarkModeToggle.addEventListener("click", toggleDarkMode);
+
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+      }
+
+      const languageToggle = document.getElementById("sidebar-language-toggle");
+
+      languageToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        const isRTL = document.body.classList.contains("rtl");
+        if (isRTL) {
+          document.body.classList.remove("rtl");
+          document.body.classList.add("ltr");
+          document.documentElement.lang = "en";
+          document.documentElement.dir = "ltr";
+          updateLanguage("en");
+          localStorage.setItem("language", "en");
+        } else {
+          document.body.classList.remove("ltr");
+          document.body.classList.add("rtl");
+          document.documentElement.lang = "ar";
+          document.documentElement.dir = "rtl";
+          updateLanguage("ar");
+          localStorage.setItem("language", "ar");
+        }
+      });
+
+      if (localStorage.getItem("language") === "en") {
+        document.body.classList.remove("rtl");
+        document.body.classList.add("ltr");
+        document.documentElement.lang = "en";
+        document.documentElement.dir = "ltr";
+        updateLanguage("en");
+      }
+
+      let currentChildId = "child1";
+      const childTabs = document.querySelectorAll(".child-tab");
+      childTabs.forEach((tab) => {
+        tab.addEventListener("click", function () {
+          childTabs.forEach((t) => t.classList.remove("active"));
+          this.classList.add("active");
+          currentChildId = this.getAttribute("data-child");
+          loadHomeworkDataFor(currentChildId);
+        });
+      });
+
+      const childrenData = {
+        child1: {
+          stats: { pending: 3, submitted: 5, overdue: 1, completion: "88%" },
+          homeworks: [
+            {
+              title: "تمارين الجبر - الفصل الثالث",
+              subject: "الرياضيات",
+              desc: "حل جميع التمارين من صفحة 45 إلى صفحة 52. التركيز على المعادلات الخطية والمعادلات التربيعية.",
+              teacher: "أ. محمد العلي",
+              assigned: "2024-10-25",
+              due: "2024-10-30",
+              attachments: ["تمارين_الجبر.pdf", "ورقة_العمل.docx"],
             },
-            en: {
-                pageTitle: 'Homework',
-                userType: 'Parent',
-                menuDashboard: 'Dashboard',
-                menuChildren: 'Children',
-                menuHomework: 'Homework',
-                menuCalendar: 'Schedule & Events',
-                menuAttendance: 'Attendance',
-                menuGrades: 'Grades',
-                menuMessages: 'Messages',
-                menuPayments: 'Payments',
-                menuReports: 'Reports',
-                menuSettings: 'Settings',
-                darkModeText: 'Dark Mode',
-                languageText: 'العربية',
-                logoutText: 'Logout',
-                selectChildTitle: 'Select Child:',
-                filterStatusLabel: 'Status:',
-                filterAll: 'All',
-                filterPending: 'Pending',
-                filterSubmitted: 'Submitted',
-                filterGraded: 'Graded',
-                filterOverdue: 'Overdue',
-                filterSubjectLabel: 'Subject:',
-                subjectAll: 'All Subjects',
-                pendingLabel: 'Pending',
-                submittedLabel: 'Submitted',
-                overdueLabel: 'Overdue',
-                completionLabel: 'Completion Rate'
-            }
-        };
+            {
+              title: "تقرير عن الخلية",
+              subject: "العلوم",
+              desc: "إعداد تقرير شامل عن أنواع الخلايا ووظائفها.",
+              teacher: "أ. فاطمة الأحمد",
+              assigned: "2024-10-28",
+              due: "2024-11-05",
+              attachments: ["دليل_الخلية.pdf"],
+            },
+            {
+              title: "مقال عن التراث العربي",
+              subject: "اللغة العربية",
+              desc: "كتابة مقال من 500 كلمة عن أهمية الحفاظ على التراث العربي.",
+              teacher: "أ. سارة المنصور",
+              assigned: "2024-10-20",
+              submitted: "2024-10-27",
+              attachments: ["التوجيهات.docx"],
+            },
+            {
+              title: "Grammar Exercises - Unit 4",
+              subject: "اللغة الإنجليزية",
+              desc: "Complete all exercises on pages 78-82.",
+              teacher: "Ms. Sarah Johnson",
+              grade: "95/100",
+              feedback: "ممتاز! استمر بهذا الأداء",
+              attachments: ["Unit4_Exercises.pdf"],
+            },
+          ],
+        },
+        child2: {
+          stats: { pending: 2, submitted: 6, overdue: 0, completion: "92%" },
+          homeworks: [
+            {
+              title: "مسائل الكسور - الوحدة 2",
+              subject: "الرياضيات",
+              desc: "حل مسائل الكسور واعتماد التبسيط.",
+              teacher: "أ. منى خالد",
+              assigned: "2024-10-22",
+              due: "2024-10-29",
+              attachments: ["fractions.pdf"],
+            },
+            {
+              title: "بحث الماء في الطبيعة",
+              subject: "العلوم",
+              desc: "بحث عن دورة الماء مع رسومات.",
+              teacher: "أ. فاطمة الأحمد",
+              assigned: "2024-10-26",
+              due: "2024-11-03",
+              attachments: ["water_cycle.pptx"],
+            },
+            {
+              title: "قصة قصيرة عن التعاون",
+              subject: "اللغة العربية",
+              desc: "كتابة قصة قصيرة لا تقل عن 300 كلمة.",
+              teacher: "أ. سارة المنصور",
+              assigned: "2024-10-18",
+              submitted: "2024-10-24",
+              attachments: [],
+            },
+            {
+              title: "Vocabulary Worksheet - Unit 3",
+              subject: "اللغة الإنجليزية",
+              desc: "مراجعة مفردات الوحدة الثالثة.",
+              teacher: "Mr. Adam Smith",
+              grade: "98/100",
+              feedback: "عمل رائع",
+              attachments: ["unit3_vocab.docx"],
+            },
+          ],
+        },
+        child3: {
+          stats: { pending: 4, submitted: 3, overdue: 2, completion: "80%" },
+          homeworks: [
+            {
+              title: "تمارين الجمع والطرح",
+              subject: "الرياضيات",
+              desc: "حل 10 مسائل جمع وطرح.",
+              teacher: "أ. سامي حسن",
+              assigned: "2024-10-21",
+              due: "2024-10-25",
+              attachments: [],
+            },
+            {
+              title: "رسم دورة حياة النبات",
+              subject: "العلوم",
+              desc: "رسم دورة حياة النبات وتلوينها.",
+              teacher: "أ. ليلى محمود",
+              assigned: "2024-10-23",
+              due: "2024-10-30",
+              attachments: ["plant_life_cycle.png"],
+            },
+            {
+              title: "قراءة نص قصير",
+              subject: "اللغة العربية",
+              desc: "قراءة نص وتلخيصه في 5 جمل.",
+              teacher: "أ. سارة المنصور",
+              assigned: "2024-10-19",
+              submitted: "2024-10-22",
+              attachments: [],
+            },
+            {
+              title: "Spelling Practice - Week 5",
+              subject: "اللغة الإنجليزية",
+              desc: "تمرين تهجئة لعشرة كلمات.",
+              teacher: "Ms. Emily Clark",
+              grade: "85/100",
+              feedback: "بحاجة لمزيد من التدريب",
+              attachments: ["week5_spelling.pdf"],
+            },
+          ],
+        },
+      };
 
-        function updateLanguage(lang) {
-            const t = translations[lang];
-            document.getElementById('page-title').textContent = t.pageTitle;
-            document.getElementById('user-type').textContent = t.userType;
-            document.getElementById('menu-dashboard').textContent = t.menuDashboard;
-            document.getElementById('menu-children').textContent = t.menuChildren;
-            document.getElementById('menu-homework').textContent = t.menuHomework;
-            document.getElementById('menu-calendar').textContent = t.menuCalendar;
-            document.getElementById('menu-attendance').textContent = t.menuAttendance;
-            document.getElementById('menu-grades').textContent = t.menuGrades;
-            document.getElementById('menu-messages').textContent = t.menuMessages;
-            document.getElementById('menu-payments').textContent = t.menuPayments;
-            document.getElementById('menu-reports').textContent = t.menuReports;
-            document.getElementById('menu-settings').textContent = t.menuSettings;
-            document.getElementById('dark-mode-text').textContent = t.darkModeText;
-            document.getElementById('header-dark-mode-text').textContent = t.darkModeText;
-            document.getElementById('language-text').textContent = t.languageText;
-            document.getElementById('logout-text').textContent = t.logoutText;
-            document.getElementById('header-logout-text').textContent = t.logoutText;
-            document.getElementById('select-child-title').textContent = t.selectChildTitle;
-            document.getElementById('filter-status-label').textContent = t.filterStatusLabel;
-            document.getElementById('filter-subject-label').textContent = t.filterSubjectLabel;
-            document.getElementById('pending-label').textContent = t.pendingLabel;
-            document.getElementById('submitted-label').textContent = t.submittedLabel;
-            document.getElementById('overdue-label').textContent = t.overdueLabel;
-            document.getElementById('completion-label').textContent = t.completionLabel;
+      let dbReady = false;
+      async function ensureDBOpen() {
+        if (!dbReady && window.db) {
+          await db.open();
+          dbReady = true;
         }
+      }
 
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const sidebarDarkModeToggle = document.getElementById('sidebar-dark-mode-toggle');
-        
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-        }
-
-        darkModeToggle.addEventListener('click', toggleDarkMode);
-        sidebarDarkModeToggle.addEventListener('click', toggleDarkMode);
-
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
-
-        const languageToggle = document.getElementById('sidebar-language-toggle');
-
-        languageToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            const isRTL = document.body.classList.contains('rtl');
-            if (isRTL) {
-                document.body.classList.remove('rtl');
-                document.body.classList.add('ltr');
-                document.documentElement.lang = 'en';
-                document.documentElement.dir = 'ltr';
-                updateLanguage('en');
-                localStorage.setItem('language', 'en');
-            } else {
-                document.body.classList.remove('ltr');
-                document.body.classList.add('rtl');
-                document.documentElement.lang = 'ar';
-                document.documentElement.dir = 'rtl';
-                updateLanguage('ar');
-                localStorage.setItem('language', 'ar');
-            }
-        });
-
-        if (localStorage.getItem('language') === 'en') {
-            document.body.classList.remove('rtl');
-            document.body.classList.add('ltr');
-            document.documentElement.lang = 'en';
-            document.documentElement.dir = 'ltr';
-            updateLanguage('en');
-        }
-
-        const childTabs = document.querySelectorAll('.child-tab');
-        childTabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                childTabs.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
+      async function seedHomeworkIfEmpty() {
+        await ensureDBOpen();
+        const cnt = await db.homework.count();
+        if (cnt === 0) {
+          for (const [cid, data] of Object.entries(childrenData)) {
+            const s = data.stats || {};
+            await db.homeworkStats.put({
+              childId: cid,
+              pending: s.pending || 0,
+              submitted: s.submitted || 0,
+              overdue: s.overdue || 0,
+              completion: s.completion || "0%",
             });
-        });
-
-        function viewHomework(id) {
-            document.getElementById('homeworkModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('homeworkModal').style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('homeworkModal');
-            if (event.target === modal) {
-                closeModal();
+            const items = data.homeworks || [];
+            for (const hw of items) {
+              await db.homework.add({
+                childId: cid,
+                title: hw.title || "",
+                subject: hw.subject || "",
+                desc: hw.desc || "",
+                teacher: hw.teacher || "",
+                assigned: hw.assigned || "",
+                due: hw.due || "",
+                submitted: hw.submitted || "",
+                grade: hw.grade || "",
+                feedback: hw.feedback || "",
+              });
             }
+          }
         }
+      }
 
-        document.getElementById('status-filter').addEventListener('change', function() {
-            console.log('Filter by status:', this.value);
+      async function loadHomeworkDataFor(childId) {
+        await seedHomeworkIfEmpty();
+        const stats = await db.homeworkStats
+          .where("childId")
+          .equals(childId)
+          .first();
+        const items = await db.homework
+          .where("childId")
+          .equals(childId)
+          .toArray();
+        childrenData[childId] = { stats: stats || {}, homeworks: items };
+        updateChildData(childId);
+      }
+
+      function updateChildData(childId) {
+        const data = childrenData[childId];
+        if (!data) return;
+        document.getElementById("pending-count").textContent =
+          data.stats.pending;
+        document.getElementById("submitted-count").textContent =
+          data.stats.submitted;
+        document.getElementById("overdue-count").textContent =
+          data.stats.overdue;
+        document.getElementById("completion-rate").textContent =
+          data.stats.completion;
+
+        for (let i = 0; i < 4; i++) {
+          const hw = data.homeworks[i];
+          if (!hw) continue;
+          document.getElementById(`hw-title-${i + 1}`).textContent = hw.title;
+          document.getElementById(`hw-subject-${i + 1}`).textContent =
+            hw.subject;
+          document.getElementById(`hw-desc-${i + 1}`).textContent = hw.desc;
+          const teacherEl = document.getElementById(`teacher-${i + 1}`);
+          if (teacherEl) teacherEl.textContent = hw.teacher;
+          const assignedEl = document.getElementById(`assigned-${i + 1}`);
+          if (assignedEl && hw.assigned)
+            assignedEl.textContent = `تاريخ التكليف: ${hw.assigned}`;
+          const dueEl = document.getElementById(`due-${i + 1}`);
+          if (dueEl && hw.due) dueEl.textContent = `الموعد النهائي: ${hw.due}`;
+          const submittedEl = document.getElementById(`submitted-${i + 1}`);
+          if (submittedEl && hw.submitted)
+            submittedEl.textContent = `تم التقديم: ${hw.submitted}`;
+          const gradeEl = document.getElementById(`grade-${i + 1}`);
+          if (gradeEl && hw.grade) gradeEl.textContent = `الدرجة: ${hw.grade}`;
+          const feedbackEl = document.getElementById(`feedback-${i + 1}`);
+          if (feedbackEl && hw.feedback) feedbackEl.textContent = hw.feedback;
+        }
+      }
+
+      loadHomeworkDataFor(currentChildId);
+
+      function viewHomework(id) {
+        const hw = childrenData[currentChildId].homeworks[id - 1];
+        if (hw) {
+          document.getElementById("modal-title").textContent = "تفاصيل الواجب";
+          document.getElementById("detail-title").textContent = hw.title;
+          document.getElementById("detail-subject").textContent = hw.subject;
+          document.getElementById("detail-teacher").textContent =
+            hw.teacher || "";
+          document.getElementById("detail-description").textContent =
+            hw.desc || "";
+          const list = document.getElementById("attachments-list");
+          list.innerHTML = "";
+          (hw.attachments || []).forEach((name) => {
+            const li = document.createElement("li");
+            li.className = "attachment-item";
+            const iEl = document.createElement("i");
+            iEl.className = "fas fa-paperclip";
+            const span = document.createElement("span");
+            span.textContent = name;
+            li.appendChild(iEl);
+            li.appendChild(span);
+            list.appendChild(li);
+          });
+          document.getElementById(
+            "detail-assigned"
+          ).innerHTML = `<strong>تاريخ التكليف:</strong> ${hw.assigned || "-"}`;
+          document.getElementById(
+            "detail-due"
+          ).innerHTML = `<strong>الموعد النهائي:</strong> ${hw.due || "-"}`;
+        }
+        document.getElementById("homeworkModal").style.display = "flex";
+      }
+
+      function closeModal() {
+        document.getElementById("homeworkModal").style.display = "none";
+      }
+
+      window.onclick = function (event) {
+        const modal = document.getElementById("homeworkModal");
+        if (event.target === modal) {
+          closeModal();
+        }
+      };
+
+      document
+        .getElementById("status-filter")
+        .addEventListener("change", function () {
+          console.log("Filter by status:", this.value);
         });
 
-        document.getElementById('subject-filter').addEventListener('change', function() {
-            console.log('Filter by subject:', this.value);
+      document
+        .getElementById("subject-filter")
+        .addEventListener("change", function () {
+          console.log("Filter by subject:", this.value);
         });
     </script>
-</body>
+  </body>
 </html>

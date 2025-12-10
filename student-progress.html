@@ -1,1080 +1,1273 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>التقدم الدراسي - DT Edu</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        :root {
-            --primary: #4a6cf7;
-            --primary-dark: #3a56d4;
-            --secondary: #6c5ce7;
-            --accent: #00b894;
-            --light: #f8f9fa;
-            --dark: #2d3436;
-            --text: #333;
-            --text-light: #666;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-            --sidebar-width: 260px;
-        }
-        
-        .dark-mode {
-            --light: #1a1a2e;
-            --dark: #f8f9fa;
-            --text: #e6e6e6;
-            --text-light: #b0b0b0;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', 'Segoe UI', sans-serif;
-        }
-        
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
-        }
-        
-        body.dark-mode {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-        }
-        
-        body.rtl {
-            direction: rtl;
-        }
-        
-        body.ltr {
-            direction: ltr;
-        }
-        
-        /* التصميم الرئيسي */
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        /* الشريط الجانبي - إصلاح مشكلة تغيير اللغة */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: var(--shadow);
-            z-index: 100;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            transition: var(--transition);
-            /* إصلاح: بقاء القائمة في مكانها بغض النظر عن اللغة */
-            right: 0;
-        }
-        
-        body.ltr .sidebar {
-            right: auto;
-            left: 0;
-        }
-        
-        .sidebar-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 20px;
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        
-        .logo {
-            width: 70px;
-            height: 70px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .logo svg {
-            width: 50px;
-            height: 50px;
-        }
-        
-        .logo-text {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, white, #e1f0fa);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .user-info {
-            text-align: center;
-            margin-top: 10px;
-        }
-        
-        .user-name {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        
-        .user-type {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: inline-block;
-        }
-        
-        .sidebar-menu {
-            list-style: none;
-            padding: 0 15px;
-            margin-bottom: 20px;
-        }
-        
-        .menu-item {
-            margin-bottom: 8px;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .menu-item a {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        
-        .menu-item a:hover, .menu-item.active a {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(5px);
-        }
-        
-        body.ltr .menu-item a:hover, 
-        body.ltr .menu-item.active a {
-            transform: translateX(-5px);
-        }
-        
-        .menu-item i {
-            margin-left: 10px;
-            font-size: 18px;
-            width: 24px;
-            text-align: center;
-        }
-        
-        body.ltr .menu-item i {
-            margin-left: 0;
-            margin-right: 10px;
-        }
-        
-        .menu-item span {
-            flex: 1;
-        }
-        
-        .sidebar-footer {
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: auto;
-        }
-        
-        .sidebar-footer .menu-item a {
-            padding: 10px 15px;
-        }
-        
-        /* المحتوى الرئيسي - إصلاح مشكلة التداخل */
-        .main-content {
-            flex: 1;
-            margin-right: var(--sidebar-width);
-            padding: 20px;
-            transition: var(--transition);
-        }
-        
-        body.ltr .main-content {
-            margin-right: 0;
-            margin-left: var(--sidebar-width);
-        }
-        
-        .header {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
-        }
-        
-        body.dark-mode .header {
-            background: var(--light);
-            color: var(--dark);
-        }
-        
-        .header h1 {
-            color: var(--primary);
-            font-size: 28px;
-            font-weight: 700;
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        
-        .dark-mode-toggle, .back-btn {
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .dark-mode-toggle {
-            background: rgba(74, 108, 247, 0.1);
-            color: var(--primary);
-        }
-        
-        .dark-mode-toggle:hover {
-            background: rgba(74, 108, 247, 0.2);
-        }
-        
-        .back-btn {
-            background: rgba(108, 92, 231, 0.1);
-            color: var(--secondary);
-        }
-        
-        .back-btn:hover {
-            background: rgba(108, 92, 231, 0.2);
-        }
-        
-        /* محتوى التقدم الدراسي */
-        .progress-content {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-        
-        /* بطاقات إحصائيات التقدم */
-        .progress-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        
-        .progress-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 25px;
-            display: flex;
-            align-items: center;
-            transition: var(--transition);
-        }
-        
-        body.dark-mode .progress-card {
-            background: var(--light);
-            color: var(--dark);
-        }
-        
-        .progress-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-        
-        .progress-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 15px;
-            font-size: 24px;
-            color: white;
-        }
-        
-        body.ltr .progress-icon {
-            margin-left: 0;
-            margin-right: 15px;
-        }
-        
-        .progress-info {
-            flex: 1;
-        }
-        
-        .progress-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-        
-        .progress-label {
-            color: var(--text-light);
-            font-size: 14px;
-        }
-        
-        /* مخططات التقدم */
+      :root {
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
+        --accent: #00b894;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --text: #333;
+        --text-light: #666;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --sidebar-width: 260px;
+      }
+
+      .dark-mode {
+        --light: #1a1a2e;
+        --dark: #f8f9fa;
+        --text: #e6e6e6;
+        --text-light: #b0b0b0;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Tajawal", "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: var(--transition);
+      }
+
+      body.dark-mode {
+        background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+      }
+
+      body.rtl {
+        direction: rtl;
+      }
+
+      body.ltr {
+        direction: ltr;
+      }
+
+      /* التصميم الرئيسي */
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* الشريط الجانبي - إصلاح مشكلة تغيير اللغة */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(
+          180deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 20px 0;
+        box-shadow: var(--shadow);
+        z-index: 100;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        transition: var(--transition);
+        /* إصلاح: بقاء القائمة في مكانها بغض النظر عن اللغة */
+        right: 0;
+      }
+
+      body.ltr .sidebar {
+        right: auto;
+        left: 0;
+      }
+
+      .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+ 
+      .logo img {
+        width:140px;
+        object-fit: contain;
+        display: block;
+      }
+      
+      .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, white, #e1f0fa);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .user-info {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .user-name {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .user-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+        display: inline-block;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0 15px;
+        margin-bottom: 20px;
+      }
+
+      .menu-item {
+        margin-bottom: 8px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .menu-item a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .menu-item a:hover,
+      .menu-item.active a {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateX(5px);
+      }
+
+      body.ltr .menu-item a:hover,
+      body.ltr .menu-item.active a {
+        transform: translateX(-5px);
+      }
+
+      .menu-item i {
+        margin-left: 10px;
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      body.ltr .menu-item i {
+        margin-left: 0;
+        margin-right: 10px;
+      }
+
+      .menu-item span {
+        flex: 1;
+      }
+
+      .sidebar-footer {
+        padding: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: auto;
+      }
+
+      .sidebar-footer .menu-item a {
+        padding: 10px 15px;
+      }
+
+      /* المحتوى الرئيسي - إصلاح مشكلة التداخل */
+      .main-content {
+        flex: 1;
+        margin-right: var(--sidebar-width);
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      body.ltr .main-content {
+        margin-right: 0;
+        margin-left: var(--sidebar-width);
+      }
+
+      .header {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .header {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .header h1 {
+        color: var(--primary);
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .dark-mode-toggle,
+      .back-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dark-mode-toggle {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .dark-mode-toggle:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      .back-btn {
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--secondary);
+      }
+
+      .back-btn:hover {
+        background: rgba(108, 92, 231, 0.2);
+      }
+
+      /* محتوى التقدم الدراسي */
+      .progress-content {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+      }
+
+      /* بطاقات إحصائيات التقدم */
+      .progress-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .progress-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        display: flex;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .progress-card {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .progress-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .progress-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 15px;
+        font-size: 24px;
+        color: white;
+      }
+
+      body.ltr .progress-icon {
+        margin-left: 0;
+        margin-right: 15px;
+      }
+
+      .progress-info {
+        flex: 1;
+      }
+
+      .progress-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 5px;
+      }
+
+      .progress-label {
+        color: var(--text-light);
+        font-size: 14px;
+      }
+
+      /* مخططات التقدم */
+      .progress-charts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 25px;
+      }
+
+      .chart-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+
+      body.dark-mode .chart-container {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .chart-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+      }
+
+      .chart-title {
+        color: var(--primary);
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .chart {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-around;
+        height: 200px;
+        padding: 10px;
+      }
+
+      .chart-bar {
+        position: relative;
+        width: 50px;
+        background: linear-gradient(to top, var(--primary), var(--secondary));
+        border-radius: 5px 5px 0 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        transition: var(--transition);
+      }
+
+      .chart-bar:hover {
+        transform: scale(1.05);
+      }
+
+      .chart-value {
+        color: white;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .chart-label {
+        margin-top: 5px;
+        font-size: 14px;
+        color: var(--text);
+      }
+
+      body.dark-mode .chart-label {
+        color: var(--dark);
+      }
+
+      /* جدول التقدم التفصيلي */
+      .progress-table-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+
+      body.dark-mode .progress-table-container {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .progress-table-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+      }
+
+      .progress-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      .progress-table th,
+      .progress-table td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+      }
+
+      body.dark-mode .progress-table th,
+      body.dark-mode .progress-table td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .progress-table th {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .grade-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .grade-excellent {
+        background: rgba(0, 184, 148, 0.1);
+        color: #00b894;
+      }
+
+      .grade-very-good {
+        background: rgba(116, 185, 255, 0.1);
+        color: #74b9ff;
+      }
+
+      .grade-good {
+        background: rgba(253, 203, 110, 0.1);
+        color: #fdcb6e;
+      }
+
+      /* التصميم المتجاوب */
+      @media (max-width: 1200px) {
         .progress-charts {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 25px;
+          grid-template-columns: 1fr;
         }
-        
-        .chart-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 25px;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
+      }
+
+      @media (max-width: 992px) {
+        .sidebar {
+          width: 80px;
+          right: 0;
         }
-        
-        body.dark-mode .chart-container {
-            background: var(--light);
-            color: var(--dark);
+
+        body.ltr .sidebar {
+          left: 0;
         }
-        
-        .chart-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
+
+        .sidebar-header .logo-text,
+        .user-info,
+        .menu-item span {
+          display: none;
         }
-        
-        .chart-title {
-            color: var(--primary);
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: 700;
+
+        .main-content {
+          margin-right: 80px;
         }
-        
-        .chart {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            height: 200px;
-            padding: 10px;
+
+        body.ltr .main-content {
+          margin-left: 80px;
+          margin-right: 0;
         }
-        
-        .chart-bar {
-            position: relative;
-            width: 50px;
-            background: linear-gradient(to top, var(--primary), var(--secondary));
-            border-radius: 5px 5px 0 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            transition: var(--transition);
+
+        .menu-item a {
+          justify-content: center;
+          padding: 15px;
         }
-        
-        .chart-bar:hover {
-            transform: scale(1.05);
+
+        .menu-item i {
+          margin-left: 0;
+          font-size: 20px;
         }
-        
-        .chart-value {
-            color: white;
-            font-weight: bold;
-            margin-bottom: 5px;
+
+        .sidebar-footer .menu-item span {
+          display: none;
         }
-        
-        .chart-label {
-            margin-top: 5px;
-            font-size: 14px;
-            color: var(--text);
+      }
+
+      @media (max-width: 768px) {
+        .progress-stats {
+          grid-template-columns: 1fr;
         }
-        
-        body.dark-mode .chart-label {
-            color: var(--dark);
+
+        .progress-charts {
+          grid-template-columns: 1fr;
         }
-        
-        /* جدول التقدم التفصيلي */
-        .progress-table-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 25px;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
+
+        .header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
         }
-        
-        body.dark-mode .progress-table-container {
-            background: var(--light);
-            color: var(--dark);
+
+        .header-actions {
+          justify-content: center;
         }
-        
-        .progress-table-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-        }
-        
+
         .progress-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+          display: block;
+          overflow-x: auto;
+          white-space: nowrap;
         }
-        
-        .progress-table th,
-        .progress-table td {
-            padding: 12px 15px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
+      }
+
+      @media (max-width: 576px) {
+        .main-content {
+          padding: 15px;
         }
-        
-        body.dark-mode .progress-table th,
-        body.dark-mode .progress-table td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        .sidebar {
+          width: 70px;
+          right: 0;
         }
-        
-        .progress-table th {
-            background: rgba(74, 108, 247, 0.1);
-            color: var(--primary);
-            font-weight: 600;
+
+        body.ltr .sidebar {
+          left: 0;
         }
-        
-        .grade-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
+
+        .main-content {
+          margin-right: 70px;
         }
-        
-        .grade-excellent {
-            background: rgba(0, 184, 148, 0.1);
-            color: #00b894;
+
+        body.ltr .main-content {
+          margin-left: 70px;
+          margin-right: 0;
         }
-        
-        .grade-very-good {
-            background: rgba(116, 185, 255, 0.1);
-            color: #74b9ff;
+
+        .chart {
+          height: 150px;
         }
-        
-        .grade-good {
-            background: rgba(253, 203, 110, 0.1);
-            color: #fdcb6e;
+
+        .chart-bar {
+          width: 40px;
         }
-        
-        /* التصميم المتجاوب */
-        @media (max-width: 1200px) {
-            .progress-charts {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 80px;
-                right: 0;
-            }
-            
-            body.ltr .sidebar {
-                left: 0;
-            }
-            
-            .sidebar-header .logo-text,
-            .user-info,
-            .menu-item span {
-                display: none;
-            }
-            
-            .main-content {
-                margin-right: 80px;
-            }
-            
-            body.ltr .main-content {
-                margin-left: 80px;
-                margin-right: 0;
-            }
-            
-            .menu-item a {
-                justify-content: center;
-                padding: 15px;
-            }
-            
-            .menu-item i {
-                margin-left: 0;
-                font-size: 20px;
-            }
-            
-            .sidebar-footer .menu-item span {
-                display: none;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .progress-stats {
-                grid-template-columns: 1fr;
-            }
-            
-            .progress-charts {
-                grid-template-columns: 1fr;
-            }
-            
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .header-actions {
-                justify-content: center;
-            }
-            
-            .progress-table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .main-content {
-                padding: 15px;
-            }
-            
-            .sidebar {
-                width: 70px;
-                right: 0;
-            }
-            
-            body.ltr .sidebar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-right: 70px;
-            }
-            
-            body.ltr .main-content {
-                margin-left: 70px;
-                margin-right: 0;
-            }
-            
-            .chart {
-                height: 150px;
-            }
-            
-            .chart-bar {
-                width: 40px;
-            }
-        }
+      }
     </style>
-</head>
-<body class="rtl">
+  </head>
+  <body class="rtl">
     <div class="dashboard-container">
-        <!-- الشريط الجانبي -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-container">
-                    <div class="logo">
-                    <img src="logo.png" width="210px" style="margin-bottom: 20px;" alt="logo">
-                        <!-- الشعار داخل دائرة بيضاء -->
-                         <!-- الشعار داخل دائرة بيضاء -->  
-                    </div>
-                </div>
-                <div class="logo-text">DT Edu</div>
-                <div class="user-info">
-                    <div class="user-name" id="user-name">أحمد الطالب</div>
-                    <div class="user-type" id="user-type">طالب</div>
-                </div>
+      <!-- الشريط الجانبي -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo-container">
+            <div class="logo">
+              <img src="logo.png" alt="logo" />
             </div>
-            
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="student-dashboard.html">
-                        <i class="fas fa-home"></i>
-                        <span id="menu-dashboard">لوحة التحكم</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="student-schedule.html">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span id="menu-schedule">الجدول الدراسي</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="student-courses.html">
-                        <i class="fas fa-book"></i>
-                        <span id="menu-courses">المقررات الدراسية</span>
-                    </a>
-                </li>
-                <li class="menu-item active">
-                    <a href="student-progress.html">
-                        <i class="fas fa-chart-bar"></i>
-                        <span id="menu-progress">التقدم الدراسي</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="student-messages.html">
-                        <i class="fas fa-comments"></i>
-                        <span id="menu-messages">الرسائل</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="student-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span id="menu-settings">الإعدادات</span>
-                    </a>
-                </li>
-            </ul>
-            
-            <div class="sidebar-footer">
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="javascript:void(0)" id="dark-mode-toggle-sidebar">
-                            <i class="fas fa-moon"></i>
-                            <span id="dark-mode-text">الوضع الداكن</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="login.html" id="logout-link">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span id="logout-text">تسجيل الخروج</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+          </div>
+          <div class="logo-text">DT Edu</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">أحمد الطالب</div>
+            <div class="user-type" id="user-type">طالب</div>
+          </div>
         </div>
-        
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content">
-            <div class="header">
-                <h1 id="header-title">التقدم الدراسي - نظام DT Edu</h1>
-                <div class="header-actions">
-                    <button id="dark-mode-toggle" class="dark-mode-toggle">
-                        <i class="fas fa-moon"></i>
-                        <span id="dark-mode-btn-text">الوضع الداكن</span>
-                    </button>
-                    <button id="back-btn" class="back-btn" onclick="goBack()">
-                        <i class="fas fa-arrow-right"></i>
-                        <span id="back-text">العودة</span>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- محتوى التقدم الدراسي -->
-            <div class="progress-content">
-                <!-- إحصائيات التقدم -->
-                <div class="progress-stats">
-                    <div class="progress-card">
-                        <div class="progress-icon" style="background: linear-gradient(135deg, #4a6cf7, #6c5ce7);">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="progress-info">
-                            <div class="progress-value">87%</div>
-                            <div class="progress-label" id="overall-progress-label">التقدم الدراسي العام</div>
-                        </div>
-                    </div>
-                    
-                    <div class="progress-card">
-                        <div class="progress-icon" style="background: linear-gradient(135deg, #00b894, #00a085);">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="progress-info">
-                            <div class="progress-value">92%</div>
-                            <div class="progress-label" id="average-grade-label">المعدل التراكمي</div>
-                        </div>
-                    </div>
-                    
-                    <div class="progress-card">
-                        <div class="progress-icon" style="background: linear-gradient(135deg, #fd79a8, #e84393);">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div class="progress-info">
-                            <div class="progress-value">24/28</div>
-                            <div class="progress-label" id="completed-tasks-label">الواجبات المكتملة</div>
-                        </div>
-                    </div>
-                    
-                    <div class="progress-card">
-                        <div class="progress-icon" style="background: linear-gradient(135deg, #fdcb6e, #e17055);">
-                            <i class="fas fa-award"></i>
-                        </div>
-                        <div class="progress-info">
-                            <div class="progress-value">15</div>
-                            <div class="progress-label" id="achievements-label">الإنجازات</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- مخططات التقدم -->
-                <div class="progress-charts">
-                    <div class="chart-container">
-                        <h3 class="chart-title" id="subjects-chart-title">التقدم في المواد الدراسية</h3>
-                        <div class="chart" id="subjects-chart">
-                            <div class="chart-bar" style="height: 85%; background: linear-gradient(to top, #4a6cf7, #6c5ce7);">
-                                <span class="chart-value">85%</span>
-                                <span class="chart-label" id="math-label">رياضيات</span>
-                            </div>
-                            <div class="chart-bar" style="height: 70%; background: linear-gradient(to top, #00b894, #00a085);">
-                                <span class="chart-value">70%</span>
-                                <span class="chart-label" id="science-label">علوم</span>
-                            </div>
-                            <div class="chart-bar" style="height: 95%; background: linear-gradient(to top, #fd79a8, #e84393);">
-                                <span class="chart-value">95%</span>
-                                <span class="chart-label" id="arabic-label">عربية</span>
-                            </div>
-                            <div class="chart-bar" style="height: 60%; background: linear-gradient(to top, #fdcb6e, #e17055);">
-                                <span class="chart-value">60%</span>
-                                <span class="chart-label" id="english-label">إنجليزية</span>
-                            </div>
-                            <div class="chart-bar" style="height: 75%; background: linear-gradient(to top, #a29bfe, #6c5ce7);">
-                                <span class="chart-value">75%</span>
-                                <span class="chart-label" id="history-label">تاريخ</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <h3 class="chart-title" id="monthly-progress-title">التقدم الشهري</h3>
-                        <div class="chart" id="monthly-chart">
-                            <div class="chart-bar" style="height: 60%; background: linear-gradient(to top, #4a6cf7, #6c5ce7);">
-                                <span class="chart-value">60%</span>
-                                <span class="chart-label" id="jan-label">يناير</span>
-                            </div>
-                            <div class="chart-bar" style="height: 65%; background: linear-gradient(to top, #00b894, #00a085);">
-                                <span class="chart-value">65%</span>
-                                <span class="chart-label" id="feb-label">فبراير</span>
-                            </div>
-                            <div class="chart-bar" style="height: 72%; background: linear-gradient(to top, #fd79a8, #e84393);">
-                                <span class="chart-value">72%</span>
-                                <span class="chart-label" id="mar-label">مارس</span>
-                            </div>
-                            <div class="chart-bar" style="height: 78%; background: linear-gradient(to top, #fdcb6e, #e17055);">
-                                <span class="chart-value">78%</span>
-                                <span class="chart-label" id="apr-label">أبريل</span>
-                            </div>
-                            <div class="chart-bar" style="height: 85%; background: linear-gradient(to top, #a29bfe, #6c5ce7);">
-                                <span class="chart-value">85%</span>
-                                <span class="chart-label" id="may-label">مايو</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- جدول التقدم التفصيلي -->
-                <div class="progress-table-container">
-                    <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;" id="detailed-progress-title">التقدم التفصيلي في المواد</h3>
-                    <table class="progress-table">
-                        <thead>
-                            <tr>
-                                <th id="subject-header">المادة</th>
-                                <th id="progress-header">التقدم</th>
-                                <th id="grade-header">التقييم</th>
-                                <th id="assignments-header">الواجبات</th>
-                                <th id="exams-header">الاختبارات</th>
-                                <th id="status-header">الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td id="math-row">الرياضيات</td>
-                                <td>
-                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
-                                        <div style="background: linear-gradient(135deg, #4a6cf7, #6c5ce7); width: 85%; height: 100%; border-radius: 10px;"></div>
-                                    </div>
-                                    <small>85%</small>
-                                </td>
-                                <td><span class="grade-badge grade-excellent">94%</span></td>
-                                <td>18/20</td>
-                                <td>4/5</td>
-                                <td><span style="color: #00b894;">●</span> <span id="math-status">ممتاز</span></td>
-                            </tr>
-                            <tr>
-                                <td id="science-row">العلوم</td>
-                                <td>
-                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
-                                        <div style="background: linear-gradient(135deg, #00b894, #00a085); width: 70%; height: 100%; border-radius: 10px;"></div>
-                                    </div>
-                                    <small>70%</small>
-                                </td>
-                                <td><span class="grade-badge grade-very-good">88%</span></td>
-                                <td>15/18</td>
-                                <td>3/4</td>
-                                <td><span style="color: #74b9ff;">●</span> <span id="science-status">جيد جداً</span></td>
-                            </tr>
-                            <tr>
-                                <td id="arabic-row">اللغة العربية</td>
-                                <td>
-                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
-                                        <div style="background: linear-gradient(135deg, #fd79a8, #e84393); width: 95%; height: 100%; border-radius: 10px;"></div>
-                                    </div>
-                                    <small>95%</small>
-                                </td>
-                                <td><span class="grade-badge grade-excellent">96%</span></td>
-                                <td>20/20</td>
-                                <td>5/5</td>
-                                <td><span style="color: #00b894;">●</span> <span id="arabic-status">ممتاز</span></td>
-                            </tr>
-                            <tr>
-                                <td id="english-row">اللغة الإنجليزية</td>
-                                <td>
-                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
-                                        <div style="background: linear-gradient(135deg, #fdcb6e, #e17055); width: 60%; height: 100%; border-radius: 10px;"></div>
-                                    </div>
-                                    <small>60%</small>
-                                </td>
-                                <td><span class="grade-badge grade-good">82%</span></td>
-                                <td>12/15</td>
-                                <td>2/3</td>
-                                <td><span style="color: #fdcb6e;">●</span> <span id="english-status">جيد</span></td>
-                            </tr>
-                            <tr>
-                                <td id="history-row">التاريخ</td>
-                                <td>
-                                    <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
-                                        <div style="background: linear-gradient(135deg, #a29bfe, #6c5ce7); width: 75%; height: 100%; border-radius: 10px;"></div>
-                                    </div>
-                                    <small>75%</small>
-                                </td>
-                                <td><span class="grade-badge grade-very-good">89%</span></td>
-                                <td>14/16</td>
-                                <td>3/4</td>
-                                <td><span style="color: #74b9ff;">●</span> <span id="history-status">جيد جداً</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="student-dashboard.html">
+              <i class="fas fa-home"></i>
+              <span id="menu-dashboard">لوحة التحكم</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="student-schedule.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-schedule">الجدول الدراسي</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="student-courses.html">
+              <i class="fas fa-book"></i>
+              <span id="menu-courses">المقررات الدراسية</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="student-progress.html">
+              <i class="fas fa-chart-bar"></i>
+              <span id="menu-progress">التقدم الدراسي</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="student-messages.html">
+              <i class="fas fa-comments"></i>
+              <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="student-settings.html">
+              <i class="fas fa-cog"></i>
+              <span id="menu-settings">الإعدادات</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-footer">
+          <ul class="sidebar-menu">
+            <li class="menu-item">
+              <a href="javascript:void(0)" id="dark-mode-toggle-sidebar">
+                <i class="fas fa-moon"></i>
+                <span id="dark-mode-text">الوضع الداكن</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="login.html" id="logout-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span id="logout-text">تسجيل الخروج</span>
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
+
+      <!-- المحتوى الرئيسي -->
+      <div class="main-content">
+        <div class="header">
+          <h1 id="header-title">التقدم الدراسي - نظام DT Edu</h1>
+          <div class="header-actions">
+            <button id="dark-mode-toggle" class="dark-mode-toggle">
+              <i class="fas fa-moon"></i>
+              <span id="dark-mode-btn-text">الوضع الداكن</span>
+            </button>
+            <button id="back-btn" class="back-btn" onclick="goBack()">
+              <i class="fas fa-arrow-right"></i>
+              <span id="back-text">العودة</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- محتوى التقدم الدراسي -->
+        <div class="progress-content">
+          <!-- إحصائيات التقدم -->
+          <div class="progress-stats">
+            <div class="progress-card">
+              <div
+                class="progress-icon"
+                style="background: linear-gradient(135deg, #4a6cf7, #6c5ce7)"
+              >
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="progress-info">
+                <div class="progress-value">87%</div>
+                <div class="progress-label" id="overall-progress-label">
+                  التقدم الدراسي العام
+                </div>
+              </div>
+            </div>
+
+            <div class="progress-card">
+              <div
+                class="progress-icon"
+                style="background: linear-gradient(135deg, #00b894, #00a085)"
+              >
+                <i class="fas fa-trophy"></i>
+              </div>
+              <div class="progress-info">
+                <div class="progress-value">92%</div>
+                <div class="progress-label" id="average-grade-label">
+                  المعدل التراكمي
+                </div>
+              </div>
+            </div>
+
+            <div class="progress-card">
+              <div
+                class="progress-icon"
+                style="background: linear-gradient(135deg, #fd79a8, #e84393)"
+              >
+                <i class="fas fa-tasks"></i>
+              </div>
+              <div class="progress-info">
+                <div class="progress-value">24/28</div>
+                <div class="progress-label" id="completed-tasks-label">
+                  الواجبات المكتملة
+                </div>
+              </div>
+            </div>
+
+            <div class="progress-card">
+              <div
+                class="progress-icon"
+                style="background: linear-gradient(135deg, #fdcb6e, #e17055)"
+              >
+                <i class="fas fa-award"></i>
+              </div>
+              <div class="progress-info">
+                <div class="progress-value">15</div>
+                <div class="progress-label" id="achievements-label">
+                  الإنجازات
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- مخططات التقدم -->
+          <div class="progress-charts">
+            <div class="chart-container">
+              <h3 class="chart-title" id="subjects-chart-title">
+                التقدم في المواد الدراسية
+              </h3>
+              <div class="chart" id="subjects-chart">
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 85%;
+                    background: linear-gradient(to top, #4a6cf7, #6c5ce7);
+                  "
+                >
+                  <span class="chart-value">85%</span>
+                  <span class="chart-label" id="math-label">رياضيات</span>
+                </div>
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 70%;
+                    background: linear-gradient(to top, #00b894, #00a085);
+                  "
+                >
+                  <span class="chart-value">70%</span>
+                  <span class="chart-label" id="science-label">علوم</span>
+                </div>
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 95%;
+                    background: linear-gradient(to top, #fd79a8, #e84393);
+                  "
+                >
+                  <span class="chart-value">95%</span>
+                  <span class="chart-label" id="arabic-label">عربية</span>
+                </div>
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 60%;
+                    background: linear-gradient(to top, #fdcb6e, #e17055);
+                  "
+                >
+                  <span class="chart-value">60%</span>
+                  <span class="chart-label" id="english-label">إنجليزية</span>
+                </div>
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 75%;
+                    background: linear-gradient(to top, #a29bfe, #6c5ce7);
+                  "
+                >
+                  <span class="chart-value">75%</span>
+                  <span class="chart-label" id="history-label">تاريخ</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              <h3 class="chart-title" id="monthly-progress-title">
+                التقدم الشهري
+              </h3>
+              <div class="chart" id="monthly-chart">
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 60%;
+                    background: linear-gradient(to top, #4a6cf7, #6c5ce7);
+                  "
+                >
+                  <span class="chart-value">60%</span>
+                  <span class="chart-label" id="jan-label">يناير</span>
+                </div>
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 65%;
+                    background: linear-gradient(to top, #00b894, #00a085);
+                  "
+                >
+                  <span class="chart-value">65%</span>
+                  <span class="chart-label" id="feb-label">فبراير</span>
+                </div>
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 72%;
+                    background: linear-gradient(to top, #fd79a8, #e84393);
+                  "
+                >
+                  <span class="chart-value">72%</span>
+                  <span class="chart-label" id="mar-label">مارس</span>
+                </div>
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 78%;
+                    background: linear-gradient(to top, #fdcb6e, #e17055);
+                  "
+                >
+                  <span class="chart-value">78%</span>
+                  <span class="chart-label" id="apr-label">أبريل</span>
+                </div>
+                <div
+                  class="chart-bar"
+                  style="
+                    height: 85%;
+                    background: linear-gradient(to top, #a29bfe, #6c5ce7);
+                  "
+                >
+                  <span class="chart-value">85%</span>
+                  <span class="chart-label" id="may-label">مايو</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- جدول التقدم التفصيلي -->
+          <div class="progress-table-container">
+            <h3
+              style="
+                color: var(--primary);
+                margin-bottom: 20px;
+                text-align: center;
+              "
+              id="detailed-progress-title"
+            >
+              التقدم التفصيلي في المواد
+            </h3>
+            <table class="progress-table">
+              <thead>
+                <tr>
+                  <th id="subject-header">المادة</th>
+                  <th id="progress-header">التقدم</th>
+                  <th id="grade-header">التقييم</th>
+                  <th id="assignments-header">الواجبات</th>
+                  <th id="exams-header">الاختبارات</th>
+                  <th id="status-header">الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td id="math-row">الرياضيات</td>
+                  <td>
+                    <div
+                      style="
+                        background: #e0e0e0;
+                        border-radius: 10px;
+                        height: 8px;
+                      "
+                    >
+                      <div
+                        style="
+                          background: linear-gradient(135deg, #4a6cf7, #6c5ce7);
+                          width: 85%;
+                          height: 100%;
+                          border-radius: 10px;
+                        "
+                      ></div>
+                    </div>
+                    <small>85%</small>
+                  </td>
+                  <td><span class="grade-badge grade-excellent">94%</span></td>
+                  <td>18/20</td>
+                  <td>4/5</td>
+                  <td>
+                    <span style="color: #00b894">●</span>
+                    <span id="math-status">ممتاز</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td id="science-row">العلوم</td>
+                  <td>
+                    <div
+                      style="
+                        background: #e0e0e0;
+                        border-radius: 10px;
+                        height: 8px;
+                      "
+                    >
+                      <div
+                        style="
+                          background: linear-gradient(135deg, #00b894, #00a085);
+                          width: 70%;
+                          height: 100%;
+                          border-radius: 10px;
+                        "
+                      ></div>
+                    </div>
+                    <small>70%</small>
+                  </td>
+                  <td><span class="grade-badge grade-very-good">88%</span></td>
+                  <td>15/18</td>
+                  <td>3/4</td>
+                  <td>
+                    <span style="color: #74b9ff">●</span>
+                    <span id="science-status">جيد جداً</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td id="arabic-row">اللغة العربية</td>
+                  <td>
+                    <div
+                      style="
+                        background: #e0e0e0;
+                        border-radius: 10px;
+                        height: 8px;
+                      "
+                    >
+                      <div
+                        style="
+                          background: linear-gradient(135deg, #fd79a8, #e84393);
+                          width: 95%;
+                          height: 100%;
+                          border-radius: 10px;
+                        "
+                      ></div>
+                    </div>
+                    <small>95%</small>
+                  </td>
+                  <td><span class="grade-badge grade-excellent">96%</span></td>
+                  <td>20/20</td>
+                  <td>5/5</td>
+                  <td>
+                    <span style="color: #00b894">●</span>
+                    <span id="arabic-status">ممتاز</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td id="english-row">اللغة الإنجليزية</td>
+                  <td>
+                    <div
+                      style="
+                        background: #e0e0e0;
+                        border-radius: 10px;
+                        height: 8px;
+                      "
+                    >
+                      <div
+                        style="
+                          background: linear-gradient(135deg, #fdcb6e, #e17055);
+                          width: 60%;
+                          height: 100%;
+                          border-radius: 10px;
+                        "
+                      ></div>
+                    </div>
+                    <small>60%</small>
+                  </td>
+                  <td><span class="grade-badge grade-good">82%</span></td>
+                  <td>12/15</td>
+                  <td>2/3</td>
+                  <td>
+                    <span style="color: #fdcb6e">●</span>
+                    <span id="english-status">جيد</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td id="history-row">التاريخ</td>
+                  <td>
+                    <div
+                      style="
+                        background: #e0e0e0;
+                        border-radius: 10px;
+                        height: 8px;
+                      "
+                    >
+                      <div
+                        style="
+                          background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+                          width: 75%;
+                          height: 100%;
+                          border-radius: 10px;
+                        "
+                      ></div>
+                    </div>
+                    <small>75%</small>
+                  </td>
+                  <td><span class="grade-badge grade-very-good">89%</span></td>
+                  <td>14/16</td>
+                  <td>3/4</td>
+                  <td>
+                    <span style="color: #74b9ff">●</span>
+                    <span id="history-status">جيد جداً</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        // استعادة اللغة المحفوظة
-        let currentLanguage = localStorage.getItem('currentLanguage') || 'ar';
-        
-        // استعادة وضع التصميم المحفوظ
-        let darkMode = localStorage.getItem('darkMode') === 'true';
-        
-        // تحديث اتجاه الصفحة واللغة والوضع الداكن
-        document.body.className = currentLanguage === 'ar' ? 'rtl' : 'ltr';
-        if (darkMode) {
-            document.body.classList.add('dark-mode');
-        }
-        
-        // إعداد زر الوضع الداكن
-        document.querySelectorAll('#dark-mode-toggle, #dark-mode-toggle-sidebar').forEach(btn => {
-            btn.addEventListener('click', function() {
-                // تبديل الوضع الداكن
-                darkMode = !darkMode;
-                
-                // تحديث الوضع الداكن في التخزين المحلي
-                localStorage.setItem('darkMode', darkMode);
-                
-                // تحديث الوضع الداكن في الصفحة
-                if (darkMode) {
-                    document.body.classList.add('dark-mode');
-                } else {
-                    document.body.classList.remove('dark-mode');
-                }
-                
-                // تحديث نص الزر
-                updateDarkModeText();
-            });
+      // استعادة اللغة المحفوظة
+      let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
+
+      // استعادة وضع التصميم المحفوظ
+      let darkMode = localStorage.getItem("darkMode") === "true";
+
+      // تحديث اتجاه الصفحة واللغة والوضع الداكن
+      document.body.className = currentLanguage === "ar" ? "rtl" : "ltr";
+      if (darkMode) {
+        document.body.classList.add("dark-mode");
+      }
+
+      // إعداد زر الوضع الداكن
+      document
+        .querySelectorAll("#dark-mode-toggle, #dark-mode-toggle-sidebar")
+        .forEach((btn) => {
+          btn.addEventListener("click", function () {
+            // تبديل الوضع الداكن
+            darkMode = !darkMode;
+
+            // تحديث الوضع الداكن في التخزين المحلي
+            localStorage.setItem("darkMode", darkMode);
+
+            // تحديث الوضع الداكن في الصفحة
+            if (darkMode) {
+              document.body.classList.add("dark-mode");
+            } else {
+              document.body.classList.remove("dark-mode");
+            }
+
+            // تحديث نص الزر
+            updateDarkModeText();
+          });
         });
-        
-        // إعداد زر تسجيل الخروج
-        document.getElementById('logout-link').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.removeItem('currentUser');
-            window.location.href = 'login.html';
+
+      // إعداد زر تسجيل الخروج
+      document
+        .getElementById("logout-link")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("currentUser");
+          window.location.href = "login.html";
         });
-        
-        // وظيفة العودة
-        function goBack() {
-            window.history.back();
-        }
-        
-        // تحديث النصوص حسب اللغة الحالية
-        function updateLanguage() {
-            const translations = {
-                'ar': {
-                    'header-title': 'التقدم الدراسي - نظام DT Edu',
-                    'menu-dashboard': 'لوحة التحكم',
-                    'menu-schedule': 'الجدول الدراسي',
-                    'menu-courses': 'المقررات الدراسية',
-                    'menu-progress': 'التقدم الدراسي',
-                    'menu-messages': 'الرسائل',
-                    'menu-settings': 'الإعدادات',
-                    
-                    // إحصائيات التقدم
-                    'overall-progress-label': 'التقدم الدراسي العام',
-                    'average-grade-label': 'المعدل التراكمي',
-                    'completed-tasks-label': 'الواجبات المكتملة',
-                    'achievements-label': 'الإنجازات',
-                    
-                    // عناوين المخططات
-                    'subjects-chart-title': 'التقدم في المواد الدراسية',
-                    'monthly-progress-title': 'التقدم الشهري',
-                    'detailed-progress-title': 'التقدم التفصيلي في المواد',
-                    
-                    // تسميات المخططات
-                    'math-label': 'رياضيات',
-                    'science-label': 'علوم',
-                    'arabic-label': 'عربية',
-                    'english-label': 'إنجليزية',
-                    'history-label': 'تاريخ',
-                    'jan-label': 'يناير',
-                    'feb-label': 'فبراير',
-                    'mar-label': 'مارس',
-                    'apr-label': 'أبريل',
-                    'may-label': 'مايو',
-                    
-                    // رؤوس الجدول
-                    'subject-header': 'المادة',
-                    'progress-header': 'التقدم',
-                    'grade-header': 'التقييم',
-                    'assignments-header': 'الواجبات',
-                    'exams-header': 'الاختبارات',
-                    'status-header': 'الحالة',
-                    
-                    // صفوف الجدول
-                    'math-row': 'الرياضيات',
-                    'science-row': 'العلوم',
-                    'arabic-row': 'اللغة العربية',
-                    'english-row': 'اللغة الإنجليزية',
-                    'history-row': 'التاريخ',
-                    
-                    // حالات المواد
-                    'math-status': 'ممتاز',
-                    'science-status': 'جيد جداً',
-                    'arabic-status': 'ممتاز',
-                    'english-status': 'جيد',
-                    'history-status': 'جيد جداً',
-                    
-                    // عناصر مشتركة
-                    'logout-text': 'تسجيل الخروج',
-                    'dark-mode-text': 'الوضع الداكن',
-                    'dark-mode-btn-text': 'الوضع الداكن',
-                    'back-text': 'العودة'
-                },
-                'en': {
-                    'header-title': 'Academic Progress - DT Edu System',
-                    'menu-dashboard': 'Dashboard',
-                    'menu-schedule': 'Schedule',
-                    'menu-courses': 'Courses',
-                    'menu-progress': 'Progress',
-                    'menu-messages': 'Messages',
-                    'menu-settings': 'Settings',
-                    
-                    // إحصائيات التقدم
-                    'overall-progress-label': 'Overall Academic Progress',
-                    'average-grade-label': 'Average Grade',
-                    'completed-tasks-label': 'Completed Assignments',
-                    'achievements-label': 'Achievements',
-                    
-                    // عناوين المخططات
-                    'subjects-chart-title': 'Progress in Subjects',
-                    'monthly-progress-title': 'Monthly Progress',
-                    'detailed-progress-title': 'Detailed Progress in Subjects',
-                    
-                    // تسميات المخططات
-                    'math-label': 'Math',
-                    'science-label': 'Science',
-                    'arabic-label': 'Arabic',
-                    'english-label': 'English',
-                    'history-label': 'History',
-                    'jan-label': 'Jan',
-                    'feb-label': 'Feb',
-                    'mar-label': 'Mar',
-                    'apr-label': 'Apr',
-                    'may-label': 'May',
-                    
-                    // رؤوس الجدول
-                    'subject-header': 'Subject',
-                    'progress-header': 'Progress',
-                    'grade-header': 'Grade',
-                    'assignments-header': 'Assignments',
-                    'exams-header': 'Exams',
-                    'status-header': 'Status',
-                    
-                    // صفوف الجدول
-                    'math-row': 'Mathematics',
-                    'science-row': 'Science',
-                    'arabic-row': 'Arabic Language',
-                    'english-row': 'English Language',
-                    'history-row': 'History',
-                    
-                    // حالات المواد
-                    'math-status': 'Excellent',
-                    'science-status': 'Very Good',
-                    'arabic-status': 'Excellent',
-                    'english-status': 'Good',
-                    'history-status': 'Very Good',
-                    
-                    // عناصر مشتركة
-                    'logout-text': 'Logout',
-                    'dark-mode-text': 'Dark Mode',
-                    'dark-mode-btn-text': 'Dark Mode',
-                    'back-text': 'Back'
-                }
-            };
-            
-            // تطبيق الترجمات
-            Object.keys(translations[currentLanguage]).forEach(key => {
-                const element = document.getElementById(key);
-                if (element) {
-                    element.textContent = translations[currentLanguage][key];
-                }
-            });
-        }
-        
-        // تحديث نص زر الوضع الداكن
-        function updateDarkModeText() {
-            const darkModeText = currentLanguage === 'ar' 
-                ? (darkMode ? 'الوضع الفاتح' : 'الوضع الداكن')
-                : (darkMode ? 'Light Mode' : 'Dark Mode');
-            
-            document.getElementById('dark-mode-text').textContent = darkModeText;
-            document.getElementById('dark-mode-btn-text').textContent = darkModeText;
-            
-            // تحديث الأيقونة
-            const icons = document.querySelectorAll('#dark-mode-toggle i, #dark-mode-toggle-sidebar i');
-            icons.forEach(icon => {
-                icon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
-            });
-        }
-        
-        // تحديث اللغة والوضع الداكن عند تحميل الصفحة
-        updateLanguage();
-        updateDarkModeText();
+
+      // وظيفة العودة
+      function goBack() {
+        window.history.back();
+      }
+
+      // تحديث النصوص حسب اللغة الحالية
+      function updateLanguage() {
+        const translations = {
+          ar: {
+            "header-title": "التقدم الدراسي - نظام DT Edu",
+            "menu-dashboard": "لوحة التحكم",
+            "menu-schedule": "الجدول الدراسي",
+            "menu-courses": "المقررات الدراسية",
+            "menu-progress": "التقدم الدراسي",
+            "menu-messages": "الرسائل",
+            "menu-settings": "الإعدادات",
+
+            // إحصائيات التقدم
+            "overall-progress-label": "التقدم الدراسي العام",
+            "average-grade-label": "المعدل التراكمي",
+            "completed-tasks-label": "الواجبات المكتملة",
+            "achievements-label": "الإنجازات",
+
+            // عناوين المخططات
+            "subjects-chart-title": "التقدم في المواد الدراسية",
+            "monthly-progress-title": "التقدم الشهري",
+            "detailed-progress-title": "التقدم التفصيلي في المواد",
+
+            // تسميات المخططات
+            "math-label": "رياضيات",
+            "science-label": "علوم",
+            "arabic-label": "عربية",
+            "english-label": "إنجليزية",
+            "history-label": "تاريخ",
+            "jan-label": "يناير",
+            "feb-label": "فبراير",
+            "mar-label": "مارس",
+            "apr-label": "أبريل",
+            "may-label": "مايو",
+
+            // رؤوس الجدول
+            "subject-header": "المادة",
+            "progress-header": "التقدم",
+            "grade-header": "التقييم",
+            "assignments-header": "الواجبات",
+            "exams-header": "الاختبارات",
+            "status-header": "الحالة",
+
+            // صفوف الجدول
+            "math-row": "الرياضيات",
+            "science-row": "العلوم",
+            "arabic-row": "اللغة العربية",
+            "english-row": "اللغة الإنجليزية",
+            "history-row": "التاريخ",
+
+            // حالات المواد
+            "math-status": "ممتاز",
+            "science-status": "جيد جداً",
+            "arabic-status": "ممتاز",
+            "english-status": "جيد",
+            "history-status": "جيد جداً",
+
+            // عناصر مشتركة
+            "logout-text": "تسجيل الخروج",
+            "dark-mode-text": "الوضع الداكن",
+            "dark-mode-btn-text": "الوضع الداكن",
+            "back-text": "العودة",
+          },
+          en: {
+            "header-title": "Academic Progress - DT Edu System",
+            "menu-dashboard": "Dashboard",
+            "menu-schedule": "Schedule",
+            "menu-courses": "Courses",
+            "menu-progress": "Progress",
+            "menu-messages": "Messages",
+            "menu-settings": "Settings",
+
+            // إحصائيات التقدم
+            "overall-progress-label": "Overall Academic Progress",
+            "average-grade-label": "Average Grade",
+            "completed-tasks-label": "Completed Assignments",
+            "achievements-label": "Achievements",
+
+            // عناوين المخططات
+            "subjects-chart-title": "Progress in Subjects",
+            "monthly-progress-title": "Monthly Progress",
+            "detailed-progress-title": "Detailed Progress in Subjects",
+
+            // تسميات المخططات
+            "math-label": "Math",
+            "science-label": "Science",
+            "arabic-label": "Arabic",
+            "english-label": "English",
+            "history-label": "History",
+            "jan-label": "Jan",
+            "feb-label": "Feb",
+            "mar-label": "Mar",
+            "apr-label": "Apr",
+            "may-label": "May",
+
+            // رؤوس الجدول
+            "subject-header": "Subject",
+            "progress-header": "Progress",
+            "grade-header": "Grade",
+            "assignments-header": "Assignments",
+            "exams-header": "Exams",
+            "status-header": "Status",
+
+            // صفوف الجدول
+            "math-row": "Mathematics",
+            "science-row": "Science",
+            "arabic-row": "Arabic Language",
+            "english-row": "English Language",
+            "history-row": "History",
+
+            // حالات المواد
+            "math-status": "Excellent",
+            "science-status": "Very Good",
+            "arabic-status": "Excellent",
+            "english-status": "Good",
+            "history-status": "Very Good",
+
+            // عناصر مشتركة
+            "logout-text": "Logout",
+            "dark-mode-text": "Dark Mode",
+            "dark-mode-btn-text": "Dark Mode",
+            "back-text": "Back",
+          },
+        };
+
+        // تطبيق الترجمات
+        Object.keys(translations[currentLanguage]).forEach((key) => {
+          const element = document.getElementById(key);
+          if (element) {
+            element.textContent = translations[currentLanguage][key];
+          }
+        });
+      }
+
+      // تحديث نص زر الوضع الداكن
+      function updateDarkModeText() {
+        const darkModeText =
+          currentLanguage === "ar"
+            ? darkMode
+              ? "الوضع الفاتح"
+              : "الوضع الداكن"
+            : darkMode
+            ? "Light Mode"
+            : "Dark Mode";
+
+        document.getElementById("dark-mode-text").textContent = darkModeText;
+        document.getElementById("dark-mode-btn-text").textContent =
+          darkModeText;
+
+        // تحديث الأيقونة
+        const icons = document.querySelectorAll(
+          "#dark-mode-toggle i, #dark-mode-toggle-sidebar i"
+        );
+        icons.forEach((icon) => {
+          icon.className = darkMode ? "fas fa-sun" : "fas fa-moon";
+        });
+      }
+
+      // تحديث اللغة والوضع الداكن عند تحميل الصفحة
+      updateLanguage();
+      updateDarkModeText();
     </script>
-</body>
+  </body>
 </html>

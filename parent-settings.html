@@ -1,1013 +1,1170 @@
 <!-- the following is the completed code for DTES/parent-settings.html:  -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>الإعدادات - DT Edu</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        :root {
-            --primary: #4a6cf7;
-            --primary-dark: #3a56d4;
-            --secondary: #6c5ce7;
-            --accent: #00b894;
-            --light: #f8f9fa;
-            --dark: #2d3436;
-            --text: #333;
-            --text-light: #666;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-            --sidebar-width: 260px;
-        }
+      :root {
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
+        --accent: #00b894;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --text: #333;
+        --text-light: #666;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --sidebar-width: 260px;
+      }
 
-        .dark-mode {
-            --light: #1a1a2e;
-            --dark: #f8f9fa;
-            --text: #e6e6e6;
-            --text-light: #b0b0b0;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
+      .dark-mode {
+        --light: #1a1a2e;
+        --dark: #f8f9fa;
+        --text: #e6e6e6;
+        --text-light: #b0b0b0;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', 'Segoe UI', sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Tajawal", "Segoe UI", sans-serif;
+      }
 
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
-            transition: var(--transition);
-        }
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+        transition: var(--transition);
+      }
 
-        body.dark-mode {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-        }
+      body.dark-mode {
+        background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+      }
 
-        body.rtl { direction: rtl; }
-        body.ltr { direction: ltr; }
+      body.rtl {
+        direction: rtl;
+      }
+      body.ltr {
+        direction: ltr;
+      }
 
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
 
+      .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(
+          180deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 20px 0;
+        box-shadow: var(--shadow);
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        transition: var(--transition);
+        z-index: 100;
+      }
+
+      body.rtl .sidebar {
+        right: 0;
+      }
+      body.ltr .sidebar {
+        left: 0;
+      }
+      body.rtl .main-content {
+        margin-right: var(--sidebar-width);
+      }
+      body.ltr .main-content {
+        margin-left: var(--sidebar-width);
+        margin-right: 0;
+      }
+
+      .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .logo img {
+        width: 140px;
+        object-fit: contain;
+        display: block;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, white, #e1f0fa);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .user-info {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .user-name {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .user-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0 15px;
+      }
+
+      .menu-item {
+        margin-bottom: 8px;
+        border-radius: 10px;
+      }
+
+      .menu-item a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .menu-item a:hover,
+      .menu-item.active a {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      body.rtl .menu-item a:hover,
+      body.rtl .menu-item.active a {
+        transform: translateX(-5px);
+      }
+      body.ltr .menu-item a:hover,
+      body.ltr .menu-item.active a {
+        transform: translateX(5px);
+      }
+
+      .menu-item i {
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      body.rtl .menu-item i {
+        margin-left: 10px;
+      }
+      body.ltr .menu-item i {
+        margin-right: 10px;
+      }
+
+      .sidebar-footer {
+        padding: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 20px;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      .header {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .header {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .header h1 {
+        color: var(--primary);
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .dark-mode-toggle,
+      .logout-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dark-mode-toggle {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .dark-mode-toggle:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      .logout-btn {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      .logout-btn:hover {
+        background: rgba(231, 76, 60, 0.2);
+      }
+
+      .settings-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 30px;
+        margin-bottom: 25px;
+      }
+
+      body.dark-mode .settings-card {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .card-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid rgba(74, 108, 247, 0.1);
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--text);
+        font-size: 15px;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: var(--transition);
+        background-color: #f8f9fa;
+      }
+
+      body.dark-mode .form-group input,
+      body.dark-mode .form-group select,
+      body.dark-mode .form-group textarea {
+        background-color: var(--light);
+        color: var(--dark);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        border-color: var(--primary);
+        background-color: white;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+      }
+
+      body.dark-mode .form-group input:focus,
+      body.dark-mode .form-group select:focus,
+      body.dark-mode .form-group textarea:focus {
+        background-color: var(--light);
+      }
+
+      .switch-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      body.dark-mode .switch-container {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .switch-container:last-child {
+        border-bottom: none;
+      }
+
+      .switch-label {
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .switch-description {
+        font-size: 14px;
+        color: var(--text-light);
+        margin-top: 5px;
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 30px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: var(--primary);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(30px);
+      }
+
+      .save-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .save-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .cancel-btn {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .cancel-btn:hover {
+        background: rgba(231, 76, 60, 0.2);
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .language-select {
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background: white;
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .language-select {
+        background: var(--light);
+        color: var(--dark);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .language-select:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      @media (max-width: 992px) {
         .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: var(--shadow);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            transition: var(--transition);
-            z-index: 100;
+          width: 80px;
         }
-
-        body.rtl .sidebar { right: 0; }
-        body.ltr .sidebar { left: 0; }
-        body.rtl .main-content { margin-right: var(--sidebar-width); }
-        body.ltr .main-content { margin-left: var(--sidebar-width); margin-right: 0; }
-
-        .sidebar-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 20px;
+        .sidebar-header .logo-text,
+        .user-info,
+        .menu-item span {
+          display: none;
         }
-
-        .logo {
-            width: 70px;
-            height: 70px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px;
+        body.rtl .main-content {
+          margin-right: 80px;
         }
-
-        .logo svg { width: 50px; height: 50px; }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, white, #e1f0fa);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        body.ltr .main-content {
+          margin-left: 80px;
         }
-
-        .user-info {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .user-name {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .user-type {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0 15px;
-        }
-
-        .menu-item {
-            margin-bottom: 8px;
-            border-radius: 10px;
-        }
-
         .menu-item a {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
+          justify-content: center;
+          padding: 15px;
         }
-
-        .menu-item a:hover,
-        .menu-item.active a {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        body.rtl .menu-item a:hover,
-        body.rtl .menu-item.active a { transform: translateX(-5px); }
-        body.ltr .menu-item a:hover,
-        body.ltr .menu-item.active a { transform: translateX(5px); }
-
         .menu-item i {
-            font-size: 18px;
-            width: 24px;
-            text-align: center;
+          margin: 0;
+          font-size: 20px;
         }
+      }
 
-        body.rtl .menu-item i { margin-left: 10px; }
-        body.ltr .menu-item i { margin-right: 10px; }
-
-        .sidebar-footer {
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: 20px;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            transition: var(--transition);
-        }
-
+      @media (max-width: 768px) {
         .header {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
         }
-
-        body.dark-mode .header {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .header h1 {
-            color: var(--primary);
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .dark-mode-toggle,
-        .logout-btn {
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dark-mode-toggle {
-            background: rgba(74, 108, 247, 0.1);
-            color: var(--primary);
-        }
-
-        .dark-mode-toggle:hover {
-            background: rgba(74, 108, 247, 0.2);
-        }
-
-        .logout-btn {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-        }
-
-        .logout-btn:hover {
-            background: rgba(231, 76, 60, 0.2);
-        }
-
-        .settings-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 30px;
-            margin-bottom: 25px;
-        }
-
-        body.dark-mode .settings-card {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(74, 108, 247, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: var(--text);
-            font-size: 15px;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: var(--transition);
-            background-color: #f8f9fa;
-        }
-
-        body.dark-mode .form-group input,
-        body.dark-mode .form-group select,
-        body.dark-mode .form-group textarea {
-            background-color: var(--light);
-            color: var(--dark);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: var(--primary);
-            background-color: white;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
-        }
-
-        body.dark-mode .form-group input:focus,
-        body.dark-mode .form-group select:focus,
-        body.dark-mode .form-group textarea:focus {
-            background-color: var(--light);
-        }
-
-        .switch-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        body.dark-mode .switch-container {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .switch-container:last-child {
-            border-bottom: none;
-        }
-
-        .switch-label {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .switch-description {
-            font-size: 14px;
-            color: var(--text-light);
-            margin-top: 5px;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 30px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--primary);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(30px);
-        }
-
-        .save-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .save-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .cancel-btn {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .cancel-btn:hover {
-            background: rgba(231, 76, 60, 0.2);
-        }
-
         .btn-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
+          flex-direction: column;
         }
+      }
 
-        .language-select {
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            background: white;
-            color: var(--text);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
+      @media (max-width: 576px) {
+        .main-content {
+          padding: 15px;
         }
-
-        body.dark-mode .language-select {
-            background: var(--light);
-            color: var(--dark);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .sidebar {
+          width: 70px;
         }
-
-        .language-select:focus {
-            outline: none;
-            border-color: var(--primary);
+        body.rtl .main-content {
+          margin-right: 70px;
         }
-
-        @media (max-width: 992px) {
-            .sidebar { width: 80px; }
-            .sidebar-header .logo-text,
-            .user-info,
-            .menu-item span { display: none; }
-            body.rtl .main-content { margin-right: 80px; }
-            body.ltr .main-content { margin-left: 80px; }
-            .menu-item a {
-                justify-content: center;
-                padding: 15px;
-            }
-            .menu-item i {
-                margin: 0;
-                font-size: 20px;
-            }
+        body.ltr .main-content {
+          margin-left: 70px;
         }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .btn-group {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .main-content { padding: 15px; }
-            .sidebar { width: 70px; }
-            body.rtl .main-content { margin-right: 70px; }
-            body.ltr .main-content { margin-left: 70px; }
-        }
+      }
     </style>
-</head>
-<body class="rtl">
+  </head>
+  <body class="rtl">
     <div class="dashboard-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#4a6cf7"/>
-                                <stop offset="100%" stop-color="#00b894"/>
-                            </linearGradient>
-                        </defs>
-                        <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
-                        <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
-                        <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
-                        <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
-                        <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
-                    </svg>
-                </div>
-                <div class="logo-text">DT Edu</div>
-                <div class="user-info">
-                    <div class="user-name" id="user-name">ولي الأمر</div>
-                    <div class="user-type" id="user-type">Parent</div>
-                </div>
-            </div>
-
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="parent-dashboard.html">
-                        <i class="fas fa-home"></i>
-                        <span id="menu-dashboard">لوحة التحكم</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-children.html">
-                        <i class="fas fa-child"></i>
-                        <span id="menu-children">الأبناء</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-attendance.html">
-                        <i class="fas fa-calendar-check"></i>
-                        <span id="menu-attendance">الحضور والغياب</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-grades.html">
-                        <i class="fas fa-chart-line"></i>
-                        <span id="menu-grades">الدرجات والتقييمات</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-messages.html">
-                        <i class="fas fa-comments"></i>
-                        <span id="menu-messages">الرسائل</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-payments.html">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span id="menu-payments">المدفوعات</span>
-                    </a>
-                </li>
-                <li class="menu-item active">
-                    <a href="parent-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span id="menu-settings">الإعدادات</span>
-                    </a>
-                </li>
-            </ul>
-
-            <div class="sidebar-footer">
-            </div>
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <img src="logo.png" alt="Logo" />
+          </div>
+          <div class="logo-text">DT Edu</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">ولي الأمر</div>
+            <div class="user-type" id="user-type">Parent</div>
+          </div>
         </div>
 
-        <div class="main-content">
-            <div class="header">
-                <h1 id="page-title">الإعدادات</h1>
-            </div>
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="parent-dashboard.html">
+              <i class="fas fa-home"></i>
+              <span id="menu-dashboard">لوحة التحكم</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-children.html">
+              <i class="fas fa-child"></i>
+              <span id="menu-children">الأبناء</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-homework.html">
+              <i class="fas fa-clipboard-list"></i>
+              <span id="menu-homework">الواجبات المنزلية</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-calendar.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-calendar">الجدول والفعاليات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-attendance.html">
+              <i class="fas fa-calendar-check"></i>
+              <span id="menu-attendance">الحضور والغياب</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-grades.html">
+              <i class="fas fa-chart-line"></i>
+              <span id="menu-grades">الدرجات والتقييمات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-messages.html">
+              <i class="fas fa-comments"></i>
+              <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-payments.html">
+              <i class="fas fa-money-bill-wave"></i>
+              <span id="menu-payments">المدفوعات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-reports.html">
+              <i class="fas fa-file-alt"></i>
+              <span id="menu-reports">التقارير</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="parent-settings.html">
+              <i class="fas fa-cog"></i>
+              <span id="menu-settings">الإعدادات</span>
+            </a>
+          </li>
+        </ul>
 
-            <div class="settings-card">
-                <h2 class="card-title">
-                    <i class="fas fa-user"></i>
-                    <span id="profile-title">المعلومات الشخصية</span>
-                </h2>
-                <form onsubmit="event.preventDefault(); saveSettings();">
-                    <div class="form-group">
-                        <label id="name-label">الاسم الكامل</label>
-                        <input type="text" value="محمد أحمد السعيد" required>
-                    </div>
-                    <div class="form-group">
-                        <label id="email-label">البريد الإلكتروني</label>
-                        <input type="email" value="parent@example.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label id="phone-label">رقم الهاتف</label>
-                        <input type="tel" value="+966 50 123 4567" required>
-                    </div>
-                    <div class="form-group">
-                        <label id="address-label">العنوان</label>
-                        <textarea rows="3">الرياض، المملكة العربية السعودية</textarea>
-                    </div>
-                </form>
-            </div>
+        <div class="sidebar-footer"></div>
+      </div>
 
-            <div class="settings-card">
-                <h2 class="card-title">
-                    <i class="fas fa-cog"></i>
-                    <span id="general-settings-title">الإعدادات العامة</span>
-                </h2>
-                <div class="switch-container">
-                    <div>
-                        <div class="switch-label" id="language-setting">اللغة</div>
-                        <div class="switch-description" id="language-desc">اختر اللغة المفضلة للوحة التحكم</div>
-                    </div>
-                    <select class="language-select" id="language-select" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ddd; background: white; font-weight: 600; cursor: pointer;">
-                        <option value="ar">العربية</option>
-                        <option value="en">English</option>
-                    </select>
-                </div>
-                <div class="switch-container">
-                    <div>
-                        <div class="switch-label" id="dark-mode-setting">وضع العرض</div>
-                        <div class="switch-description" id="dark-mode-desc">تبديل بين الوضع الفاتح والوضع الداكن</div>
-                    </div>
-                    <button class="save-btn" id="dark-mode-toggle" style="padding: 10px 20px;">
-                        <i class="fas fa-moon"></i>
-                        <span id="dark-mode-text">الوضع الداكن</span>
-                    </button>
-                </div>
-                <div class="switch-container">
-                    <div>
-                        <div class="switch-label" id="logout-setting">تسجيل الخروج</div>
-                        <div class="switch-description" id="logout-desc">الخروج من حسابك الحالي</div>
-                    </div>
-                    <button class="cancel-btn" onclick="window.location.href='index.html'" style="padding: 10px 20px;">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span id="logout-text">تسجيل الخروج</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="settings-card">
-                <h2 class="card-title">
-                    <i class="fas fa-bell"></i>
-                    <span id="notifications-title">إعدادات الإشعارات</span>
-                </h2>
-                <div class="switch-container">
-                    <div>
-                        <div class="switch-label" id="email-notif-label">إشعارات البريد الإلكتروني</div>
-                        <div class="switch-description" id="email-notif-desc">تلقي التحديثات عبر البريد الإلكتروني</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="switch-container">
-                    <div>
-                        <div class="switch-label" id="sms-notif-label">إشعارات الرسائل النصية</div>
-                        <div class="switch-description" id="sms-notif-desc">تلقي التحديثات عبر الرسائل النصية</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="switch-container">
-                    <div>
-                        <div class="switch-label" id="grades-notif-label">إشعارات الدرجات</div>
-                        <div class="switch-description" id="grades-notif-desc">إشعار عند نشر الدرجات الجديدة</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="switch-container">
-                    <div>
-                        <div class="switch-label" id="attendance-notif-label">إشعارات الحضور</div>
-                        <div class="switch-description" id="attendance-notif-desc">إشعار عند الغياب أو التأخر</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="settings-card">
-                <h2 class="card-title">
-                    <i class="fas fa-universal-access"></i>
-                    <span id="accessibility-title">إعدادات إمكانية الوصول</span>
-                </h2>
-                <div class="switch-container">
-                    <div>
-                        <div class="switch-label" id="high-contrast-label">التباين العالي</div>
-                        <div class="switch-description" id="high-contrast-desc">تحسين التباين للرؤية الأفضل</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="high-contrast-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="switch-container">
-                    <div>
-                        <div class="switch-label" id="font-size-label">حجم الخط</div>
-                        <div class="switch-description" id="font-size-desc">تعديل حجم الخط لسهولة القراءة</div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="save-btn" onclick="decreaseFontSize()" style="padding: 8px 15px;">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button class="save-btn" onclick="resetFontSize()" style="padding: 8px 15px;">
-                            <i class="fas fa-redo"></i>
-                        </button>
-                        <button class="save-btn" onclick="increaseFontSize()" style="padding: 8px 15px;">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-card">
-                <h2 class="card-title">
-                    <i class="fas fa-lock"></i>
-                    <span id="security-title">الأمان والخصوصية</span>
-                </h2>
-                <form onsubmit="event.preventDefault(); changePassword();">
-                    <div class="form-group">
-                        <label id="current-password-label">كلمة المرور الحالية</label>
-                        <input type="password" placeholder="••••••••">
-                    </div>
-                    <div class="form-group">
-                        <label id="new-password-label">كلمة المرور الجديدة</label>
-                        <input type="password" placeholder="••••••••">
-                    </div>
-                    <div class="form-group">
-                        <label id="confirm-password-label">تأكيد كلمة المرور</label>
-                        <input type="password" placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="save-btn">
-                        <i class="fas fa-key"></i>
-                        <span id="change-password-btn">تغيير كلمة المرور</span>
-                    </button>
-                </form>
-            </div>
-
-            <div class="btn-group">
-                <button class="save-btn" onclick="saveSettings()">
-                    <i class="fas fa-save"></i>
-                    <span id="save-btn-text">حفظ التغييرات</span>
-                </button>
-                <button class="cancel-btn" onclick="cancelChanges()">
-                    <i class="fas fa-times"></i>
-                    <span id="cancel-btn-text">إلغاء</span>
-                </button>
-            </div>
+      <div class="main-content">
+        <div class="header">
+          <h1 id="page-title">الإعدادات</h1>
         </div>
+
+        <div class="settings-card">
+          <h2 class="card-title">
+            <i class="fas fa-user"></i>
+            <span id="profile-title">المعلومات الشخصية</span>
+          </h2>
+          <form onsubmit="event.preventDefault(); saveSettings();">
+            <div class="form-group">
+              <label id="name-label">الاسم الكامل</label>
+              <input type="text" value="محمد أحمد السعيد" required />
+            </div>
+            <div class="form-group">
+              <label id="email-label">البريد الإلكتروني</label>
+              <input type="email" value="parent@example.com" required />
+            </div>
+            <div class="form-group">
+              <label id="phone-label">رقم الهاتف</label>
+              <input type="tel" value="+966 50 123 4567" required />
+            </div>
+            <div class="form-group">
+              <label id="address-label">العنوان</label>
+              <textarea rows="3">الرياض، المملكة العربية السعودية</textarea>
+            </div>
+          </form>
+        </div>
+
+        <div class="settings-card">
+          <h2 class="card-title">
+            <i class="fas fa-cog"></i>
+            <span id="general-settings-title">الإعدادات العامة</span>
+          </h2>
+          <div class="switch-container">
+            <div>
+              <div class="switch-label" id="language-setting">اللغة</div>
+              <div class="switch-description" id="language-desc">
+                اختر اللغة المفضلة للوحة التحكم
+              </div>
+            </div>
+            <select
+              class="language-select"
+              id="language-select"
+              style="
+                padding: 10px 15px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                background: white;
+                font-weight: 600;
+                cursor: pointer;
+              "
+            >
+              <option value="ar">العربية</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="switch-container">
+            <div>
+              <div class="switch-label" id="dark-mode-setting">وضع العرض</div>
+              <div class="switch-description" id="dark-mode-desc">
+                تبديل بين الوضع الفاتح والوضع الداكن
+              </div>
+            </div>
+            <button
+              class="save-btn"
+              id="dark-mode-toggle"
+              style="padding: 10px 20px"
+            >
+              <i class="fas fa-moon"></i>
+              <span id="dark-mode-text">الوضع الداكن</span>
+            </button>
+          </div>
+          <div class="switch-container">
+            <div>
+              <div class="switch-label" id="logout-setting">تسجيل الخروج</div>
+              <div class="switch-description" id="logout-desc">
+                الخروج من حسابك الحالي
+              </div>
+            </div>
+            <button
+              class="cancel-btn"
+              onclick="window.location.href='index.html'"
+              style="padding: 10px 20px"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+              <span id="logout-text">تسجيل الخروج</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h2 class="card-title">
+            <i class="fas fa-bell"></i>
+            <span id="notifications-title">إعدادات الإشعارات</span>
+          </h2>
+          <div class="switch-container">
+            <div>
+              <div class="switch-label" id="email-notif-label">
+                إشعارات البريد الإلكتروني
+              </div>
+              <div class="switch-description" id="email-notif-desc">
+                تلقي التحديثات عبر البريد الإلكتروني
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch-container">
+            <div>
+              <div class="switch-label" id="sms-notif-label">
+                إشعارات الرسائل النصية
+              </div>
+              <div class="switch-description" id="sms-notif-desc">
+                تلقي التحديثات عبر الرسائل النصية
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch-container">
+            <div>
+              <div class="switch-label" id="grades-notif-label">
+                إشعارات الدرجات
+              </div>
+              <div class="switch-description" id="grades-notif-desc">
+                إشعار عند نشر الدرجات الجديدة
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch-container">
+            <div>
+              <div class="switch-label" id="attendance-notif-label">
+                إشعارات الحضور
+              </div>
+              <div class="switch-description" id="attendance-notif-desc">
+                إشعار عند الغياب أو التأخر
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h2 class="card-title">
+            <i class="fas fa-universal-access"></i>
+            <span id="accessibility-title">إعدادات إمكانية الوصول</span>
+          </h2>
+          <div class="switch-container">
+            <div>
+              <div class="switch-label" id="high-contrast-label">
+                التباين العالي
+              </div>
+              <div class="switch-description" id="high-contrast-desc">
+                تحسين التباين للرؤية الأفضل
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="high-contrast-toggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch-container">
+            <div>
+              <div class="switch-label" id="font-size-label">حجم الخط</div>
+              <div class="switch-description" id="font-size-desc">
+                تعديل حجم الخط لسهولة القراءة
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px">
+              <button
+                class="save-btn"
+                onclick="decreaseFontSize()"
+                style="padding: 8px 15px"
+              >
+                <i class="fas fa-minus"></i>
+              </button>
+              <button
+                class="save-btn"
+                onclick="resetFontSize()"
+                style="padding: 8px 15px"
+              >
+                <i class="fas fa-redo"></i>
+              </button>
+              <button
+                class="save-btn"
+                onclick="increaseFontSize()"
+                style="padding: 8px 15px"
+              >
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h2 class="card-title">
+            <i class="fas fa-lock"></i>
+            <span id="security-title">الأمان والخصوصية</span>
+          </h2>
+          <form onsubmit="event.preventDefault(); changePassword();">
+            <div class="form-group">
+              <label id="current-password-label">كلمة المرور الحالية</label>
+              <input type="password" placeholder="••••••••" />
+            </div>
+            <div class="form-group">
+              <label id="new-password-label">كلمة المرور الجديدة</label>
+              <input type="password" placeholder="••••••••" />
+            </div>
+            <div class="form-group">
+              <label id="confirm-password-label">تأكيد كلمة المرور</label>
+              <input type="password" placeholder="••••••••" />
+            </div>
+            <button type="submit" class="save-btn">
+              <i class="fas fa-key"></i>
+              <span id="change-password-btn">تغيير كلمة المرور</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="btn-group">
+          <button class="save-btn" onclick="saveSettings()">
+            <i class="fas fa-save"></i>
+            <span id="save-btn-text">حفظ التغييرات</span>
+          </button>
+          <button class="cancel-btn" onclick="cancelChanges()">
+            <i class="fas fa-times"></i>
+            <span id="cancel-btn-text">إلغاء</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <script src="core.js"></script>
     <script>
-        const translations = {
-            ar: {
-                pageTitle: 'الإعدادات',
-                userType: 'ولي أمر',
-                menuDashboard: 'لوحة التحكم',
-                menuChildren: 'الأبناء',
-                menuAttendance: 'الحضور والغياب',
-                menuGrades: 'الدرجات والتقييمات',
-                menuMessages: 'الرسائل',
-                menuPayments: 'المدفوعات',
-                menuSettings: 'الإعدادات',
-                darkModeText: 'الوضع الداكن',
-                logoutText: 'تسجيل الخروج',
-                generalSettingsTitle: 'الإعدادات العامة',
-                languageSetting: 'اللغة',
-                languageDesc: 'اختر اللغة المفضلة للوحة التحكم',
-                darkModeSetting: 'وضع العرض',
-                darkModeDesc: 'تبديل بين الوضع الفاتح والوضع الداكن',
-                logoutSetting: 'تسجيل الخروج',
-                logoutDesc: 'الخروج من حسابك الحالي',
-                profileTitle: 'المعلومات الشخصية',
-                nameLabel: 'الاسم الكامل',
-                emailLabel: 'البريد الإلكتروني',
-                phoneLabel: 'رقم الهاتف',
-                addressLabel: 'العنوان',
-                notificationsTitle: 'إعدادات الإشعارات',
-                emailNotifLabel: 'إشعارات البريد الإلكتروني',
-                emailNotifDesc: 'تلقي التحديثات عبر البريد الإلكتروني',
-                smsNotifLabel: 'إشعارات الرسائل النصية',
-                smsNotifDesc: 'تلقي التحديثات عبر الرسائل النصية',
-                gradesNotifLabel: 'إشعارات الدرجات',
-                gradesNotifDesc: 'إشعار عند نشر الدرجات الجديدة',
-                attendanceNotifLabel: 'إشعارات الحضور',
-                attendanceNotifDesc: 'إشعار عند الغياب أو التأخر',
-                accessibilityTitle: 'إعدادات إمكانية الوصول',
-                highContrastLabel: 'التباين العالي',
-                highContrastDesc: 'تحسين التباين للرؤية الأفضل',
-                fontSizeLabel: 'حجم الخط',
-                fontSizeDesc: 'تعديل حجم الخط لسهولة القراءة',
-                securityTitle: 'الأمان والخصوصية',
-                currentPasswordLabel: 'كلمة المرور الحالية',
-                newPasswordLabel: 'كلمة المرور الجديدة',
-                confirmPasswordLabel: 'تأكيد كلمة المرور',
-                changePasswordBtn: 'تغيير كلمة المرور',
-                saveBtnText: 'حفظ التغييرات',
-                cancelBtnText: 'إلغاء'
-            },
-            en: {
-                pageTitle: 'Settings',
-                userType: 'Parent',
-                menuDashboard: 'Dashboard',
-                menuChildren: 'Children',
-                menuAttendance: 'Attendance',
-                menuGrades: 'Grades',
-                menuMessages: 'Messages',
-                menuPayments: 'Payments',
-                menuSettings: 'Settings',
-                darkModeText: 'Dark Mode',
-                logoutText: 'Logout',
-                generalSettingsTitle: 'General Settings',
-                languageSetting: 'Language',
-                languageDesc: 'Choose your preferred language for the dashboard',
-                darkModeSetting: 'Display Mode',
-                darkModeDesc: 'Toggle between light and dark mode',
-                logoutSetting: 'Logout',
-                logoutDesc: 'Sign out of your current account',
-                profileTitle: 'Personal Information',
-                nameLabel: 'Full Name',
-                emailLabel: 'Email Address',
-                phoneLabel: 'Phone Number',
-                addressLabel: 'Address',
-                notificationsTitle: 'Notification Settings',
-                emailNotifLabel: 'Email Notifications',
-                emailNotifDesc: 'Receive updates via email',
-                smsNotifLabel: 'SMS Notifications',
-                smsNotifDesc: 'Receive updates via SMS',
-                gradesNotifLabel: 'Grades Notifications',
-                gradesNotifDesc: 'Notify when new grades are posted',
-                attendanceNotifLabel: 'Attendance Notifications',
-                attendanceNotifDesc: 'Notify on absence or tardiness',
-                accessibilityTitle: 'Accessibility Settings',
-                highContrastLabel: 'High Contrast',
-                highContrastDesc: 'Improve contrast for better visibility',
-                fontSizeLabel: 'Font Size',
-                fontSizeDesc: 'Adjust font size for easier reading',
-                securityTitle: 'Security & Privacy',
-                currentPasswordLabel: 'Current Password',
-                newPasswordLabel: 'New Password',
-                confirmPasswordLabel: 'Confirm Password',
-                changePasswordBtn: 'Change Password',
-                saveBtnText: 'Save Changes',
-                cancelBtnText: 'Cancel'
-            }
-        };
+      const translations = {
+        ar: {
+          pageTitle: "الإعدادات",
+          userType: "ولي أمر",
+          menuDashboard: "لوحة التحكم",
+          menuChildren: "الأبناء",
+          menuAttendance: "الحضور والغياب",
+          menuGrades: "الدرجات والتقييمات",
+          menuMessages: "الرسائل",
+          menuPayments: "المدفوعات",
+          menuSettings: "الإعدادات",
+          darkModeText: "الوضع الداكن",
+          logoutText: "تسجيل الخروج",
+          generalSettingsTitle: "الإعدادات العامة",
+          languageSetting: "اللغة",
+          languageDesc: "اختر اللغة المفضلة للوحة التحكم",
+          darkModeSetting: "وضع العرض",
+          darkModeDesc: "تبديل بين الوضع الفاتح والوضع الداكن",
+          logoutSetting: "تسجيل الخروج",
+          logoutDesc: "الخروج من حسابك الحالي",
+          profileTitle: "المعلومات الشخصية",
+          nameLabel: "الاسم الكامل",
+          emailLabel: "البريد الإلكتروني",
+          phoneLabel: "رقم الهاتف",
+          addressLabel: "العنوان",
+          notificationsTitle: "إعدادات الإشعارات",
+          emailNotifLabel: "إشعارات البريد الإلكتروني",
+          emailNotifDesc: "تلقي التحديثات عبر البريد الإلكتروني",
+          smsNotifLabel: "إشعارات الرسائل النصية",
+          smsNotifDesc: "تلقي التحديثات عبر الرسائل النصية",
+          gradesNotifLabel: "إشعارات الدرجات",
+          gradesNotifDesc: "إشعار عند نشر الدرجات الجديدة",
+          attendanceNotifLabel: "إشعارات الحضور",
+          attendanceNotifDesc: "إشعار عند الغياب أو التأخر",
+          accessibilityTitle: "إعدادات إمكانية الوصول",
+          highContrastLabel: "التباين العالي",
+          highContrastDesc: "تحسين التباين للرؤية الأفضل",
+          fontSizeLabel: "حجم الخط",
+          fontSizeDesc: "تعديل حجم الخط لسهولة القراءة",
+          securityTitle: "الأمان والخصوصية",
+          currentPasswordLabel: "كلمة المرور الحالية",
+          newPasswordLabel: "كلمة المرور الجديدة",
+          confirmPasswordLabel: "تأكيد كلمة المرور",
+          changePasswordBtn: "تغيير كلمة المرور",
+          saveBtnText: "حفظ التغييرات",
+          cancelBtnText: "إلغاء",
+        },
+        en: {
+          pageTitle: "Settings",
+          userType: "Parent",
+          menuDashboard: "Dashboard",
+          menuChildren: "Children",
+          menuAttendance: "Attendance",
+          menuGrades: "Grades",
+          menuMessages: "Messages",
+          menuPayments: "Payments",
+          menuSettings: "Settings",
+          darkModeText: "Dark Mode",
+          logoutText: "Logout",
+          generalSettingsTitle: "General Settings",
+          languageSetting: "Language",
+          languageDesc: "Choose your preferred language for the dashboard",
+          darkModeSetting: "Display Mode",
+          darkModeDesc: "Toggle between light and dark mode",
+          logoutSetting: "Logout",
+          logoutDesc: "Sign out of your current account",
+          profileTitle: "Personal Information",
+          nameLabel: "Full Name",
+          emailLabel: "Email Address",
+          phoneLabel: "Phone Number",
+          addressLabel: "Address",
+          notificationsTitle: "Notification Settings",
+          emailNotifLabel: "Email Notifications",
+          emailNotifDesc: "Receive updates via email",
+          smsNotifLabel: "SMS Notifications",
+          smsNotifDesc: "Receive updates via SMS",
+          gradesNotifLabel: "Grades Notifications",
+          gradesNotifDesc: "Notify when new grades are posted",
+          attendanceNotifLabel: "Attendance Notifications",
+          attendanceNotifDesc: "Notify on absence or tardiness",
+          accessibilityTitle: "Accessibility Settings",
+          highContrastLabel: "High Contrast",
+          highContrastDesc: "Improve contrast for better visibility",
+          fontSizeLabel: "Font Size",
+          fontSizeDesc: "Adjust font size for easier reading",
+          securityTitle: "Security & Privacy",
+          currentPasswordLabel: "Current Password",
+          newPasswordLabel: "New Password",
+          confirmPasswordLabel: "Confirm Password",
+          changePasswordBtn: "Change Password",
+          saveBtnText: "Save Changes",
+          cancelBtnText: "Cancel",
+        },
+      };
 
-        function updateLanguage(lang) {
-            const t = translations[lang];
-            document.getElementById('page-title').textContent = t.pageTitle;
-            document.getElementById('user-type').textContent = t.userType;
-            document.getElementById('menu-dashboard').textContent = t.menuDashboard;
-            document.getElementById('menu-children').textContent = t.menuChildren;
-            document.getElementById('menu-attendance').textContent = t.menuAttendance;
-            document.getElementById('menu-grades').textContent = t.menuGrades;
-            document.getElementById('menu-messages').textContent = t.menuMessages;
-            document.getElementById('menu-payments').textContent = t.menuPayments;
-            document.getElementById('menu-settings').textContent = t.menuSettings;
-            
-            // Update general settings
-            if (document.getElementById('general-settings-title')) {
-                document.getElementById('general-settings-title').textContent = t.generalSettingsTitle;
-            }
-            if (document.getElementById('language-setting')) {
-                document.getElementById('language-setting').textContent = t.languageSetting;
-            }
-            if (document.getElementById('language-desc')) {
-                document.getElementById('language-desc').textContent = t.languageDesc;
-            }
-            if (document.getElementById('dark-mode-setting')) {
-                document.getElementById('dark-mode-setting').textContent = t.darkModeSetting;
-            }
-            if (document.getElementById('dark-mode-desc')) {
-                document.getElementById('dark-mode-desc').textContent = t.darkModeDesc;
-            }
-            if (document.getElementById('dark-mode-text')) {
-                const isDark = document.body.classList.contains('dark-mode');
-                document.getElementById('dark-mode-text').textContent = lang === 'ar' ? 
-                    (isDark ? 'الوضع الفاتح' : 'الوضع الداكن') : 
-                    (isDark ? 'Light Mode' : 'Dark Mode');
-            }
-            if (document.getElementById('logout-setting')) {
-                document.getElementById('logout-setting').textContent = t.logoutSetting;
-            }
-            if (document.getElementById('logout-desc')) {
-                document.getElementById('logout-desc').textContent = t.logoutDesc;
-            }
-            if (document.getElementById('logout-text')) {
-                document.getElementById('logout-text').textContent = t.logoutText;
-            }
-            
-            document.getElementById('profile-title').textContent = t.profileTitle;
-            document.getElementById('name-label').textContent = t.nameLabel;
-            document.getElementById('email-label').textContent = t.emailLabel;
-            document.getElementById('phone-label').textContent = t.phoneLabel;
-            document.getElementById('address-label').textContent = t.addressLabel;
-            document.getElementById('notifications-title').textContent = t.notificationsTitle;
-            document.getElementById('email-notif-label').textContent = t.emailNotifLabel;
-            document.getElementById('email-notif-desc').textContent = t.emailNotifDesc;
-            document.getElementById('sms-notif-label').textContent = t.smsNotifLabel;
-            document.getElementById('sms-notif-desc').textContent = t.smsNotifDesc;
-            document.getElementById('grades-notif-label').textContent = t.gradesNotifLabel;
-            document.getElementById('grades-notif-desc').textContent = t.gradesNotifDesc;
-            document.getElementById('attendance-notif-label').textContent = t.attendanceNotifLabel;
-            document.getElementById('attendance-notif-desc').textContent = t.attendanceNotifDesc;
-            if (document.getElementById('accessibility-title')) {
-                document.getElementById('accessibility-title').textContent = t.accessibilityTitle;
-            }
-            if (document.getElementById('high-contrast-label')) {
-                document.getElementById('high-contrast-label').textContent = t.highContrastLabel;
-            }
-            if (document.getElementById('high-contrast-desc')) {
-                document.getElementById('high-contrast-desc').textContent = t.highContrastDesc;
-            }
-            if (document.getElementById('font-size-label')) {
-                document.getElementById('font-size-label').textContent = t.fontSizeLabel;
-            }
-            if (document.getElementById('font-size-desc')) {
-                document.getElementById('font-size-desc').textContent = t.fontSizeDesc;
-            }
-            document.getElementById('security-title').textContent = t.securityTitle;
-            document.getElementById('current-password-label').textContent = t.currentPasswordLabel;
-            document.getElementById('new-password-label').textContent = t.newPasswordLabel;
-            document.getElementById('confirm-password-label').textContent = t.confirmPasswordLabel;
-            document.getElementById('change-password-btn').textContent = t.changePasswordBtn;
-            document.getElementById('save-btn-text').textContent = t.saveBtnText;
-            document.getElementById('cancel-btn-text').textContent = t.cancelBtnText;
+      function updateLanguage(lang) {
+        const t = translations[lang];
+        document.getElementById("page-title").textContent = t.pageTitle;
+        document.getElementById("user-type").textContent = t.userType;
+        document.getElementById("menu-dashboard").textContent = t.menuDashboard;
+        document.getElementById("menu-children").textContent = t.menuChildren;
+        document.getElementById("menu-attendance").textContent =
+          t.menuAttendance;
+        document.getElementById("menu-grades").textContent = t.menuGrades;
+        document.getElementById("menu-messages").textContent = t.menuMessages;
+        document.getElementById("menu-payments").textContent = t.menuPayments;
+        document.getElementById("menu-settings").textContent = t.menuSettings;
+
+        // Update general settings
+        if (document.getElementById("general-settings-title")) {
+          document.getElementById("general-settings-title").textContent =
+            t.generalSettingsTitle;
+        }
+        if (document.getElementById("language-setting")) {
+          document.getElementById("language-setting").textContent =
+            t.languageSetting;
+        }
+        if (document.getElementById("language-desc")) {
+          document.getElementById("language-desc").textContent = t.languageDesc;
+        }
+        if (document.getElementById("dark-mode-setting")) {
+          document.getElementById("dark-mode-setting").textContent =
+            t.darkModeSetting;
+        }
+        if (document.getElementById("dark-mode-desc")) {
+          document.getElementById("dark-mode-desc").textContent =
+            t.darkModeDesc;
+        }
+        if (document.getElementById("dark-mode-text")) {
+          const isDark = document.body.classList.contains("dark-mode");
+          document.getElementById("dark-mode-text").textContent =
+            lang === "ar"
+              ? isDark
+                ? "الوضع الفاتح"
+                : "الوضع الداكن"
+              : isDark
+              ? "Light Mode"
+              : "Dark Mode";
+        }
+        if (document.getElementById("logout-setting")) {
+          document.getElementById("logout-setting").textContent =
+            t.logoutSetting;
+        }
+        if (document.getElementById("logout-desc")) {
+          document.getElementById("logout-desc").textContent = t.logoutDesc;
+        }
+        if (document.getElementById("logout-text")) {
+          document.getElementById("logout-text").textContent = t.logoutText;
         }
 
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-            // Update button text
-            const isDark = document.body.classList.contains('dark-mode');
-            const currentLang = localStorage.getItem('language') || 'ar';
-            if (darkModeToggle) {
-                const textSpan = darkModeToggle.querySelector('span');
-                if (textSpan) {
-                    textSpan.textContent = currentLang === 'ar' ? 
-                        (isDark ? 'الوضع الفاتح' : 'الوضع الداكن') : 
-                        (isDark ? 'Light Mode' : 'Dark Mode');
-                }
-            }
+        document.getElementById("profile-title").textContent = t.profileTitle;
+        document.getElementById("name-label").textContent = t.nameLabel;
+        document.getElementById("email-label").textContent = t.emailLabel;
+        document.getElementById("phone-label").textContent = t.phoneLabel;
+        document.getElementById("address-label").textContent = t.addressLabel;
+        document.getElementById("notifications-title").textContent =
+          t.notificationsTitle;
+        document.getElementById("email-notif-label").textContent =
+          t.emailNotifLabel;
+        document.getElementById("email-notif-desc").textContent =
+          t.emailNotifDesc;
+        document.getElementById("sms-notif-label").textContent =
+          t.smsNotifLabel;
+        document.getElementById("sms-notif-desc").textContent = t.smsNotifDesc;
+        document.getElementById("grades-notif-label").textContent =
+          t.gradesNotifLabel;
+        document.getElementById("grades-notif-desc").textContent =
+          t.gradesNotifDesc;
+        document.getElementById("attendance-notif-label").textContent =
+          t.attendanceNotifLabel;
+        document.getElementById("attendance-notif-desc").textContent =
+          t.attendanceNotifDesc;
+        if (document.getElementById("accessibility-title")) {
+          document.getElementById("accessibility-title").textContent =
+            t.accessibilityTitle;
         }
+        if (document.getElementById("high-contrast-label")) {
+          document.getElementById("high-contrast-label").textContent =
+            t.highContrastLabel;
+        }
+        if (document.getElementById("high-contrast-desc")) {
+          document.getElementById("high-contrast-desc").textContent =
+            t.highContrastDesc;
+        }
+        if (document.getElementById("font-size-label")) {
+          document.getElementById("font-size-label").textContent =
+            t.fontSizeLabel;
+        }
+        if (document.getElementById("font-size-desc")) {
+          document.getElementById("font-size-desc").textContent =
+            t.fontSizeDesc;
+        }
+        document.getElementById("security-title").textContent = t.securityTitle;
+        document.getElementById("current-password-label").textContent =
+          t.currentPasswordLabel;
+        document.getElementById("new-password-label").textContent =
+          t.newPasswordLabel;
+        document.getElementById("confirm-password-label").textContent =
+          t.confirmPasswordLabel;
+        document.getElementById("change-password-btn").textContent =
+          t.changePasswordBtn;
+        document.getElementById("save-btn-text").textContent = t.saveBtnText;
+        document.getElementById("cancel-btn-text").textContent =
+          t.cancelBtnText;
+      }
 
+      const darkModeToggle = document.getElementById("dark-mode-toggle");
+
+      function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem(
+          "darkMode",
+          document.body.classList.contains("dark-mode")
+        );
+        // Update button text
+        const isDark = document.body.classList.contains("dark-mode");
+        const currentLang = localStorage.getItem("language") || "ar";
         if (darkModeToggle) {
-            darkModeToggle.addEventListener('click', toggleDarkMode);
+          const textSpan = darkModeToggle.querySelector("span");
+          if (textSpan) {
+            textSpan.textContent =
+              currentLang === "ar"
+                ? isDark
+                  ? "الوضع الفاتح"
+                  : "الوضع الداكن"
+                : isDark
+                ? "Light Mode"
+                : "Dark Mode";
+          }
         }
+      }
 
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
+      if (darkModeToggle) {
+        darkModeToggle.addEventListener("click", toggleDarkMode);
+      }
 
-        function saveSettings() {
-            showToast('success', 'تم حفظ الإعدادات بنجاح!');
-        }
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+      }
 
-        function cancelChanges() {
-            if (confirm('هل أنت متأكد من إلغاء التغييرات؟')) {
-                location.reload();
-            }
-        }
+      function saveSettings() {
+        showToast("success", "تم حفظ الإعدادات بنجاح!");
+      }
 
-        function changePassword() {
-            showToast('success', 'تم تغيير كلمة المرور بنجاح!');
+      function cancelChanges() {
+        if (confirm("هل أنت متأكد من إلغاء التغييرات؟")) {
+          location.reload();
         }
+      }
 
-        // Accessibility functions
-        function increaseFontSize() {
-            const currentSize = parseInt(getComputedStyle(document.body).fontSize);
-            document.body.style.fontSize = (currentSize + 2) + 'px';
-            localStorage.setItem('fontSize', (currentSize + 2));
-        }
+      function changePassword() {
+        showToast("success", "تم تغيير كلمة المرور بنجاح!");
+      }
 
-        function decreaseFontSize() {
-            const currentSize = parseInt(getComputedStyle(document.body).fontSize);
-            document.body.style.fontSize = (currentSize - 2) + 'px';
-            localStorage.setItem('fontSize', (currentSize - 2));
-        }
+      // Accessibility functions
+      function increaseFontSize() {
+        const currentSize = parseInt(getComputedStyle(document.body).fontSize);
+        document.body.style.fontSize = currentSize + 2 + "px";
+        localStorage.setItem("fontSize", currentSize + 2);
+      }
 
-        function resetFontSize() {
-            document.body.style.fontSize = '16px';
-            localStorage.removeItem('fontSize');
-        }
+      function decreaseFontSize() {
+        const currentSize = parseInt(getComputedStyle(document.body).fontSize);
+        document.body.style.fontSize = currentSize - 2 + "px";
+        localStorage.setItem("fontSize", currentSize - 2);
+      }
 
-        // Load saved font size
-        const savedFontSize = localStorage.getItem('fontSize');
-        if (savedFontSize) {
-            document.body.style.fontSize = savedFontSize + 'px';
-        }
+      function resetFontSize() {
+        document.body.style.fontSize = "16px";
+        localStorage.removeItem("fontSize");
+      }
 
-        // High contrast toggle
-        const highContrastToggle = document.getElementById('high-contrast-toggle');
-        if (highContrastToggle) {
-            highContrastToggle.checked = localStorage.getItem('highContrast') === 'true';
-            highContrastToggle.addEventListener('change', function() {
-                if (window.HighContrastMode) {
-                    window.HighContrastMode.toggle();
-                }
-            });
-        }
+      // Load saved font size
+      const savedFontSize = localStorage.getItem("fontSize");
+      if (savedFontSize) {
+        document.body.style.fontSize = savedFontSize + "px";
+      }
 
-        // Language select handler
-        const languageSelect = document.getElementById('language-select');
-        if (languageSelect) {
-            languageSelect.value = localStorage.getItem('language') || 'ar';
-            languageSelect.addEventListener('change', function() {
-                const isRTL = this.value === 'ar';
-                document.body.classList.remove('rtl', 'ltr');
-                document.body.classList.add(isRTL ? 'rtl' : 'ltr');
-                document.documentElement.lang = this.value;
-                document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
-                updateLanguage(this.value);
-                localStorage.setItem('language', this.value);
-            });
-        }
+      // High contrast toggle
+      const highContrastToggle = document.getElementById(
+        "high-contrast-toggle"
+      );
+      if (highContrastToggle) {
+        highContrastToggle.checked =
+          localStorage.getItem("highContrast") === "true";
+        highContrastToggle.addEventListener("change", function () {
+          if (window.HighContrastMode) {
+            window.HighContrastMode.toggle();
+          }
+        });
+      }
+
+      // Language select handler
+      const languageSelect = document.getElementById("language-select");
+      if (languageSelect) {
+        languageSelect.value = localStorage.getItem("language") || "ar";
+        languageSelect.addEventListener("change", function () {
+          const isRTL = this.value === "ar";
+          document.body.classList.remove("rtl", "ltr");
+          document.body.classList.add(isRTL ? "rtl" : "ltr");
+          document.documentElement.lang = this.value;
+          document.documentElement.dir = isRTL ? "rtl" : "ltr";
+          updateLanguage(this.value);
+          localStorage.setItem("language", this.value);
+        });
+      }
     </script>
-</body>
+  </body>
 </html>

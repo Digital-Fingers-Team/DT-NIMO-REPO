@@ -1,897 +1,1066 @@
 <!-- the following is the completed code for DTES/parent-children.html:  -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>إدارة الأبناء - DT Edu</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        :root {
-            --primary: #4a6cf7;
-            --primary-dark: #3a56d4;
-            --secondary: #6c5ce7;
-            --accent: #00b894;
-            --light: #f8f9fa;
-            --dark: #2d3436;
-            --text: #333;
-            --text-light: #666;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-            --sidebar-width: 260px;
+      :root {
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
+        --accent: #00b894;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --text: #333;
+        --text-light: #666;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --sidebar-width: 260px;
+      }
+
+      .dark-mode {
+        --light: #1a1a2e;
+        --dark: #f8f9fa;
+        --text: #e6e6e6;
+        --text-light: #b0b0b0;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Tajawal", "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+        transition: var(--transition);
+      }
+
+      body.dark-mode {
+        background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+      }
+
+      body.rtl {
+        direction: rtl;
+      }
+      body.ltr {
+        direction: ltr;
+      }
+
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* الشريط الجانبي */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(
+          180deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 20px 0;
+        box-shadow: var(--shadow);
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        transition: var(--transition);
+        z-index: 100;
+      }
+
+      body.rtl .sidebar {
+        right: 0;
+      }
+      body.ltr .sidebar {
+        left: 0;
+      }
+      body.rtl .main-content {
+        margin-right: var(--sidebar-width);
+      }
+      body.ltr .main-content {
+        margin-left: var(--sidebar-width);
+        margin-right: 0;
+      }
+
+      .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .logo img {
+        width: 140px;
+        object-fit: contain;
+        display: block;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, white, #e1f0fa);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .user-info {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .user-name {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .user-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0 15px;
+      }
+
+      .menu-item {
+        margin-bottom: 8px;
+        border-radius: 10px;
+      }
+
+      .menu-item a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .menu-item a:hover,
+      .menu-item.active a {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      body.rtl .menu-item a:hover,
+      body.rtl .menu-item.active a {
+        transform: translateX(-5px);
+      }
+      body.ltr .menu-item a:hover,
+      body.ltr .menu-item.active a {
+        transform: translateX(5px);
+      }
+
+      .menu-item i {
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      body.rtl .menu-item i {
+        margin-left: 10px;
+      }
+      body.ltr .menu-item i {
+        margin-right: 10px;
+      }
+
+      .sidebar-footer {
+        padding: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 20px;
+      }
+
+      /* المحتوى الرئيسي */
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      .header {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .header {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .header h1 {
+        color: var(--primary);
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .dark-mode-toggle,
+      .logout-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dark-mode-toggle {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .dark-mode-toggle:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      .logout-btn {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      .logout-btn:hover {
+        background: rgba(231, 76, 60, 0.2);
+      }
+
+      /* بطاقات الأبناء */
+      .children-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .child-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .child-card {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .child-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .child-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 30px 25px;
+        text-align: center;
+      }
+
+      .child-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 48px;
+        color: var(--primary);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .child-name {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+
+      .child-grade {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      .child-body {
+        padding: 25px;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      body.dark-mode .info-row {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        color: var(--text-light);
+        font-weight: 600;
+      }
+
+      .info-value {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .child-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .action-btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-view {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .btn-view:hover {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-report {
+        background: rgba(0, 184, 148, 0.1);
+        color: #00b894;
+      }
+
+      .btn-report:hover {
+        background: #00b894;
+        color: white;
+      }
+
+      .badge {
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .badge-success {
+        background: rgba(0, 184, 148, 0.1);
+        color: #00b894;
+      }
+      .badge-warning {
+        background: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+      }
+      .badge-danger {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+      }
+
+      /* النوافذ المنبثقة */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 700px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 30px;
+        position: relative;
+        animation: modalFadeIn 0.3s ease-out;
+      }
+
+      body.dark-mode .modal-content {
+        background-color: var(--light);
+        color: var(--dark);
+      }
+
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
         }
-
-        .dark-mode {
-            --light: #1a1a2e;
-            --dark: #f8f9fa;
-            --text: #e6e6e6;
-            --text-light: #b0b0b0;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', 'Segoe UI', sans-serif;
-        }
+      .close-btn {
+        position: absolute;
+        top: 20px;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-light);
+        transition: var(--transition);
+      }
 
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
-            transition: var(--transition);
-        }
+      body.rtl .close-btn {
+        left: 25px;
+      }
+      body.ltr .close-btn {
+        right: 25px;
+      }
 
-        body.dark-mode {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-        }
+      .close-btn:hover {
+        color: var(--text);
+      }
 
-        body.rtl { direction: rtl; }
-        body.ltr { direction: ltr; }
+      .modal-title {
+        color: var(--primary);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        font-size: 24px;
+      }
 
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
+      body.dark-mode .modal-title {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
 
-        /* الشريط الجانبي */
+      .detail-section {
+        margin-bottom: 25px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+      }
+
+      .stat-box {
+        background: rgba(74, 108, 247, 0.05);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      body.dark-mode .stat-box {
+        background: rgba(74, 108, 247, 0.15);
+      }
+
+      .stat-box-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 5px;
+      }
+
+      .stat-box-label {
+        font-size: 12px;
+        color: var(--text-light);
+      }
+
+      /* التصميم المتجاوب */
+      @media (max-width: 992px) {
         .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: var(--shadow);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            transition: var(--transition);
-            z-index: 100;
+          width: 80px;
         }
 
-        body.rtl .sidebar { right: 0; }
-        body.ltr .sidebar { left: 0; }
-        body.rtl .main-content { margin-right: var(--sidebar-width); }
-        body.ltr .main-content { margin-left: var(--sidebar-width); margin-right: 0; }
-
-        .sidebar-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 20px;
+        .sidebar-header .logo-text,
+        .user-info,
+        .menu-item span {
+          display: none;
         }
 
-        .logo {
-            width: 70px;
-            height: 70px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px;
+        body.rtl .main-content {
+          margin-right: 80px;
         }
-
-        .logo svg {
-            width: 50px;
-            height: 50px;
-        }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, white, #e1f0fa);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .user-info {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .user-name {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .user-type {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0 15px;
-        }
-
-        .menu-item {
-            margin-bottom: 8px;
-            border-radius: 10px;
+        body.ltr .main-content {
+          margin-left: 80px;
         }
 
         .menu-item a {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
+          justify-content: center;
+          padding: 15px;
         }
-
-        .menu-item a:hover,
-        .menu-item.active a {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        body.rtl .menu-item a:hover,
-        body.rtl .menu-item.active a { transform: translateX(-5px); }
-        body.ltr .menu-item a:hover,
-        body.ltr .menu-item.active a { transform: translateX(5px); }
 
         .menu-item i {
-            font-size: 18px;
-            width: 24px;
-            text-align: center;
+          margin: 0;
+          font-size: 20px;
         }
+      }
 
-        body.rtl .menu-item i { margin-left: 10px; }
-        body.ltr .menu-item i { margin-right: 10px; }
-
-        .sidebar-footer {
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: 20px;
-        }
-
-        /* المحتوى الرئيسي */
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            transition: var(--transition);
+      @media (max-width: 768px) {
+        .children-grid {
+          grid-template-columns: 1fr;
         }
 
         .header {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .main-content {
+          padding: 15px;
         }
 
-        body.dark-mode .header {
-            background: var(--light);
-            color: var(--dark);
+        .sidebar {
+          width: 70px;
         }
 
-        .header h1 {
-            color: var(--primary);
-            font-size: 28px;
-            font-weight: 700;
+        body.rtl .main-content {
+          margin-right: 70px;
         }
-
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .dark-mode-toggle,
-        .logout-btn {
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dark-mode-toggle {
-            background: rgba(74, 108, 247, 0.1);
-            color: var(--primary);
-        }
-
-        .dark-mode-toggle:hover {
-            background: rgba(74, 108, 247, 0.2);
-        }
-
-        .logout-btn {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-        }
-
-        .logout-btn:hover {
-            background: rgba(231, 76, 60, 0.2);
-        }
-
-        /* بطاقات الأبناء */
-        .children-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .child-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            transition: var(--transition);
-        }
-
-        body.dark-mode .child-card {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .child-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .child-header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 30px 25px;
-            text-align: center;
-        }
-
-        .child-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 48px;
-            color: var(--primary);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .child-name {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .child-grade {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-
-        .child-body {
-            padding: 25px;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        body.dark-mode .info-row {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            color: var(--text-light);
-            font-weight: 600;
-        }
-
-        .info-value {
-            color: var(--text);
-            font-weight: 600;
+        body.ltr .main-content {
+          margin-left: 70px;
         }
 
         .child-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
+          flex-direction: column;
         }
-
-        .action-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-view {
-            background: rgba(74, 108, 247, 0.1);
-            color: var(--primary);
-        }
-
-        .btn-view:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-report {
-            background: rgba(0, 184, 148, 0.1);
-            color: #00b894;
-        }
-
-        .btn-report:hover {
-            background: #00b894;
-            color: white;
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge-success { background: rgba(0, 184, 148, 0.1); color: #00b894; }
-        .badge-warning { background: rgba(243, 156, 18, 0.1); color: #f39c12; }
-        .badge-danger { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
-
-        /* النوافذ المنبثقة */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 30px;
-            position: relative;
-            animation: modalFadeIn 0.3s ease-out;
-        }
-
-        body.dark-mode .modal-content {
-            background-color: var(--light);
-            color: var(--dark);
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-light);
-            transition: var(--transition);
-        }
-
-        body.rtl .close-btn { left: 25px; }
-        body.ltr .close-btn { right: 25px; }
-
-        .close-btn:hover {
-            color: var(--text);
-        }
-
-        .modal-title {
-            color: var(--primary);
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            font-size: 24px;
-        }
-
-        body.dark-mode .modal-title {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .detail-section {
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .stat-box {
-            background: rgba(74, 108, 247, 0.05);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        body.dark-mode .stat-box {
-            background: rgba(74, 108, 247, 0.15);
-        }
-
-        .stat-box-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
-
-        .stat-box-label {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        /* التصميم المتجاوب */
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 80px;
-            }
-
-            .sidebar-header .logo-text,
-            .user-info,
-            .menu-item span {
-                display: none;
-            }
-
-            body.rtl .main-content { margin-right: 80px; }
-            body.ltr .main-content { margin-left: 80px; }
-
-            .menu-item a {
-                justify-content: center;
-                padding: 15px;
-            }
-
-            .menu-item i {
-                margin: 0;
-                font-size: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .children-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .main-content {
-                padding: 15px;
-            }
-
-            .sidebar {
-                width: 70px;
-            }
-
-            body.rtl .main-content { margin-right: 70px; }
-            body.ltr .main-content { margin-left: 70px; }
-
-            .child-actions {
-                flex-direction: column;
-            }
-        }
+      }
     </style>
-</head>
-<body class="rtl">
+  </head>
+  <body class="rtl">
     <div class="dashboard-container">
-        <!-- الشريط الجانبي -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <svg width="50" height="50" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#4a6cf7"/>
-                                <stop offset="100%" stop-color="#00b894"/>
-                            </linearGradient>
-                        </defs>
-                        <circle cx="48" cy="48" r="46" fill="url(#grad)" opacity="0.15" stroke="#4a6cf7" stroke-width="2"/>
-                        <path d="M28 62C28 48.745 38.745 38 52 38H60V46H52C43.163 46 36 53.163 36 62H28Z" fill="#4a6cf7"/>
-                        <path d="M40 58C40 44.745 50.745 34 64 34H72V42H64C55.163 42 48 49.163 48 58H40Z" fill="#00b894" opacity="0.85"/>
-                        <circle cx="60" cy="32" r="8" fill="#4a6cf7" opacity="0.75"/>
-                        <circle cx="36" cy="60" r="6" fill="#00b894" opacity="0.8"/>
-                    </svg>
-                </div>
-                <div class="logo-text">DT Edu</div>
-                <div class="user-info">
-                    <div class="user-name">ولي الأمر</div>
-                    <div class="user-type">Parent</div>
-                </div>
-            </div>
-
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="parent-dashboard.html">
-                        <i class="fas fa-home"></i>
-                        <span>لوحة التحكم</span>
-                    </a>
-                </li>
-                <li class="menu-item active">
-                    <a href="parent-children.html">
-                        <i class="fas fa-child"></i>
-                        <span>الأبناء</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-attendance.html">
-                        <i class="fas fa-calendar-check"></i>
-                        <span>الحضور والغياب</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-grades.html">
-                        <i class="fas fa-chart-line"></i>
-                        <span>الدرجات والتقييمات</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-messages.html">
-                        <i class="fas fa-comments"></i>
-                        <span>الرسائل</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-payments.html">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span>المدفوعات</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="parent-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span>الإعدادات</span>
-                    </a>
-                </li>
-            </ul>
-
-            <div class="sidebar-footer">
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="#" id="sidebar-dark-mode-toggle">
-                            <i class="fas fa-moon"></i>
-                            <span>الوضع الداكن</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" id="sidebar-language-toggle">
-                            <i class="fas fa-language"></i>
-                            <span>English</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="index.html">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>تسجيل الخروج</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+      <!-- الشريط الجانبي -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <img src="logo.png" alt="Logo" />
+          </div>
+          <div class="logo-text">DT Edu</div>
+          <div class="user-info">
+            <div class="user-name">ولي الأمر</div>
+            <div class="user-type">Parent</div>
+          </div>
         </div>
 
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content">
-            <div class="header">
-                <h1>إدارة الأبناء</h1>
-                <div class="header-actions">
-                    <button class="dark-mode-toggle" id="dark-mode-toggle">
-                        <i class="fas fa-moon"></i>
-                        <span>الوضع الداكن</span>
-                    </button>
-                    <button class="logout-btn" onclick="window.location.href='index.html'">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>تسجيل الخروج</span>
-                    </button>
-                </div>
-            </div>
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="parent-dashboard.html">
+              <i class="fas fa-home"></i>
+              <span id="menu-dashboard">لوحة التحكم</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="parent-children.html">
+              <i class="fas fa-child"></i>
+              <span id="menu-children">الأبناء</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-homework.html">
+              <i class="fas fa-clipboard-list"></i>
+              <span id="menu-homework">الواجبات المنزلية</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-calendar.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-calendar">الجدول والفعاليات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-attendance.html">
+              <i class="fas fa-calendar-check"></i>
+              <span id="menu-attendance">الحضور والغياب</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-grades.html">
+              <i class="fas fa-chart-line"></i>
+              <span id="menu-grades">الدرجات والتقييمات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-messages.html">
+              <i class="fas fa-comments"></i>
+              <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-payments.html">
+              <i class="fas fa-money-bill-wave"></i>
+              <span id="menu-payments">المدفوعات</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-reports.html">
+              <i class="fas fa-file-alt"></i>
+              <span id="menu-reports">التقارير</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-settings.html">
+              <i class="fas fa-cog"></i>
+              <span id="menu-settings">الإعدادات</span>
+            </a>
+          </li>
+        </ul>
 
-            <!-- بطاقات الأبناء -->
-            <div class="children-grid">
-                <!-- طفل 1 -->
-                <div class="child-card">
-                    <div class="child-header">
-                        <div class="child-avatar">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
-                        <div class="child-name">أحمد محمد</div>
-                        <div class="child-grade">الصف الثامن - المرحلة المتوسطة</div>
-                    </div>
-                    <div class="child-body">
-                        <div class="info-row">
-                            <span class="info-label">رقم الطالب</span>
-                            <span class="info-value">2024001</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">المعدل العام</span>
-                            <span class="info-value badge-success badge">88%</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">نسبة الحضور</span>
-                            <span class="info-value badge-success badge">95%</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">الحالة</span>
-                            <span class="info-value badge-success badge">نشط</span>
-                        </div>
-                        <div class="child-actions">
-                            <button class="action-btn btn-view" onclick="viewChildDetails('أحمد محمد')">
-                                <i class="fas fa-eye"></i>
-                                <span>عرض التفاصيل</span>
-                            </button>
-                            <button class="action-btn btn-report" onclick="downloadReport('أحمد محمد')">
-                                <i class="fas fa-download"></i>
-                                <span>تقرير</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- طفل 2 -->
-                <div class="child-card">
-                    <div class="child-header" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
-                        <div class="child-avatar">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
-                        <div class="child-name">فاطمة محمد</div>
-                        <div class="child-grade">الصف السادس - المرحلة الابتدائية</div>
-                    </div>
-                    <div class="child-body">
-                        <div class="info-row">
-                            <span class="info-label">رقم الطالب</span>
-                            <span class="info-value">2024002</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">المعدل العام</span>
-                            <span class="info-value badge-success badge">92%</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">نسبة الحضور</span>
-                            <span class="info-value badge-success badge">98%</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">الحالة</span>
-                            <span class="info-value badge-success badge">نشط</span>
-                        </div>
-                        <div class="child-actions">
-                            <button class="action-btn btn-view" onclick="viewChildDetails('فاطمة محمد')">
-                                <i class="fas fa-eye"></i>
-                                <span>عرض التفاصيل</span>
-                            </button>
-                            <button class="action-btn btn-report" onclick="downloadReport('فاطمة محمد')">
-                                <i class="fas fa-download"></i>
-                                <span>تقرير</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- طفل 3 -->
-                <div class="child-card">
-                    <div class="child-header" style="background: linear-gradient(135deg, #00b894, #00d2ff);">
-                        <div class="child-avatar">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
-                        <div class="child-name">عمر محمد</div>
-                        <div class="child-grade">الصف الثالث - المرحلة الابتدائية</div>
-                    </div>
-                    <div class="child-body">
-                        <div class="info-row">
-                            <span class="info-label">رقم الطالب</span>
-                            <span class="info-value">2024003</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">المعدل العام</span>
-                            <span class="info-value badge-warning badge">85%</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">نسبة الحضور</span>
-                            <span class="info-value badge-success badge">93%</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">الحالة</span>
-                            <span class="info-value badge-success badge">نشط</span>
-                        </div>
-                        <div class="child-actions">
-                            <button class="action-btn btn-view" onclick="viewChildDetails('عمر محمد')">
-                                <i class="fas fa-eye"></i>
-                                <span>عرض التفاصيل</span>
-                            </button>
-                            <button class="action-btn btn-report" onclick="downloadReport('عمر محمد')">
-                                <i class="fas fa-download"></i>
-                                <span>تقرير</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="sidebar-footer">
+          <ul class="sidebar-menu">
+            <li class="menu-item">
+              <a href="#" id="sidebar-dark-mode-toggle">
+                <i class="fas fa-moon"></i>
+                <span>الوضع الداكن</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" id="sidebar-language-toggle">
+                <i class="fas fa-language"></i>
+                <span>English</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="index.html">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>تسجيل الخروج</span>
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
+
+      <!-- المحتوى الرئيسي -->
+      <div class="main-content">
+        <div class="header">
+          <h1>إدارة الأبناء</h1>
+          <div class="header-actions">
+            <button class="dark-mode-toggle" id="dark-mode-toggle">
+              <i class="fas fa-moon"></i>
+              <span>الوضع الداكن</span>
+            </button>
+            <button
+              class="logout-btn"
+              onclick="window.location.href='index.html'"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+              <span>تسجيل الخروج</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- بطاقات الأبناء -->
+        <div class="children-grid">
+          <!-- طفل 1 -->
+          <div class="child-card">
+            <div class="child-header">
+              <div class="child-avatar">
+                <i class="fas fa-user-graduate"></i>
+              </div>
+              <div class="child-name">أحمد محمد</div>
+              <div class="child-grade">الصف الثامن - المرحلة المتوسطة</div>
+            </div>
+            <div class="child-body">
+              <div class="info-row">
+                <span class="info-label">رقم الطالب</span>
+                <span class="info-value">2024001</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">المعدل العام</span>
+                <span class="info-value badge-success badge">88%</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">نسبة الحضور</span>
+                <span class="info-value badge-success badge">95%</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">الحالة</span>
+                <span class="info-value badge-success badge">نشط</span>
+              </div>
+              <div class="child-actions">
+                <button
+                  class="action-btn btn-view"
+                  onclick="viewChildDetails('أحمد محمد')"
+                >
+                  <i class="fas fa-eye"></i>
+                  <span>عرض التفاصيل</span>
+                </button>
+                <button
+                  class="action-btn btn-report"
+                  onclick="downloadReport('أحمد محمد')"
+                >
+                  <i class="fas fa-download"></i>
+                  <span>تقرير</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- طفل 2 -->
+          <div class="child-card">
+            <div
+              class="child-header"
+              style="background: linear-gradient(135deg, #e74c3c, #c0392b)"
+            >
+              <div class="child-avatar">
+                <i class="fas fa-user-graduate"></i>
+              </div>
+              <div class="child-name">فاطمة محمد</div>
+              <div class="child-grade">الصف السادس - المرحلة الابتدائية</div>
+            </div>
+            <div class="child-body">
+              <div class="info-row">
+                <span class="info-label">رقم الطالب</span>
+                <span class="info-value">2024002</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">المعدل العام</span>
+                <span class="info-value badge-success badge">92%</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">نسبة الحضور</span>
+                <span class="info-value badge-success badge">98%</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">الحالة</span>
+                <span class="info-value badge-success badge">نشط</span>
+              </div>
+              <div class="child-actions">
+                <button
+                  class="action-btn btn-view"
+                  onclick="viewChildDetails('فاطمة محمد')"
+                >
+                  <i class="fas fa-eye"></i>
+                  <span>عرض التفاصيل</span>
+                </button>
+                <button
+                  class="action-btn btn-report"
+                  onclick="downloadReport('فاطمة محمد')"
+                >
+                  <i class="fas fa-download"></i>
+                  <span>تقرير</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- طفل 3 -->
+          <div class="child-card">
+            <div
+              class="child-header"
+              style="background: linear-gradient(135deg, #00b894, #00d2ff)"
+            >
+              <div class="child-avatar">
+                <i class="fas fa-user-graduate"></i>
+              </div>
+              <div class="child-name">عمر محمد</div>
+              <div class="child-grade">الصف الثالث - المرحلة الابتدائية</div>
+            </div>
+            <div class="child-body">
+              <div class="info-row">
+                <span class="info-label">رقم الطالب</span>
+                <span class="info-value">2024003</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">المعدل العام</span>
+                <span class="info-value badge-warning badge">85%</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">نسبة الحضور</span>
+                <span class="info-value badge-success badge">93%</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">الحالة</span>
+                <span class="info-value badge-success badge">نشط</span>
+              </div>
+              <div class="child-actions">
+                <button
+                  class="action-btn btn-view"
+                  onclick="viewChildDetails('عمر محمد')"
+                >
+                  <i class="fas fa-eye"></i>
+                  <span>عرض التفاصيل</span>
+                </button>
+                <button
+                  class="action-btn btn-report"
+                  onclick="downloadReport('عمر محمد')"
+                >
+                  <i class="fas fa-download"></i>
+                  <span>تقرير</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- نافذة منبثقة لتفاصيل الطفل -->
     <div id="childDetailsModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('childDetailsModal')">&times;</span>
-            <h2 class="modal-title" id="modalChildName">تفاصيل الطالب</h2>
-            
-            <div class="detail-section">
-                <h3 class="section-title">
-                    <i class="fas fa-info-circle"></i>
-                    المعلومات الأساسية
-                </h3>
-                <div class="info-row">
-                    <span class="info-label">الاسم الكامل</span>
-                    <span class="info-value">أحمد محمد علي السعيد</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">تاريخ الميلاد</span>
-                    <span class="info-value">2010-05-15</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">الصف الدراسي</span>
-                    <span class="info-value">الثامن - المتوسط</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">المدرس الرئيسي</span>
-                    <span class="info-value">أ. محمد العلي</span>
-                </div>
-            </div>
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('childDetailsModal')"
+          >&times;</span
+        >
+        <h2 class="modal-title" id="modalChildName">تفاصيل الطالب</h2>
 
-            <div class="detail-section">
-                <h3 class="section-title">
-                    <i class="fas fa-chart-bar"></i>
-                    الإحصائيات الأكاديمية
-                </h3>
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <div class="stat-box-value">88%</div>
-                        <div class="stat-box-label">المعدل العام</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-box-value">95%</div>
-                        <div class="stat-box-label">نسبة الحضور</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-box-value">8</div>
-                        <div class="stat-box-label">المواد</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-box-value">3</div>
-                        <div class="stat-box-label">الأنشطة</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="detail-section">
-                <h3 class="section-title">
-                    <i class="fas fa-trophy"></i>
-                    الإنجازات والجوائز
-                </h3>
-                <ul style="list-style: none; padding: 0;">
-                    <li style="padding: 10px; margin-bottom: 5px; background: rgba(0, 184, 148, 0.05); border-radius: 8px;">
-                        <i class="fas fa-medal" style="color: #f39c12;"></i>
-                        <span style="margin-right: 10px;">المركز الأول في مسابقة الرياضيات</span>
-                    </li>
-                    <li style="padding: 10px; margin-bottom: 5px; background: rgba(0, 184, 148, 0.05); border-radius: 8px;">
-                        <i class="fas fa-medal" style="color: #00b894;"></i>
-                        <span style="margin-right: 10px;">الطالب المثالي لشهر فبراير</span>
-                    </li>
-                </ul>
-            </div>
+        <div class="detail-section">
+          <h3 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            المعلومات الأساسية
+          </h3>
+          <div class="info-row">
+            <span class="info-label">الاسم الكامل</span>
+            <span class="info-value" id="modalFullName">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">تاريخ الميلاد</span>
+            <span class="info-value" id="modalBirthDate">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">الصف الدراسي</span>
+            <span class="info-value" id="modalGrade">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">المدرس الرئيسي</span>
+            <span class="info-value" id="modalTeacher">-</span>
+          </div>
         </div>
+
+        <div class="detail-section">
+          <h3 class="section-title">
+            <i class="fas fa-chart-bar"></i>
+            الإحصائيات الأكاديمية
+          </h3>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-box-value" id="modalAvg">-</div>
+              <div class="stat-box-label">المعدل العام</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-value" id="modalAttendance">-</div>
+              <div class="stat-box-label">نسبة الحضور</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-value" id="modalSubjects">-</div>
+              <div class="stat-box-label">المواد</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-value" id="modalActivities">-</div>
+              <div class="stat-box-label">الأنشطة</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="section-title">
+            <i class="fas fa-trophy"></i>
+            الإنجازات والجوائز
+          </h3>
+          <ul id="modalAchievements" style="list-style: none; padding: 0"></ul>
+        </div>
+      </div>
     </div>
-    
+
     <script src="core.js"></script>
     <script>
-        // إدارة الوضع الداكن
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const sidebarDarkModeToggle = document.getElementById('sidebar-dark-mode-toggle');
-        
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark);
-        }
+      // إدارة الوضع الداكن
+      const darkModeToggle = document.getElementById("dark-mode-toggle");
+      const sidebarDarkModeToggle = document.getElementById(
+        "sidebar-dark-mode-toggle"
+      );
 
-        darkModeToggle.addEventListener('click', toggleDarkMode);
-        sidebarDarkModeToggle.addEventListener('click', toggleDarkMode);
+      function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        const isDark = document.body.classList.contains("dark-mode");
+        localStorage.setItem("darkMode", isDark);
+      }
 
-        // تحميل إعدادات الوضع الداكن
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
+      darkModeToggle.addEventListener("click", toggleDarkMode);
+      sidebarDarkModeToggle.addEventListener("click", toggleDarkMode);
 
-        // فتح نافذة تفاصيل الطفل
-        function viewChildDetails(childName) {
-            document.getElementById('modalChildName').textContent = 'تفاصيل الطالب: ' + childName;
-            document.getElementById('childDetailsModal').style.display = 'flex';
-        }
+      // تحميل إعدادات الوضع الداكن
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+      }
 
-        // إغلاق النافذة المنبثقة
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+      // فتح نافذة تفاصيل الطفل
+      function viewChildDetails(childName) {
+        const details = {
+          "أحمد محمد": {
+            fullName: "أحمد محمد علي السعيد",
+            birthDate: "2010-05-15",
+            grade: "الثامن - المتوسط",
+            teacher: "أ. محمد العلي",
+            avg: "88%",
+            attendance: "95%",
+            subjects: "8",
+            activities: "3",
+            achievements: [
+              { text: "المركز الأول في مسابقة الرياضيات", color: "#f39c12" },
+              { text: "الطالب المثالي لشهر فبراير", color: "#00b894" },
+            ],
+          },
+          "فاطمة محمد": {
+            fullName: "فاطمة محمد أحمد",
+            birthDate: "2012-03-20",
+            grade: "السادس - الابتدائي",
+            teacher: "أ. منى خالد",
+            avg: "92%",
+            attendance: "98%",
+            subjects: "8",
+            activities: "4",
+            achievements: [
+              { text: "تميز في مشروع العلوم", color: "#6c5ce7" },
+              { text: "المركز الثاني في الإملاء", color: "#e74c3c" },
+            ],
+          },
+          "عمر محمد": {
+            fullName: "عمر محمد أحمد",
+            birthDate: "2016-09-10",
+            grade: "الثالث - الابتدائي",
+            teacher: "أ. سامي حسن",
+            avg: "85%",
+            attendance: "93%",
+            subjects: "6",
+            activities: "2",
+            achievements: [
+              { text: "تحسن ملحوظ في القراءة", color: "#00b894" },
+              { text: "مشاركة فعالة في الأنشطة", color: "#f39c12" },
+            ],
+          },
+        };
+        const data = details[childName];
+        document.getElementById("modalChildName").textContent =
+          "تفاصيل الطالب: " + childName;
+        if (data) {
+          document.getElementById("modalFullName").textContent = data.fullName;
+          document.getElementById("modalBirthDate").textContent =
+            data.birthDate;
+          document.getElementById("modalGrade").textContent = data.grade;
+          document.getElementById("modalTeacher").textContent = data.teacher;
+          document.getElementById("modalAvg").textContent = data.avg;
+          document.getElementById("modalAttendance").textContent =
+            data.attendance;
+          document.getElementById("modalSubjects").textContent = data.subjects;
+          document.getElementById("modalActivities").textContent =
+            data.activities;
+          const list = document.getElementById("modalAchievements");
+          list.innerHTML = "";
+          data.achievements.forEach((a) => {
+            const li = document.createElement("li");
+            li.style.padding = "10px";
+            li.style.marginBottom = "5px";
+            li.style.background = "rgba(0, 184, 148, 0.05)";
+            li.style.borderRadius = "8px";
+            const icon = document.createElement("i");
+            icon.className = "fas fa-medal";
+            icon.style.color = a.color;
+            const span = document.createElement("span");
+            span.style.marginRight = "10px";
+            span.textContent = a.text;
+            li.appendChild(icon);
+            li.appendChild(span);
+            list.appendChild(li);
+          });
         }
+        document.getElementById("childDetailsModal").style.display = "flex";
+      }
 
-        // تحميل التقرير
-        function downloadReport(childName) {
-            const isRTL = document.body.classList.contains('rtl');
-            showToast('info', (isRTL ? 'جاري تحميل تقرير ' : 'Downloading report for ') + childName);
-            // يمكن هنا إضافة منطق لتحميل التقرير الفعلي
-        }
+      // إغلاق النافذة المنبثقة
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
 
-        // إغلاق النافذة عند النقر خارجها
-        window.onclick = function(event) {
-            const modal = document.getElementById('childDetailsModal');
-            if (event.target === modal) {
-                closeModal('childDetailsModal');
-            }
+      // تحميل التقرير
+      function downloadReport(childName) {
+        const isRTL = document.body.classList.contains("rtl");
+        showToast(
+          "info",
+          (isRTL ? "جاري تحميل تقرير " : "Downloading report for ") + childName
+        );
+        // يمكن هنا إضافة منطق لتحميل التقرير الفعلي
+      }
+
+      // إغلاق النافذة عند النقر خارجها
+      window.onclick = function (event) {
+        const modal = document.getElementById("childDetailsModal");
+        if (event.target === modal) {
+          closeModal("childDetailsModal");
         }
+      };
     </script>
-</body>
+  </body>
 </html>

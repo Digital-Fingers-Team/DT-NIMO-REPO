@@ -1,1287 +1,1461 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>الإعدادات - DT Edu</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        :root {
-            --primary: #4a6cf7;
-            --primary-dark: #3a56d4;
-            --secondary: #6c5ce7;
-            --accent: #00b894;
-            --light: #f8f9fa;
-            --dark: #2d3436;
-            --text: #333;
-            --text-light: #666;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-            --sidebar-width: 260px;
-        }
+      :root {
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
+        --accent: #00b894;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --text: #333;
+        --text-light: #666;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --sidebar-width: 260px;
+      }
 
-        .dark-mode {
-            --light: #1a1a2e;
-            --dark: #f8f9fa;
-            --text: #e6e6e6;
-            --text-light: #b0b0b0;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
+      .dark-mode {
+        --light: #1a1a2e;
+        --dark: #f8f9fa;
+        --text: #e6e6e6;
+        --text-light: #b0b0b0;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', 'Segoe UI', sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Tajawal", "Segoe UI", sans-serif;
+      }
 
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
-        }
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: var(--transition);
+      }
 
-        body.dark-mode {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-        }
+      body.dark-mode {
+        background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+      }
 
-        body.rtl {
-            direction: rtl;
-        }
+      body.rtl {
+        direction: rtl;
+      }
 
-        body.ltr {
-            direction: ltr;
-        }
+      body.ltr {
+        direction: ltr;
+      }
 
-        /* التصميم الرئيسي */
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
+      /* التصميم الرئيسي */
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
 
-        /* الشريط الجانبي */
+      /* الشريط الجانبي */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(
+          180deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 20px 0;
+        box-shadow: var(--shadow);
+        z-index: 100;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        transition: var(--transition);
+      }
+
+      /* عندما تكون اللغة عربية */
+      body.rtl .sidebar {
+        right: 0;
+      }
+
+      body.rtl .main-content {
+        margin-right: var(--sidebar-width);
+      }
+
+      /* عندما تكون اللغة إنجليزية */
+      body.ltr .sidebar {
+        left: 0;
+      }
+
+      body.ltr .main-content {
+        margin-left: var(--sidebar-width);
+        margin-right: 0;
+      }
+
+      .sidebar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 20px;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .logo svg {
+        width: 140px;
+        height: auto;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, white, #e1f0fa);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .user-info {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .user-name {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .user-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+        display: inline-block;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0 15px;
+        margin-bottom: 20px;
+      }
+
+      .menu-item {
+        margin-bottom: 8px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .menu-item a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .menu-item a:hover,
+      .menu-item.active a {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      body.rtl .menu-item a:hover,
+      body.rtl .menu-item.active a {
+        transform: translateX(-5px);
+      }
+
+      body.ltr .menu-item a:hover,
+      body.ltr .menu-item.active a {
+        transform: translateX(5px);
+      }
+
+      .menu-item i {
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      body.rtl .menu-item i {
+        margin-left: 10px;
+      }
+
+      body.ltr .menu-item i {
+        margin-right: 10px;
+      }
+
+      .menu-item span {
+        flex: 1;
+      }
+
+      .sidebar-footer {
+        padding: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: auto;
+      }
+
+      .sidebar-footer .menu-item a {
+        padding: 10px 15px;
+      }
+
+      /* المحتوى الرئيسي */
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      .header {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .header {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .header h1 {
+        color: var(--primary);
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .dark-mode-toggle,
+      .back-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dark-mode-toggle {
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary);
+      }
+
+      .dark-mode-toggle:hover {
+        background: rgba(74, 108, 247, 0.2);
+      }
+
+      .back-btn {
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--secondary);
+      }
+
+      .back-btn:hover {
+        background: rgba(108, 92, 231, 0.2);
+      }
+
+      /* إعدادات الصفحة */
+      .settings-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      .settings-section {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 25px;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .settings-section {
+        background: var(--light);
+        color: var(--dark);
+      }
+
+      .settings-section:hover {
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .section-title {
+        color: var(--primary);
+        font-size: 22px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+      }
+
+      body.dark-mode .section-title {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      body.dark-mode .setting-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .setting-item:last-child {
+        border-bottom: none;
+      }
+
+      .setting-info {
+        flex: 1;
+      }
+
+      .setting-title {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 5px;
+      }
+
+      .setting-desc {
+        color: var(--text-light);
+        font-size: 14px;
+      }
+
+      .setting-control {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      /* التبديل */
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .toggle-slider {
+        background-color: var(--primary);
+      }
+
+      input:checked + .toggle-slider:before {
+        transform: translateX(30px);
+      }
+
+      /* الأزرار */
+      .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+      }
+
+      .btn-secondary {
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--secondary);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(108, 92, 231, 0.2);
+      }
+
+      .language-select {
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background: white;
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      body.dark-mode .language-select {
+        background: var(--light);
+        color: var(--dark);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .language-select:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      /* التصميم المتجاوب */
+      @media (max-width: 992px) {
         .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: var(--shadow);
-            z-index: 100;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            transition: var(--transition);
+          width: 80px;
         }
 
-        /* عندما تكون اللغة عربية */
-        body.rtl .sidebar {
-            right: 0;
+        .sidebar-header .logo-text,
+        .user-info,
+        .menu-item span {
+          display: none;
         }
 
         body.rtl .main-content {
-            margin-right: var(--sidebar-width);
-        }
-
-        /* عندما تكون اللغة إنجليزية */
-        body.ltr .sidebar {
-            left: 0;
+          margin-right: 80px;
         }
 
         body.ltr .main-content {
-            margin-left: var(--sidebar-width);
-            margin-right: 0;
-        }
-
-        .sidebar-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 20px;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        .logo {
-            width: 70px;
-            height: 70px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .logo svg {
-            width: 50px;
-            height: 50px;
-        }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, white, #e1f0fa);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .user-info {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .user-name {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .user-type {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: inline-block;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0 15px;
-            margin-bottom: 20px;
-        }
-
-        .menu-item {
-            margin-bottom: 8px;
-            border-radius: 10px;
-            overflow: hidden;
+          margin-left: 80px;
         }
 
         .menu-item a {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .menu-item a:hover,
-        .menu-item.active a {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        body.rtl .menu-item a:hover,
-        body.rtl .menu-item.active a {
-            transform: translateX(-5px);
-        }
-
-        body.ltr .menu-item a:hover,
-        body.ltr .menu-item.active a {
-            transform: translateX(5px);
+          justify-content: center;
+          padding: 15px;
         }
 
         .menu-item i {
-            font-size: 18px;
-            width: 24px;
-            text-align: center;
+          margin: 0;
+          font-size: 20px;
         }
 
-        body.rtl .menu-item i {
-            margin-left: 10px;
+        .sidebar-footer .menu-item span {
+          display: none;
         }
+      }
 
-        body.ltr .menu-item i {
-            margin-right: 10px;
-        }
-
-        .menu-item span {
-            flex: 1;
-        }
-
-        .sidebar-footer {
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: auto;
-        }
-
-        .sidebar-footer .menu-item a {
-            padding: 10px 15px;
-        }
-
-        /* المحتوى الرئيسي */
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            transition: var(--transition);
-        }
-
+      @media (max-width: 768px) {
         .header {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
-        }
-
-        body.dark-mode .header {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .header h1 {
-            color: var(--primary);
-            font-size: 28px;
-            font-weight: 700;
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
         }
 
         .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .dark-mode-toggle,
-        .back-btn {
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dark-mode-toggle {
-            background: rgba(74, 108, 247, 0.1);
-            color: var(--primary);
-        }
-
-        .dark-mode-toggle:hover {
-            background: rgba(74, 108, 247, 0.2);
-        }
-
-        .back-btn {
-            background: rgba(108, 92, 231, 0.1);
-            color: var(--secondary);
-        }
-
-        .back-btn:hover {
-            background: rgba(108, 92, 231, 0.2);
-        }
-
-        /* إعدادات الصفحة */
-        .settings-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-        }
-
-        .settings-section {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 25px;
-            transition: var(--transition);
-        }
-
-        body.dark-mode .settings-section {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .settings-section:hover {
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .section-title {
-            color: var(--primary);
-            font-size: 22px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        body.dark-mode .section-title {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          justify-content: center;
         }
 
         .settings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .main-content {
+          padding: 15px;
         }
 
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #f0f0f0;
+        .sidebar {
+          width: 70px;
         }
 
-        body.dark-mode .setting-item {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        body.rtl .main-content {
+          margin-right: 70px;
         }
 
-        .setting-item:last-child {
-            border-bottom: none;
+        body.ltr .main-content {
+          margin-left: 70px;
         }
-
-        .setting-info {
-            flex: 1;
-        }
-
-        .setting-title {
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-
-        .setting-desc {
-            color: var(--text-light);
-            font-size: 14px;
-        }
-
-        .setting-control {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        /* التبديل */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.toggle-slider {
-            background-color: var(--primary);
-        }
-
-        input:checked+.toggle-slider:before {
-            transform: translateX(30px);
-        }
-
-        /* الأزرار */
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-secondary {
-            background: rgba(108, 92, 231, 0.1);
-            color: var(--secondary);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(108, 92, 231, 0.2);
-        }
-
-        .language-select {
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            background: white;
-            color: var(--text);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        body.dark-mode .language-select {
-            background: var(--light);
-            color: var(--dark);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .language-select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        /* التصميم المتجاوب */
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 80px;
-            }
-
-            .sidebar-header .logo-text,
-            .user-info,
-            .menu-item span {
-                display: none;
-            }
-
-            body.rtl .main-content {
-                margin-right: 80px;
-            }
-
-            body.ltr .main-content {
-                margin-left: 80px;
-            }
-
-            .menu-item a {
-                justify-content: center;
-                padding: 15px;
-            }
-
-            .menu-item i {
-                margin: 0;
-                font-size: 20px;
-            }
-
-            .sidebar-footer .menu-item span {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .header-actions {
-                justify-content: center;
-            }
-
-            .settings-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .main-content {
-                padding: 15px;
-            }
-
-            .sidebar {
-                width: 70px;
-            }
-
-            body.rtl .main-content {
-                margin-right: 70px;
-            }
-
-            body.ltr .main-content {
-                margin-left: 70px;
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body class="rtl">
+  <body class="rtl">
     <div class="dashboard-container">
-        <!-- الشريط الجانبي -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-container">
-                    <div class="logo">
-                    <img src="logo.png" width="210px" style="margin-bottom: 20px;" alt="logo">
-                        <!-- الشعار داخل دائرة بيضاء -->
-                         <!-- الشعار داخل دائرة بيضاء -->  
-                    </div>
-                </div>
-                <div class="logo-text">DT Edu</div>
-                <div class="user-info">
-                    <div class="user-name" id="user-name">أحمد المعلم</div>
-                    <div class="user-type" id="user-type">مدرس</div>
-                </div>
+      <!-- الشريط الجانبي -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo-container">
+            <div class="logo">
+              <img
+                src="logo.png"
+                width="210px"
+                style="margin-bottom: 20px"
+                alt="logo"
+              />
             </div>
-
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="teacher-dashboard.html">
-                        <i class="fas fa-home"></i>
-                        <span id="menu-dashboard">لوحة التحكم</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="teacher-schedule.html">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span id="menu-schedule">الجدول الدراسي</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="classroom.html">
-                        <i class="fas fa-chalkboard"></i>
-                        <span>الفصل الدراسي</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="teacher-courses.html">
-                        <i class="fas fa-book"></i>
-                        <span id="menu-courses">المقررات الدراسية</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="teacher-progress.html">
-                        <i class="fas fa-chart-bar"></i>
-                        <span id="menu-progress">التقدم الدراسي</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="teacher-messages.html">
-                        <i class="fas fa-comments"></i>
-                        <span id="menu-messages">الرسائل</span>
-                    </a>
-                </li>
-                <li class="menu-item active">
-                    <a href="teacher-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span id="menu-settings">الإعدادات</span>
-                    </a>
-                </li>
-            </ul>
-
-            <div class="sidebar-footer">
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="#" id="sidebar-dark-mode-toggle">
-                            <i class="fas fa-moon"></i>
-                            <span id="dark-mode-text">الوضع الداكن</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" id="logout-link">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span id="logout-text">تسجيل الخروج</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+          </div>
+          <div class="logo-text">DT Edu</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">أحمد المعلم</div>
+            <div class="user-type" id="user-type">مدرس</div>
+          </div>
         </div>
 
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content">
-            <div class="header">
-                <h1 id="header-title">الإعدادات - نظام DT Edu</h1>
-                <div class="header-actions">
-                    <button id="header-dark-mode-toggle" class="dark-mode-toggle">
-                        <i class="fas fa-moon"></i>
-                        <span id="dark-mode-btn-text">الوضع الداكن</span>
-                    </button>
-                    <button id="back-btn" class="back-btn" onclick="goBack()">
-                        <i class="fas fa-arrow-right"></i>
-                        <span id="back-text">العودة</span>
-                    </button>
-                </div>
-            </div>
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="teacher-dashboard.html">
+              <i class="fas fa-home"></i>
+              <span id="menu-dashboard">لوحة التحكم</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="teacher-schedule.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-schedule">الجدول الدراسي</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="classroom.html">
+              <i class="fas fa-chalkboard"></i>
+              <span>الفصل الدراسي</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="teacher-courses.html">
+              <i class="fas fa-book"></i>
+              <span id="menu-courses">المقررات الدراسية</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="teacher-progress.html">
+              <i class="fas fa-chart-bar"></i>
+              <span id="menu-progress">التقدم الدراسي</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="teacher-messages.html">
+              <i class="fas fa-comments"></i>
+              <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="teacher-settings.html">
+              <i class="fas fa-cog"></i>
+              <span id="menu-settings">الإعدادات</span>
+            </a>
+          </li>
+        </ul>
 
-            <!-- إعدادات الصفحة -->
-            <div class="settings-container">
-                <!-- إعدادات الحساب -->
-                <div class="settings-section">
-                    <h2 class="section-title" id="account-settings">إعدادات الحساب</h2>
-                    <div class="settings-grid">
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="language-setting">اللغة</div>
-                                <div class="setting-desc" id="language-desc">اختر اللغة المفضلة للوحة التحكم</div>
-                            </div>
-                            <div class="setting-control">
-                                <select class="language-select" id="language-select">
-                                    <option value="ar">العربية</option>
-                                    <option value="en">English</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="notifications-setting">إشعارات النظام</div>
-                                <div class="setting-desc" id="notifications-desc">تلقي إشعارات حول الأنشطة المهمة</div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="notifications-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="email-setting">الإشعارات عبر البريد</div>
-                                <div class="setting-desc" id="email-desc">تلقي إشعارات عبر البريد الإلكتروني</div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="email-toggle">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="class-notifications-setting">إشعارات الفصل</div>
-                                <div class="setting-desc" id="class-notifications-desc">إشعارات حول طلاب الفصل وأنشطتهم
-                                </div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="class-notifications-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- إعدادات التدريس -->
-                <div class="settings-section">
-                    <h2 class="section-title" id="teaching-settings">إعدادات التدريس</h2>
-                    <div class="settings-grid">
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="grading-setting">نظام التقييم</div>
-                                <div class="setting-desc" id="grading-desc">اختر نظام التقييم الافتراضي للطلاب</div>
-                            </div>
-                            <div class="setting-control">
-                                <select class="language-select" id="grading-system">
-                                    <option value="percentage">النظام المئوي (0-100)</option>
-                                    <option value="letter">النظام الحرفي (A-F)</option>
-                                    <option value="scale">مقياس من 4 نقاط</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="auto-save-setting">الحفظ التلقائي</div>
-                                <div class="setting-desc" id="auto-save-desc">حفظ التغييرات في التقديرات تلقائيًا</div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="auto-save-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="attendance-setting">نظام الحضور</div>
-                                <div class="setting-desc" id="attendance-desc">تمكين تسجيل الحضور والغياب تلقائيًا</div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="attendance-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- إعدادات الخصوصية -->
-                <div class="settings-section">
-                    <h2 class="section-title" id="privacy-settings">الخصوصية والأمان</h2>
-                    <div class="settings-grid">
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="profile-setting">الملف الشخصي العام</div>
-                                <div class="setting-desc" id="profile-desc">السماح للطلاب برؤية ملفك الشخصي</div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="profile-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="availability-setting">ساعات التواجد</div>
-                                <div class="setting-desc" id="availability-desc">إظهار ساعات التواجد للطلاب</div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="availability-toggle">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="data-setting">جمع البيانات</div>
-                                <div class="setting-desc" id="data-desc">السماح بجمع البيانات لتحسين التجربة</div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="data-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- إعدادات النظام -->
-                <div class="settings-section">
-                    <h2 class="section-title" id="system-settings">إعدادات النظام</h2>
-                    <div class="settings-grid">
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="auto-update-setting">التحديث التلقائي</div>
-                                <div class="setting-desc" id="auto-update-desc">تثبيت التحديثات تلقائيًا عند توفرها
-                                </div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="auto-update-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="backup-setting">النسخ الاحتياطي</div>
-                                <div class="setting-desc" id="backup-desc">إنشاء نسخ احتياطية تلقائية للبيانات</div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="backup-toggle">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="performance-setting">وضع الأداء</div>
-                                <div class="setting-desc" id="performance-desc">تحسين الأداء على حساب بعض الميزات</div>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="performance-toggle">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- إجراءات الحساب -->
-                <div class="settings-section">
-                    <h2 class="section-title" id="account-actions">إجراءات الحساب</h2>
-                    <div class="settings-grid">
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="export-setting">تصدير البيانات</div>
-                                <div class="setting-desc" id="export-desc">تحميل نسخة من بيانات الطلاب والتقييمات</div>
-                            </div>
-                            <div class="setting-control">
-                                <button class="btn btn-secondary" id="export-btn">
-                                    <i class="fas fa-download"></i>
-                                    <span id="export-text">تصدير</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="reset-setting">إعادة تعيين الإعدادات</div>
-                                <div class="setting-desc" id="reset-desc">إعادة جميع الإعدادات إلى القيم الافتراضية
-                                </div>
-                            </div>
-                            <div class="setting-control">
-                                <button class="btn btn-secondary" id="reset-btn">
-                                    <i class="fas fa-redo"></i>
-                                    <span id="reset-text">إعادة تعيين</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <div class="setting-title" id="delete-setting">حذف الحساب</div>
-                                <div class="setting-desc" id="delete-desc">حذف حسابك وجميع البيانات المرتبطة به</div>
-                            </div>
-                            <div class="setting-control">
-                                <button class="btn" style="background: rgba(231, 76, 60, 0.1); color: #e74c3c;"
-                                    id="delete-btn">
-                                    <i class="fas fa-trash"></i>
-                                    <span id="delete-text">حذف الحساب</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- حفظ الإعدادات -->
-                <div class="settings-section">
-                    <div class="setting-item" style="border: none; padding: 0; justify-content: flex-end;">
-                        <button class="btn btn-primary" id="save-settings">
-                            <i class="fas fa-save"></i>
-                            <span id="save-text">حفظ التغييرات</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="sidebar-footer">
+          <ul class="sidebar-menu">
+            <li class="menu-item">
+              <a href="#" id="sidebar-dark-mode-toggle">
+                <i class="fas fa-moon"></i>
+                <span id="dark-mode-text">الوضع الداكن</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" id="logout-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span id="logout-text">تسجيل الخروج</span>
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
+
+      <!-- المحتوى الرئيسي -->
+      <div class="main-content">
+        <div class="header">
+          <h1 id="header-title">الإعدادات - نظام DT Edu</h1>
+          <div class="header-actions">
+            <button id="header-dark-mode-toggle" class="dark-mode-toggle">
+              <i class="fas fa-moon"></i>
+              <span id="dark-mode-btn-text">الوضع الداكن</span>
+            </button>
+            <button id="back-btn" class="back-btn" onclick="goBack()">
+              <i class="fas fa-arrow-right"></i>
+              <span id="back-text">العودة</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- إعدادات الصفحة -->
+        <div class="settings-container">
+          <!-- إعدادات الحساب -->
+          <div class="settings-section">
+            <h2 class="section-title" id="account-settings">إعدادات الحساب</h2>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="language-setting">اللغة</div>
+                  <div class="setting-desc" id="language-desc">
+                    اختر اللغة المفضلة للوحة التحكم
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <select class="language-select" id="language-select">
+                    <option value="ar">العربية</option>
+                    <option value="en">English</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="notifications-setting">
+                    إشعارات النظام
+                  </div>
+                  <div class="setting-desc" id="notifications-desc">
+                    تلقي إشعارات حول الأنشطة المهمة
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="notifications-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="email-setting">
+                    الإشعارات عبر البريد
+                  </div>
+                  <div class="setting-desc" id="email-desc">
+                    تلقي إشعارات عبر البريد الإلكتروني
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="email-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="class-notifications-setting">
+                    إشعارات الفصل
+                  </div>
+                  <div class="setting-desc" id="class-notifications-desc">
+                    إشعارات حول طلاب الفصل وأنشطتهم
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="class-notifications-toggle"
+                      checked
+                    />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- إعدادات التدريس -->
+          <div class="settings-section">
+            <h2 class="section-title" id="teaching-settings">
+              إعدادات التدريس
+            </h2>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="grading-setting">
+                    نظام التقييم
+                  </div>
+                  <div class="setting-desc" id="grading-desc">
+                    اختر نظام التقييم الافتراضي للطلاب
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <select class="language-select" id="grading-system">
+                    <option value="percentage">النظام المئوي (0-100)</option>
+                    <option value="letter">النظام الحرفي (A-F)</option>
+                    <option value="scale">مقياس من 4 نقاط</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="auto-save-setting">
+                    الحفظ التلقائي
+                  </div>
+                  <div class="setting-desc" id="auto-save-desc">
+                    حفظ التغييرات في التقديرات تلقائيًا
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="auto-save-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="attendance-setting">
+                    نظام الحضور
+                  </div>
+                  <div class="setting-desc" id="attendance-desc">
+                    تمكين تسجيل الحضور والغياب تلقائيًا
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="attendance-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- إعدادات الخصوصية -->
+          <div class="settings-section">
+            <h2 class="section-title" id="privacy-settings">
+              الخصوصية والأمان
+            </h2>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="profile-setting">
+                    الملف الشخصي العام
+                  </div>
+                  <div class="setting-desc" id="profile-desc">
+                    السماح للطلاب برؤية ملفك الشخصي
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="profile-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="availability-setting">
+                    ساعات التواجد
+                  </div>
+                  <div class="setting-desc" id="availability-desc">
+                    إظهار ساعات التواجد للطلاب
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="availability-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="data-setting">
+                    جمع البيانات
+                  </div>
+                  <div class="setting-desc" id="data-desc">
+                    السماح بجمع البيانات لتحسين التجربة
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="data-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- إعدادات النظام -->
+          <div class="settings-section">
+            <h2 class="section-title" id="system-settings">إعدادات النظام</h2>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="auto-update-setting">
+                    التحديث التلقائي
+                  </div>
+                  <div class="setting-desc" id="auto-update-desc">
+                    تثبيت التحديثات تلقائيًا عند توفرها
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="auto-update-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="backup-setting">
+                    النسخ الاحتياطي
+                  </div>
+                  <div class="setting-desc" id="backup-desc">
+                    إنشاء نسخ احتياطية تلقائية للبيانات
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="backup-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="performance-setting">
+                    وضع الأداء
+                  </div>
+                  <div class="setting-desc" id="performance-desc">
+                    تحسين الأداء على حساب بعض الميزات
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="performance-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- إجراءات الحساب -->
+          <div class="settings-section">
+            <h2 class="section-title" id="account-actions">إجراءات الحساب</h2>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="export-setting">
+                    تصدير البيانات
+                  </div>
+                  <div class="setting-desc" id="export-desc">
+                    تحميل نسخة من بيانات الطلاب والتقييمات
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <button class="btn btn-secondary" id="export-btn">
+                    <i class="fas fa-download"></i>
+                    <span id="export-text">تصدير</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="reset-setting">
+                    إعادة تعيين الإعدادات
+                  </div>
+                  <div class="setting-desc" id="reset-desc">
+                    إعادة جميع الإعدادات إلى القيم الافتراضية
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <button class="btn btn-secondary" id="reset-btn">
+                    <i class="fas fa-redo"></i>
+                    <span id="reset-text">إعادة تعيين</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <div class="setting-title" id="delete-setting">
+                    حذف الحساب
+                  </div>
+                  <div class="setting-desc" id="delete-desc">
+                    حذف حسابك وجميع البيانات المرتبطة به
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <button
+                    class="btn"
+                    style="background: rgba(231, 76, 60, 0.1); color: #e74c3c"
+                    id="delete-btn"
+                  >
+                    <i class="fas fa-trash"></i>
+                    <span id="delete-text">حذف الحساب</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- حفظ الإعدادات -->
+          <div class="settings-section">
+            <div
+              class="setting-item"
+              style="border: none; padding: 0; justify-content: flex-end"
+            >
+              <button class="btn btn-primary" id="save-settings">
+                <i class="fas fa-save"></i>
+                <span id="save-text">حفظ التغييرات</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
     <script src="core.js"></script>
     <script>
-        // استعادة اللغة المحفوظة
-        let currentLanguage = localStorage.getItem('currentLanguage') || 'ar';
+      // استعادة اللغة المحفوظة
+      let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
 
-        // استعادة وضع التصميم المحفوظ
-        let darkMode = localStorage.getItem('darkMode') === 'true';
+      // استعادة وضع التصميم المحفوظ
+      let darkMode = localStorage.getItem("darkMode") === "true";
 
-        // استعادة الإعدادات المحفوظة
-        let teacherSettings = JSON.parse(localStorage.getItem('teacherSettings')) || {
-            notifications: true,
-            emailNotifications: false,
-            classNotifications: true,
-            gradingSystem: 'percentage',
-            autoSave: true,
-            attendanceTracking: true,
-            publicProfile: true,
-            showAvailability: false,
-            dataCollection: true,
-            autoUpdate: true,
-            autoBackup: false,
-            performanceMode: false
-        };
+      // استعادة الإعدادات المحفوظة
+      let teacherSettings = JSON.parse(
+        localStorage.getItem("teacherSettings")
+      ) || {
+        notifications: true,
+        emailNotifications: false,
+        classNotifications: true,
+        gradingSystem: "percentage",
+        autoSave: true,
+        attendanceTracking: true,
+        publicProfile: true,
+        showAvailability: false,
+        dataCollection: true,
+        autoUpdate: true,
+        autoBackup: false,
+        performanceMode: false,
+      };
 
-        // تحديث اتجاه الصفحة واللغة والوضع الداكن
-        document.body.className = currentLanguage === 'ar' ? 'rtl' : 'ltr';
-        if (darkMode) {
-            document.body.classList.add('dark-mode');
-        }
+      // تحديث اتجاه الصفحة واللغة والوضع الداكن
+      document.body.className = currentLanguage === "ar" ? "rtl" : "ltr";
+      if (darkMode) {
+        document.body.classList.add("dark-mode");
+      }
 
-        // تحديث اختيار اللغة
-        document.getElementById('language-select').value = currentLanguage;
+      // تحديث اختيار اللغة
+      document.getElementById("language-select").value = currentLanguage;
 
-        // تحديث التبديلات بناءً على الإعدادات المحفوظة
-        document.getElementById('notifications-toggle').checked = teacherSettings.notifications;
-        document.getElementById('email-toggle').checked = teacherSettings.emailNotifications;
-        document.getElementById('class-notifications-toggle').checked = teacherSettings.classNotifications;
-        document.getElementById('grading-system').value = teacherSettings.gradingSystem;
-        document.getElementById('auto-save-toggle').checked = teacherSettings.autoSave;
-        document.getElementById('attendance-toggle').checked = teacherSettings.attendanceTracking;
-        document.getElementById('profile-toggle').checked = teacherSettings.publicProfile;
-        document.getElementById('availability-toggle').checked = teacherSettings.showAvailability;
-        document.getElementById('data-toggle').checked = teacherSettings.dataCollection;
-        document.getElementById('auto-update-toggle').checked = teacherSettings.autoUpdate;
-        document.getElementById('backup-toggle').checked = teacherSettings.autoBackup;
-        document.getElementById('performance-toggle').checked = teacherSettings.performanceMode;
+      // تحديث التبديلات بناءً على الإعدادات المحفوظة
+      document.getElementById("notifications-toggle").checked =
+        teacherSettings.notifications;
+      document.getElementById("email-toggle").checked =
+        teacherSettings.emailNotifications;
+      document.getElementById("class-notifications-toggle").checked =
+        teacherSettings.classNotifications;
+      document.getElementById("grading-system").value =
+        teacherSettings.gradingSystem;
+      document.getElementById("auto-save-toggle").checked =
+        teacherSettings.autoSave;
+      document.getElementById("attendance-toggle").checked =
+        teacherSettings.attendanceTracking;
+      document.getElementById("profile-toggle").checked =
+        teacherSettings.publicProfile;
+      document.getElementById("availability-toggle").checked =
+        teacherSettings.showAvailability;
+      document.getElementById("data-toggle").checked =
+        teacherSettings.dataCollection;
+      document.getElementById("auto-update-toggle").checked =
+        teacherSettings.autoUpdate;
+      document.getElementById("backup-toggle").checked =
+        teacherSettings.autoBackup;
+      document.getElementById("performance-toggle").checked =
+        teacherSettings.performanceMode;
 
-        // إعداد زر الوضع الداكن
-        document.querySelectorAll('#header-dark-mode-toggle, #sidebar-dark-mode-toggle').forEach(btn => {
-            btn.addEventListener('click', function () {
-                // تبديل الوضع الداكن
-                darkMode = !darkMode;
+      // إعداد زر الوضع الداكن
+      document
+        .querySelectorAll("#header-dark-mode-toggle, #sidebar-dark-mode-toggle")
+        .forEach((btn) => {
+          btn.addEventListener("click", function () {
+            // تبديل الوضع الداكن
+            darkMode = !darkMode;
 
-                // تحديث الوضع الداكن في التخزين المحلي
-                localStorage.setItem('darkMode', darkMode);
+            // تحديث الوضع الداكن في التخزين المحلي
+            localStorage.setItem("darkMode", darkMode);
 
-                // تحديث الوضع الداكن في الصفحة
-                if (darkMode) {
-                    document.body.classList.add('dark-mode');
-                } else {
-                    document.body.classList.remove('dark-mode');
-                }
-
-                // تحديث نص الزر
-                updateDarkModeText();
-            });
-        });
-
-        // إعداد زر تسجيل الخروج
-        document.getElementById('logout-link').addEventListener('click', function (e) {
-            e.preventDefault();
-            localStorage.removeItem('currentUser');
-            window.location.href = 'login.html';
-        });
-
-        // إعداد اختيار اللغة
-        document.getElementById('language-select').addEventListener('change', function () {
-            currentLanguage = this.value;
-            localStorage.setItem('currentLanguage', currentLanguage);
-
-            // تحديث اتجاه الصفحة
-            document.body.className = currentLanguage === 'ar' ? 'rtl' : 'ltr';
-
-            // تحديث النصوص
-            updateLanguage();
-
-            // تحديث اتجاه القائمة
-            updateSidebarPosition();
-
-            // تحديث اتجاه زر العودة
-            updateBackButton();
-
-            // عرض رسالة نجاح
-            setTimeout(() => {
-                showToast('success', currentLanguage === 'ar'
-                    ? 'تم تغيير اللغة بنجاح! سيتم تطبيق التغيير على جميع الصفحات.'
-                    : 'Language changed successfully! The change will be applied to all pages.');
-            }, 100);
-        });
-
-        // إعداد زر العودة
-        function goBack() {
-            window.location.href = 'dashboard-teacher.html';
-        }
-
-        // إعداد زر حفظ الإعدادات
-        document.getElementById('save-settings').addEventListener('click', function () {
-            // حفظ الإعدادات
-            teacherSettings.notifications = document.getElementById('notifications-toggle').checked;
-            teacherSettings.emailNotifications = document.getElementById('email-toggle').checked;
-            teacherSettings.classNotifications = document.getElementById('class-notifications-toggle').checked;
-            teacherSettings.gradingSystem = document.getElementById('grading-system').value;
-            teacherSettings.autoSave = document.getElementById('auto-save-toggle').checked;
-            teacherSettings.attendanceTracking = document.getElementById('attendance-toggle').checked;
-            teacherSettings.publicProfile = document.getElementById('profile-toggle').checked;
-            teacherSettings.showAvailability = document.getElementById('availability-toggle').checked;
-            teacherSettings.dataCollection = document.getElementById('data-toggle').checked;
-            teacherSettings.autoUpdate = document.getElementById('auto-update-toggle').checked;
-            teacherSettings.autoBackup = document.getElementById('backup-toggle').checked;
-            teacherSettings.performanceMode = document.getElementById('performance-toggle').checked;
-
-            localStorage.setItem('teacherSettings', JSON.stringify(teacherSettings));
-
-            // عرض رسالة نجاح
-            showToast('success', currentLanguage === 'ar' ? 'تم حفظ الإعدادات بنجاح!' : 'Settings saved successfully!');
-        });
-
-        // إعداد زر تصدير البيانات
-        document.getElementById('export-btn').addEventListener('click', function () {
-            // محاكاة تصدير البيانات
-            showToast('info', currentLanguage === 'ar' ? 'جارٍ تصدير بيانات الطلاب والتقييمات...' : 'Exporting student data and assessments...');
-
-            setTimeout(() => {
-                showToast('success', currentLanguage === 'ar'
-                    ? 'تم تصدير البيانات بنجاح! سيتم تنزيل الملف قريبًا.'
-                    : 'Data exported successfully! The file will be downloaded shortly.');
-            }, 1500);
-        });
-
-        // إعداد زر إعادة تعيين الإعدادات
-        document.getElementById('reset-btn').addEventListener('click', function () {
-            const confirmMessage = currentLanguage === 'ar'
-                ? 'هل أنت متأكد من أنك تريد إعادة تعيين جميع الإعدادات إلى القيم الافتراضية؟'
-                : 'Are you sure you want to reset all settings to default values?';
-
-            if (confirm(confirmMessage)) {
-                // إعادة تعيين الإعدادات إلى القيم الافتراضية
-                teacherSettings = {
-                    notifications: true,
-                    emailNotifications: false,
-                    classNotifications: true,
-                    gradingSystem: 'percentage',
-                    autoSave: true,
-                    attendanceTracking: true,
-                    publicProfile: true,
-                    showAvailability: false,
-                    dataCollection: true,
-                    autoUpdate: true,
-                    autoBackup: false,
-                    performanceMode: false
-                };
-
-                // تحديث الواجهة
-                document.getElementById('notifications-toggle').checked = teacherSettings.notifications;
-                document.getElementById('email-toggle').checked = teacherSettings.emailNotifications;
-                document.getElementById('class-notifications-toggle').checked = teacherSettings.classNotifications;
-                document.getElementById('grading-system').value = teacherSettings.gradingSystem;
-                document.getElementById('auto-save-toggle').checked = teacherSettings.autoSave;
-                document.getElementById('attendance-toggle').checked = teacherSettings.attendanceTracking;
-                document.getElementById('profile-toggle').checked = teacherSettings.publicProfile;
-                document.getElementById('availability-toggle').checked = teacherSettings.showAvailability;
-                document.getElementById('data-toggle').checked = teacherSettings.dataCollection;
-                document.getElementById('auto-update-toggle').checked = teacherSettings.autoUpdate;
-                document.getElementById('backup-toggle').checked = teacherSettings.autoBackup;
-                document.getElementById('performance-toggle').checked = teacherSettings.performanceMode;
-
-                localStorage.setItem('teacherSettings', JSON.stringify(teacherSettings));
-
-                showToast('success', currentLanguage === 'ar'
-                    ? 'تم إعادة تعيين الإعدادات بنجاح!'
-                    : 'Settings reset successfully!');
+            // تحديث الوضع الداكن في الصفحة
+            if (darkMode) {
+              document.body.classList.add("dark-mode");
+            } else {
+              document.body.classList.remove("dark-mode");
             }
+
+            // تحديث نص الزر
+            updateDarkModeText();
+          });
         });
 
-        // إعداد زر حذف الحساب
-        document.getElementById('delete-btn').addEventListener('click', function () {
-            const confirmMessage = currentLanguage === 'ar'
-                ? 'هل أنت متأكد من أنك تريد حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.'
-                : 'Are you sure you want to delete your account? This action cannot be undone.';
-
-            if (confirm(confirmMessage)) {
-                localStorage.removeItem('currentUser');
-                localStorage.removeItem('teacherSettings');
-                window.location.href = 'login.html';
-            }
+      // إعداد زر تسجيل الخروج
+      document
+        .getElementById("logout-link")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("currentUser");
+          window.location.href = "login.html";
         });
 
-        // تحديث النصوص حسب اللغة الحالية
-        function updateLanguage() {
-            const translations = {
-                'ar': {
-                    'header-title': 'الإعدادات - نظام DT Edu',
-                    'menu-dashboard': 'لوحة التحكم',
-                    'menu-schedule': 'الجدول الدراسي',
-                    'menu-courses': 'المقررات الدراسية',
-                    'menu-progress': 'التقدم الدراسي',
-                    'menu-messages': 'الرسائل',
-                    'menu-settings': 'الإعدادات',
-                    'account-settings': 'إعدادات الحساب',
-                    'language-setting': 'اللغة',
-                    'language-desc': 'اختر اللغة المفضلة للوحة التحكم',
-                    'notifications-setting': 'إشعارات النظام',
-                    'notifications-desc': 'تلقي إشعارات حول الأنشطة المهمة',
-                    'email-setting': 'الإشعارات عبر البريد',
-                    'email-desc': 'تلقي إشعارات عبر البريد الإلكتروني',
-                    'class-notifications-setting': 'إشعارات الفصل',
-                    'class-notifications-desc': 'إشعارات حول طلاب الفصل وأنشطتهم',
-                    'teaching-settings': 'إعدادات التدريس',
-                    'grading-setting': 'نظام التقييم',
-                    'grading-desc': 'اختر نظام التقييم الافتراضي للطلاب',
-                    'auto-save-setting': 'الحفظ التلقائي',
-                    'auto-save-desc': 'حفظ التغييرات في التقديرات تلقائيًا',
-                    'attendance-setting': 'نظام الحضور',
-                    'attendance-desc': 'تمكين تسجيل الحضور والغياب تلقائيًا',
-                    'privacy-settings': 'الخصوصية والأمان',
-                    'profile-setting': 'الملف الشخصي العام',
-                    'profile-desc': 'السماح للطلاب برؤية ملفك الشخصي',
-                    'availability-setting': 'ساعات التواجد',
-                    'availability-desc': 'إظهار ساعات التواجد للطلاب',
-                    'data-setting': 'جمع البيانات',
-                    'data-desc': 'السماح بجمع البيانات لتحسين التجربة',
-                    'system-settings': 'إعدادات النظام',
-                    'auto-update-setting': 'التحديث التلقائي',
-                    'auto-update-desc': 'تثبيت التحديثات تلقائيًا عند توفرها',
-                    'backup-setting': 'النسخ الاحتياطي',
-                    'backup-desc': 'إنشاء نسخ احتياطية تلقائية للبيانات',
-                    'performance-setting': 'وضع الأداء',
-                    'performance-desc': 'تحسين الأداء على حساب بعض الميزات',
-                    'account-actions': 'إجراءات الحساب',
-                    'export-setting': 'تصدير البيانات',
-                    'export-desc': 'تحميل نسخة من بيانات الطلاب والتقييمات',
-                    'export-text': 'تصدير',
-                    'reset-setting': 'إعادة تعيين الإعدادات',
-                    'reset-desc': 'إعادة جميع الإعدادات إلى القيم الافتراضية',
-                    'reset-text': 'إعادة تعيين',
-                    'delete-setting': 'حذف الحساب',
-                    'delete-desc': 'حذف حسابك وجميع البيانات المرتبطة به',
-                    'delete-text': 'حذف الحساب',
-                    'save-text': 'حفظ التغييرات',
-                    'logout-text': 'تسجيل الخروج',
-                    'dark-mode-text': 'الوضع الداكن',
-                    'dark-mode-btn-text': 'الوضع الداكن',
-                    'back-text': 'العودة'
-                },
-                'en': {
-                    'header-title': 'Settings - DT Edu System',
-                    'menu-dashboard': 'Dashboard',
-                    'menu-schedule': 'Schedule',
-                    'menu-courses': 'Courses',
-                    'menu-progress': 'Progress',
-                    'menu-messages': 'Messages',
-                    'menu-settings': 'Settings',
-                    'account-settings': 'Account Settings',
-                    'language-setting': 'Language',
-                    'language-desc': 'Choose your preferred language for the dashboard',
-                    'notifications-setting': 'System Notifications',
-                    'notifications-desc': 'Receive notifications about important activities',
-                    'email-setting': 'Email Notifications',
-                    'email-desc': 'Receive notifications via email',
-                    'class-notifications-setting': 'Class Notifications',
-                    'class-notifications-desc': 'Notifications about class students and their activities',
-                    'teaching-settings': 'Teaching Settings',
-                    'grading-setting': 'Grading System',
-                    'grading-desc': 'Choose the default grading system for students',
-                    'auto-save-setting': 'Auto Save',
-                    'auto-save-desc': 'Automatically save changes to grades',
-                    'attendance-setting': 'Attendance System',
-                    'attendance-desc': 'Enable automatic attendance tracking',
-                    'privacy-settings': 'Privacy & Security',
-                    'profile-setting': 'Public Profile',
-                    'profile-desc': 'Allow students to see your profile',
-                    'availability-setting': 'Availability Hours',
-                    'availability-desc': 'Show availability hours to students',
-                    'data-setting': 'Data Collection',
-                    'data-desc': 'Allow data collection to improve experience',
-                    'system-settings': 'System Settings',
-                    'auto-update-setting': 'Auto Update',
-                    'auto-update-desc': 'Install updates automatically when available',
-                    'backup-setting': 'Backup',
-                    'backup-desc': 'Create automatic backups of your data',
-                    'performance-setting': 'Performance Mode',
-                    'performance-desc': 'Improve performance at the cost of some features',
-                    'account-actions': 'Account Actions',
-                    'export-setting': 'Export Data',
-                    'export-desc': 'Download a copy of student data and assessments',
-                    'export-text': 'Export',
-                    'reset-setting': 'Reset Settings',
-                    'reset-desc': 'Reset all settings to default values',
-                    'reset-text': 'Reset',
-                    'delete-setting': 'Delete Account',
-                    'delete-desc': 'Delete your account and all associated data',
-                    'delete-text': 'Delete Account',
-                    'save-text': 'Save Changes',
-                    'logout-text': 'Logout',
-                    'dark-mode-text': 'Dark Mode',
-                    'dark-mode-btn-text': 'Dark Mode',
-                    'back-text': 'Back'
-                }
+      // إعداد اختيار اللغة
+      document
+        .getElementById("language-select")
+        .addEventListener("change", function () {
+          currentLanguage = this.value;
+          localStorage.setItem("currentLanguage", currentLanguage);
+
+          // تحديث اتجاه الصفحة
+          document.body.className = currentLanguage === "ar" ? "rtl" : "ltr";
+
+          // تحديث النصوص
+          updateLanguage();
+
+          // تحديث اتجاه القائمة
+          updateSidebarPosition();
+
+          // تحديث اتجاه زر العودة
+          updateBackButton();
+
+          // عرض رسالة نجاح
+          setTimeout(() => {
+            showToast(
+              "success",
+              currentLanguage === "ar"
+                ? "تم تغيير اللغة بنجاح! سيتم تطبيق التغيير على جميع الصفحات."
+                : "Language changed successfully! The change will be applied to all pages."
+            );
+          }, 100);
+        });
+
+      // إعداد زر العودة
+      function goBack() {
+        window.location.href = "dashboard-teacher.html";
+      }
+
+      // إعداد زر حفظ الإعدادات
+      document
+        .getElementById("save-settings")
+        .addEventListener("click", function () {
+          // حفظ الإعدادات
+          teacherSettings.notifications = document.getElementById(
+            "notifications-toggle"
+          ).checked;
+          teacherSettings.emailNotifications =
+            document.getElementById("email-toggle").checked;
+          teacherSettings.classNotifications = document.getElementById(
+            "class-notifications-toggle"
+          ).checked;
+          teacherSettings.gradingSystem =
+            document.getElementById("grading-system").value;
+          teacherSettings.autoSave =
+            document.getElementById("auto-save-toggle").checked;
+          teacherSettings.attendanceTracking =
+            document.getElementById("attendance-toggle").checked;
+          teacherSettings.publicProfile =
+            document.getElementById("profile-toggle").checked;
+          teacherSettings.showAvailability = document.getElementById(
+            "availability-toggle"
+          ).checked;
+          teacherSettings.dataCollection =
+            document.getElementById("data-toggle").checked;
+          teacherSettings.autoUpdate =
+            document.getElementById("auto-update-toggle").checked;
+          teacherSettings.autoBackup =
+            document.getElementById("backup-toggle").checked;
+          teacherSettings.performanceMode =
+            document.getElementById("performance-toggle").checked;
+
+          localStorage.setItem(
+            "teacherSettings",
+            JSON.stringify(teacherSettings)
+          );
+
+          // عرض رسالة نجاح
+          showToast(
+            "success",
+            currentLanguage === "ar"
+              ? "تم حفظ الإعدادات بنجاح!"
+              : "Settings saved successfully!"
+          );
+        });
+
+      // إعداد زر تصدير البيانات
+      document
+        .getElementById("export-btn")
+        .addEventListener("click", function () {
+          // محاكاة تصدير البيانات
+          showToast(
+            "info",
+            currentLanguage === "ar"
+              ? "جارٍ تصدير بيانات الطلاب والتقييمات..."
+              : "Exporting student data and assessments..."
+          );
+
+          setTimeout(() => {
+            showToast(
+              "success",
+              currentLanguage === "ar"
+                ? "تم تصدير البيانات بنجاح! سيتم تنزيل الملف قريبًا."
+                : "Data exported successfully! The file will be downloaded shortly."
+            );
+          }, 1500);
+        });
+
+      // إعداد زر إعادة تعيين الإعدادات
+      document
+        .getElementById("reset-btn")
+        .addEventListener("click", function () {
+          const confirmMessage =
+            currentLanguage === "ar"
+              ? "هل أنت متأكد من أنك تريد إعادة تعيين جميع الإعدادات إلى القيم الافتراضية؟"
+              : "Are you sure you want to reset all settings to default values?";
+
+          if (confirm(confirmMessage)) {
+            // إعادة تعيين الإعدادات إلى القيم الافتراضية
+            teacherSettings = {
+              notifications: true,
+              emailNotifications: false,
+              classNotifications: true,
+              gradingSystem: "percentage",
+              autoSave: true,
+              attendanceTracking: true,
+              publicProfile: true,
+              showAvailability: false,
+              dataCollection: true,
+              autoUpdate: true,
+              autoBackup: false,
+              performanceMode: false,
             };
 
-            // تطبيق الترجمات
-            Object.keys(translations[currentLanguage]).forEach(key => {
-                const element = document.getElementById(key);
-                if (element) {
-                    element.textContent = translations[currentLanguage][key];
-                }
-            });
+            // تحديث الواجهة
+            document.getElementById("notifications-toggle").checked =
+              teacherSettings.notifications;
+            document.getElementById("email-toggle").checked =
+              teacherSettings.emailNotifications;
+            document.getElementById("class-notifications-toggle").checked =
+              teacherSettings.classNotifications;
+            document.getElementById("grading-system").value =
+              teacherSettings.gradingSystem;
+            document.getElementById("auto-save-toggle").checked =
+              teacherSettings.autoSave;
+            document.getElementById("attendance-toggle").checked =
+              teacherSettings.attendanceTracking;
+            document.getElementById("profile-toggle").checked =
+              teacherSettings.publicProfile;
+            document.getElementById("availability-toggle").checked =
+              teacherSettings.showAvailability;
+            document.getElementById("data-toggle").checked =
+              teacherSettings.dataCollection;
+            document.getElementById("auto-update-toggle").checked =
+              teacherSettings.autoUpdate;
+            document.getElementById("backup-toggle").checked =
+              teacherSettings.autoBackup;
+            document.getElementById("performance-toggle").checked =
+              teacherSettings.performanceMode;
 
-            // تحديث خيارات نظام التقييم
-            const gradingSystem = document.getElementById('grading-system');
-            gradingSystem.innerHTML = '';
+            localStorage.setItem(
+              "teacherSettings",
+              JSON.stringify(teacherSettings)
+            );
 
-            if (currentLanguage === 'ar') {
-                gradingSystem.innerHTML = `
+            showToast(
+              "success",
+              currentLanguage === "ar"
+                ? "تم إعادة تعيين الإعدادات بنجاح!"
+                : "Settings reset successfully!"
+            );
+          }
+        });
+
+      // إعداد زر حذف الحساب
+      document
+        .getElementById("delete-btn")
+        .addEventListener("click", function () {
+          const confirmMessage =
+            currentLanguage === "ar"
+              ? "هل أنت متأكد من أنك تريد حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه."
+              : "Are you sure you want to delete your account? This action cannot be undone.";
+
+          if (confirm(confirmMessage)) {
+            localStorage.removeItem("currentUser");
+            localStorage.removeItem("teacherSettings");
+            window.location.href = "login.html";
+          }
+        });
+
+      // تحديث النصوص حسب اللغة الحالية
+      function updateLanguage() {
+        const translations = {
+          ar: {
+            "header-title": "الإعدادات - نظام DT Edu",
+            "menu-dashboard": "لوحة التحكم",
+            "menu-schedule": "الجدول الدراسي",
+            "menu-courses": "المقررات الدراسية",
+            "menu-progress": "التقدم الدراسي",
+            "menu-messages": "الرسائل",
+            "menu-settings": "الإعدادات",
+            "account-settings": "إعدادات الحساب",
+            "language-setting": "اللغة",
+            "language-desc": "اختر اللغة المفضلة للوحة التحكم",
+            "notifications-setting": "إشعارات النظام",
+            "notifications-desc": "تلقي إشعارات حول الأنشطة المهمة",
+            "email-setting": "الإشعارات عبر البريد",
+            "email-desc": "تلقي إشعارات عبر البريد الإلكتروني",
+            "class-notifications-setting": "إشعارات الفصل",
+            "class-notifications-desc": "إشعارات حول طلاب الفصل وأنشطتهم",
+            "teaching-settings": "إعدادات التدريس",
+            "grading-setting": "نظام التقييم",
+            "grading-desc": "اختر نظام التقييم الافتراضي للطلاب",
+            "auto-save-setting": "الحفظ التلقائي",
+            "auto-save-desc": "حفظ التغييرات في التقديرات تلقائيًا",
+            "attendance-setting": "نظام الحضور",
+            "attendance-desc": "تمكين تسجيل الحضور والغياب تلقائيًا",
+            "privacy-settings": "الخصوصية والأمان",
+            "profile-setting": "الملف الشخصي العام",
+            "profile-desc": "السماح للطلاب برؤية ملفك الشخصي",
+            "availability-setting": "ساعات التواجد",
+            "availability-desc": "إظهار ساعات التواجد للطلاب",
+            "data-setting": "جمع البيانات",
+            "data-desc": "السماح بجمع البيانات لتحسين التجربة",
+            "system-settings": "إعدادات النظام",
+            "auto-update-setting": "التحديث التلقائي",
+            "auto-update-desc": "تثبيت التحديثات تلقائيًا عند توفرها",
+            "backup-setting": "النسخ الاحتياطي",
+            "backup-desc": "إنشاء نسخ احتياطية تلقائية للبيانات",
+            "performance-setting": "وضع الأداء",
+            "performance-desc": "تحسين الأداء على حساب بعض الميزات",
+            "account-actions": "إجراءات الحساب",
+            "export-setting": "تصدير البيانات",
+            "export-desc": "تحميل نسخة من بيانات الطلاب والتقييمات",
+            "export-text": "تصدير",
+            "reset-setting": "إعادة تعيين الإعدادات",
+            "reset-desc": "إعادة جميع الإعدادات إلى القيم الافتراضية",
+            "reset-text": "إعادة تعيين",
+            "delete-setting": "حذف الحساب",
+            "delete-desc": "حذف حسابك وجميع البيانات المرتبطة به",
+            "delete-text": "حذف الحساب",
+            "save-text": "حفظ التغييرات",
+            "logout-text": "تسجيل الخروج",
+            "dark-mode-text": "الوضع الداكن",
+            "dark-mode-btn-text": "الوضع الداكن",
+            "back-text": "العودة",
+          },
+          en: {
+            "header-title": "Settings - DT Edu System",
+            "menu-dashboard": "Dashboard",
+            "menu-schedule": "Schedule",
+            "menu-courses": "Courses",
+            "menu-progress": "Progress",
+            "menu-messages": "Messages",
+            "menu-settings": "Settings",
+            "account-settings": "Account Settings",
+            "language-setting": "Language",
+            "language-desc": "Choose your preferred language for the dashboard",
+            "notifications-setting": "System Notifications",
+            "notifications-desc":
+              "Receive notifications about important activities",
+            "email-setting": "Email Notifications",
+            "email-desc": "Receive notifications via email",
+            "class-notifications-setting": "Class Notifications",
+            "class-notifications-desc":
+              "Notifications about class students and their activities",
+            "teaching-settings": "Teaching Settings",
+            "grading-setting": "Grading System",
+            "grading-desc": "Choose the default grading system for students",
+            "auto-save-setting": "Auto Save",
+            "auto-save-desc": "Automatically save changes to grades",
+            "attendance-setting": "Attendance System",
+            "attendance-desc": "Enable automatic attendance tracking",
+            "privacy-settings": "Privacy & Security",
+            "profile-setting": "Public Profile",
+            "profile-desc": "Allow students to see your profile",
+            "availability-setting": "Availability Hours",
+            "availability-desc": "Show availability hours to students",
+            "data-setting": "Data Collection",
+            "data-desc": "Allow data collection to improve experience",
+            "system-settings": "System Settings",
+            "auto-update-setting": "Auto Update",
+            "auto-update-desc": "Install updates automatically when available",
+            "backup-setting": "Backup",
+            "backup-desc": "Create automatic backups of your data",
+            "performance-setting": "Performance Mode",
+            "performance-desc":
+              "Improve performance at the cost of some features",
+            "account-actions": "Account Actions",
+            "export-setting": "Export Data",
+            "export-desc": "Download a copy of student data and assessments",
+            "export-text": "Export",
+            "reset-setting": "Reset Settings",
+            "reset-desc": "Reset all settings to default values",
+            "reset-text": "Reset",
+            "delete-setting": "Delete Account",
+            "delete-desc": "Delete your account and all associated data",
+            "delete-text": "Delete Account",
+            "save-text": "Save Changes",
+            "logout-text": "Logout",
+            "dark-mode-text": "Dark Mode",
+            "dark-mode-btn-text": "Dark Mode",
+            "back-text": "Back",
+          },
+        };
+
+        // تطبيق الترجمات
+        Object.keys(translations[currentLanguage]).forEach((key) => {
+          const element = document.getElementById(key);
+          if (element) {
+            element.textContent = translations[currentLanguage][key];
+          }
+        });
+
+        // تحديث خيارات نظام التقييم
+        const gradingSystem = document.getElementById("grading-system");
+        gradingSystem.innerHTML = "";
+
+        if (currentLanguage === "ar") {
+          gradingSystem.innerHTML = `
                     <option value="percentage">النظام المئوي (0-100)</option>
                     <option value="letter">النظام الحرفي (A-F)</option>
                     <option value="scale">مقياس من 4 نقاط</option>
                 `;
-            } else {
-                gradingSystem.innerHTML = `
+        } else {
+          gradingSystem.innerHTML = `
                     <option value="percentage">Percentage System (0-100)</option>
                     <option value="letter">Letter System (A-F)</option>
                     <option value="scale">4-Point Scale</option>
                 `;
-            }
-
-            // تعيين القيمة المحفوظة
-            gradingSystem.value = teacherSettings.gradingSystem;
         }
 
-        // تحديث نص زر الوضع الداكن
-        function updateDarkModeText() {
-            const darkModeText = currentLanguage === 'ar'
-                ? (darkMode ? 'الوضع الفاتح' : 'الوضع الداكن')
-                : (darkMode ? 'Light Mode' : 'Dark Mode');
+        // تعيين القيمة المحفوظة
+        gradingSystem.value = teacherSettings.gradingSystem;
+      }
 
-            document.getElementById('dark-mode-text').textContent = darkModeText;
-            document.getElementById('dark-mode-btn-text').textContent = darkModeText;
+      // تحديث نص زر الوضع الداكن
+      function updateDarkModeText() {
+        const darkModeText =
+          currentLanguage === "ar"
+            ? darkMode
+              ? "الوضع الفاتح"
+              : "الوضع الداكن"
+            : darkMode
+            ? "Light Mode"
+            : "Dark Mode";
 
-            // تحديث الأيقونة
-            const icons = document.querySelectorAll('#header-dark-mode-toggle i, #sidebar-dark-mode-toggle i');
-            icons.forEach(icon => {
-                icon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
-            });
+        document.getElementById("dark-mode-text").textContent = darkModeText;
+        document.getElementById("dark-mode-btn-text").textContent =
+          darkModeText;
+
+        // تحديث الأيقونة
+        const icons = document.querySelectorAll(
+          "#header-dark-mode-toggle i, #sidebar-dark-mode-toggle i"
+        );
+        icons.forEach((icon) => {
+          icon.className = darkMode ? "fas fa-sun" : "fas fa-moon";
+        });
+      }
+
+      // تحديث اتجاه القائمة حسب اللغة
+      function updateSidebarPosition() {
+        const sidebar = document.querySelector(".sidebar");
+        const mainContent = document.querySelector(".main-content");
+
+        if (currentLanguage === "ar") {
+          sidebar.style.right = "0";
+          sidebar.style.left = "auto";
+          mainContent.style.marginRight = "var(--sidebar-width)";
+          mainContent.style.marginLeft = "0";
+        } else {
+          sidebar.style.left = "0";
+          sidebar.style.right = "auto";
+          mainContent.style.marginLeft = "var(--sidebar-width)";
+          mainContent.style.marginRight = "0";
         }
+      }
 
-        // تحديث اتجاه القائمة حسب اللغة
-        function updateSidebarPosition() {
-            const sidebar = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
-
-            if (currentLanguage === 'ar') {
-                sidebar.style.right = '0';
-                sidebar.style.left = 'auto';
-                mainContent.style.marginRight = 'var(--sidebar-width)';
-                mainContent.style.marginLeft = '0';
-            } else {
-                sidebar.style.left = '0';
-                sidebar.style.right = 'auto';
-                mainContent.style.marginLeft = 'var(--sidebar-width)';
-                mainContent.style.marginRight = '0';
-            }
+      // تحديث اتجاه زر العودة
+      function updateBackButton() {
+        const backIcon = document.querySelector("#back-btn i");
+        if (currentLanguage === "ar") {
+          backIcon.className = "fas fa-arrow-right";
+        } else {
+          backIcon.className = "fas fa-arrow-left";
         }
+      }
 
-        // تحديث اتجاه زر العودة
-        function updateBackButton() {
-            const backIcon = document.querySelector('#back-btn i');
-            if (currentLanguage === 'ar') {
-                backIcon.className = 'fas fa-arrow-right';
-            } else {
-                backIcon.className = 'fas fa-arrow-left';
-            }
-        }
-
-        // تحديث اللغة والوضع الداكن عند تحميل الصفحة
-        updateLanguage();
-        updateDarkModeText();
-        updateSidebarPosition();
-        updateBackButton();
+      // تحديث اللغة والوضع الداكن عند تحميل الصفحة
+      updateLanguage();
+      updateDarkModeText();
+      updateSidebarPosition();
+      updateBackButton();
     </script>
-</body>
-
+  </body>
 </html>
