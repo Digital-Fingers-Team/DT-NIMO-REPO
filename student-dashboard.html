@@ -2097,8 +2097,10 @@
         const el = document.getElementById("user-name");
         if (!el) return;
         const isRTL = document.body.classList.contains("rtl");
-        const nameAr = currentUser && currentUser.name ? currentUser.name : el.textContent;
-        const nameEn = currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+        const nameAr =
+          currentUser && currentUser.name ? currentUser.name : el.textContent;
+        const nameEn =
+          currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
         el.textContent = isRTL ? nameAr : nameEn;
       }
 
@@ -2175,7 +2177,7 @@
               {
                 id: 1,
                 teacherId: "teacher1",
-                teacherName: "أحمد المعلم",
+                teacherName: "محمد مصباح",
                 type: "homework",
                 title: "واجب المعادلات الخطية",
                 subject: "math",
@@ -2199,7 +2201,7 @@
               {
                 id: 2,
                 teacherId: "teacher1",
-                teacherName: "أحمد المعلم",
+                teacherName: "محمد مصباح",
                 type: "quiz",
                 title: "اختبار قصير في العلوم",
                 subject: "science",
@@ -2251,7 +2253,7 @@
               {
                 id: 1,
                 teacherId: "teacher1",
-                teacherName: "أحمد المعلم",
+                teacherName: "محمد مصباح",
                 title: "عرض تقديمي عن الدوال الرياضية",
                 type: "presentation",
                 description: "عرض تقديمي يشرح أنواع الدوال الرياضية",

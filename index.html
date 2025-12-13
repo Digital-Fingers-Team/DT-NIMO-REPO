@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DT Edu – المنصة التعليمية الرئيسية</title>
+    <meta name="description" content="DT Edu منصة تعليمية حديثة للطلاب والمعلمين وأولياء الأمور مع تقارير، حضور، وجدولة دروس." />
+    <meta name="keywords" content="DT Edu, تعليم, مدرسة, طلاب, معلمين, أولياء الأمور, تقارير, حضور, واجبات" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="./index.html" />
+    <link rel="preload" href="logo.png" as="image" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      :root {
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
+        --accent: #00b894;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --text: #333;
+        --text-light: #666;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --content-max: 1200px;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: "Tajawal", "Segoe UI", sans-serif;
+        color: var(--text);
+        background: linear-gradient(135deg, #f0f8ff 0%, #e1f0fa 100%);
+      }
+
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; height: auto; }
+      .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+      /* Header & Nav */
+      header {
+        position: sticky; top: 0; z-index: 1000;
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: saturate(180%) blur(10px);
+        box-shadow: var(--shadow);
+      }
+      .nav {
+        max-width: var(--content-max);
+        margin: 0 auto;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 20px;
+      }
+      .brand { display: flex; align-items: center; gap: 12px; }
+      .brand img { width: 44px; height: 44px; border-radius: 50%; box-shadow: var(--shadow); }
+      .brand-name {
+        font-weight: 800; font-size: 20px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      }
+      .nav-links { display: flex; align-items: center; gap: 18px; }
+      .nav-links a { padding: 8px 10px; border-radius: 8px; }
+      .nav-links a:focus-visible { outline: 3px solid var(--secondary); outline-offset: 3px; }
+      .nav-links a:hover { background: rgba(74,108,247,0.12); }
+      .nav-cta {
+        padding: 10px 14px; border-radius: 10px; font-weight: 700;
+        background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff;
+      }
+      .menu-toggle { display: none; border: none; background: transparent; color: var(--text); font-size: 22px; }
+      .menu-toggle:focus-visible { outline: 3px solid var(--secondary); border-radius: 8px; }
+
+      /* Hero */
+      .hero {
+        max-width: var(--content-max);
+        margin: 0 auto; padding: 60px 20px 40px;
+        display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: center;
+      }
+      .hero-content h1 { font-size: 36px; margin: 0 0 16px; }
+      .hero-content p { color: var(--text-light); margin: 0 0 24px; }
+      .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+      .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; padding: 12px 18px; border-radius: 12px; font-weight: 700; }
+      .btn-outline { border: 2px solid var(--primary); color: var(--primary); padding: 10px 16px; border-radius: 12px; font-weight: 700; background: #fff; }
+      .hero-visual { display: grid; place-items: center; }
+      .hero-visual img { width: 280px; height: 280px; object-fit: contain; border-radius: 24px; box-shadow: var(--shadow); }
+
+      /* Featured */
+      .section { max-width: var(--content-max); margin: 0 auto; padding: 40px 20px; }
+      .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+      .section-title { font-size: 24px; font-weight: 800; color: var(--primary-dark); }
+      .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+      .card { background: #fff; border-radius: 16px; box-shadow: var(--shadow); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+      .card-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: #fff; }
+      .card h3 { margin: 8px 0 4px; font-size: 18px; }
+      .card p { margin: 0; color: var(--text-light); }
+
+      /* About */
+      .about { background: linear-gradient(135deg,#ffffff 0%, #f4f8ff 100%); border-radius: 20px; box-shadow: var(--shadow); }
+      .about p { color: var(--text-light); }
+
+      /* Footer */
+      footer { background: #fff; box-shadow: var(--shadow); margin-top: 40px; }
+      .footer-wrap { max-width: var(--content-max); margin: 0 auto; padding: 24px 20px; display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 20px; }
+      .footer-brand { display: flex; align-items: center; gap: 12px; }
+      .footer-brand img { width: 60px; height: 60px; border-radius: 16px; box-shadow: var(--shadow); }
+      .footer-links, .footer-contact { display: grid; gap: 10px; }
+      .footer-links a { color: var(--text-light); }
+      .social { display: flex; gap: 10px; align-items: center; }
+      .social a { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: rgba(74,108,247,0.12); color: var(--primary); }
+      .legal { text-align: center; color: var(--text-light); padding: 12px; border-top: 1px solid #eee; }
+
+      /* Responsive */
+      @media (max-width: 992px) {
+        .hero { grid-template-columns: 1fr; }
+        .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .footer-wrap { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 640px) {
+        .nav-links { display: none; }
+        .menu-toggle { display: inline-grid; place-items: center; }
+        .nav.open .nav-links { display: flex; flex-direction: column; gap: 8px; position: absolute; right: 16px; top: 60px; background: #fff; padding: 12px; border-radius: 12px; box-shadow: var(--shadow); }
+        .cards { grid-template-columns: 1fr; }
+        .hero-content h1 { font-size: 28px; }
+      }
+
+      /* Accessibility helpers */
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      }
+    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "DT Edu",
+        "url": "https://example.com/",
+        "logo": "https://example.com/logo.png",
+        "contactPoint": [{
+          "@type": "ContactPoint",
+          "telephone": "+966-555-555-555",
+          "contactType": "customer service",
+          "areaServed": "SA",
+          "availableLanguage": ["ar", "en"]
+        }],
+        "sameAs": [
+          "https://www.facebook.com/",
+          "https://twitter.com/",
+          "https://www.linkedin.com/"
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <a class="visually-hidden" href="#main">تخطي إلى المحتوى</a>
+    <header>
+      <nav class="nav" aria-label="التنقل الرئيسي">
+        <div class="brand">
+          <img src="logo.png" alt="شعار DT Edu" loading="eager" decoding="async" />
+          <span class="brand-name" aria-label="اسم المنصة">DT Edu</span>
+        </div>
+        <button class="menu-toggle" aria-label="فتح/إغلاق القائمة" aria-expanded="false">
+          <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+        <div class="nav-links" role="menubar">
+          <a role="menuitem" href="#hero">الرئيسية</a>
+          <a role="menuitem" href="#features">المزايا</a>
+          <a role="menuitem" href="#about">من نحن</a>
+          <a role="menuitem" href="#contact">اتصل بنا</a>
+          <a role="menuitem" class="nav-cta" href="login.html">تسجيل الدخول</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section id="hero" class="hero" aria-labelledby="hero-title">
+        <div class="hero-content">
+          <h1 id="hero-title">منصة تعليمية ذكية لكل أفراد المدرسة</h1>
+          <p>لوحات تحكم حديثة للطلاب والمعلمين وأولياء الأمور والإدارة، مع تقارير فورية وجدولة مرنة وتجربة استخدام سلسة.</p>
+          <div class="hero-actions" role="group" aria-label="خيارات سريعة">
+            <a class="btn-primary" href="login.html" id="cta-login">ابدأ الآن – تسجيل الدخول</a>
+            <a class="btn-outline" href="#features">استكشف المزايا</a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <img src="logo.png" alt="" loading="lazy" decoding="async" />
+        </div>
+      </section>
+
+      <section id="features" class="section" aria-labelledby="features-title">
+        <div class="section-header">
+          <h2 class="section-title" id="features-title">مزايا رئيسية</h2>
+        </div>
+        <div class="cards" role="list">
+          <article class="card" role="listitem">
+            <div class="card-icon" style="background: linear-gradient(135deg, #4a6cf7, #6c5ce7);"><i class="fas fa-user-graduate" aria-hidden="true"></i></div>
+            <h3>لوحة الطالب</h3>
+            <p>متابعة الدروس والجدول والتقدم بسهولة ووضوح.</p>
+          </article>
+          <article class="card" role="listitem">
+            <div class="card-icon" style="background: linear-gradient(135deg, #00b894, #00d2ff);"><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i></div>
+            <h3>أدوات المعلم</h3>
+            <p>إدارة المقررات والواجبات والتواصل مع الطلاب بسرعة.</p>
+          </article>
+          <article class="card" role="listitem">
+            <div class="card-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);"><i class="fas fa-users" aria-hidden="true"></i></div>
+            <h3>مركز ولي الأمر</h3>
+            <p>إشعارات الحضور والدرجات والدفع والتقارير الشاملة.</p>
+          </article>
+          <article class="card" role="listitem">
+            <div class="card-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);"><i class="fas fa-chart-bar" aria-hidden="true"></i></div>
+            <h3>لوحة الإدارة</h3>
+            <p>تحليلات وإحصائيات وإدارة المستخدمين والجدولة المركزية.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="about" class="section about" aria-labelledby="about-title">
+        <h2 class="section-title" id="about-title">عن DT Edu</h2>
+        <p>نقدم تجربة تعليمية رقمية متكاملة تدعم جميع الأدوار داخل المدرسة، بواجهة عربية سهلة وملائمة لجميع الأجهزة، مع توافق كامل مع معايير الوصول.</p>
+      </section>
+
+      <section id="contact" class="section" aria-labelledby="contact-title">
+        <h2 class="section-title" id="contact-title">اتصل بنا</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>البريد الإلكتروني</h3>
+            <p><a href="mailto:support@dtedu.example.com">support@dtedu.example.com</a></p>
+          </article>
+          <article class="card">
+            <h3>الهاتف</h3>
+            <p><a href="tel:+966555555555">+966 555 555 555</a></p>
+          </article>
+          <article class="card">
+            <h3>العنوان</h3>
+            <p>الرياض، المملكة العربية السعودية</p>
+          </article>
+          <article class="card">
+            <h3>وسائل التواصل</h3>
+            <div class="social" aria-label="روابط التواصل الاجتماعي">
+              <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+              <a href="https://twitter.com/" target="_blank" rel="noopener" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+              <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer role="contentinfo" aria-label="تذييل الموقع">
+      <div class="footer-wrap">
+        <div class="footer-brand">
+          <img src="logo.png" alt="شعار DT Edu" loading="lazy" decoding="async" />
+          <div>
+            <div class="brand-name" aria-label="اسم المنصة">DT Edu</div>
+            <div class="social" aria-label="روابط التواصل">
+              <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+              <a href="https://twitter.com/" target="_blank" rel="noopener" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+              <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+            </div>
+          </div>
+        </div>
+        <nav class="footer-links" aria-label="تنقل ثانوي">
+          <a href="#hero">الرئيسية</a>
+          <a href="#features">المزايا</a>
+          <a href="#about">من نحن</a>
+          <a href="#contact">اتصل بنا</a>
+          <a class="nav-cta" href="login.html">تسجيل الدخول</a>
+        </nav>
+        <div class="footer-contact">
+          <div><i class="fas fa-envelope" aria-hidden="true"></i> <a href="mailto:support@dtedu.example.com">support@dtedu.example.com</a></div>
+          <div><i class="fas fa-phone" aria-hidden="true"></i> <a href="tel:+966555555555">+966 555 555 555</a></div>
+          <div><i class="fas fa-location-dot" aria-hidden="true"></i> الرياض، المملكة العربية السعودية</div>
+        </div>
+      </div>
+      <div class="legal">© 2025 DT Edu. جميع الحقوق محفوظة.</div>
+    </footer>
+
+    <script src="core.js" defer></script>
+    <script>
+      (function(){
+        var nav = document.querySelector('.nav');
+        var toggle = document.querySelector('.menu-toggle');
+        var links = document.querySelector('.nav-links');
+        if (toggle) {
+          toggle.addEventListener('click', function(){
+            try {
+              var open = nav.classList.toggle('open');
+              toggle.setAttribute('aria-expanded', String(open));
+              if (window.analyticsTrack) analyticsTrack('menu_toggle', { open: open });
+            } catch (e) { if (window.showToast) showToast('error', 'حدث خطأ بفتح القائمة'); }
+          });
+        }
+
+        // Lightweight analytics
+        window.analyticsTrack = function(name, data){
+          try {
+            var payload = JSON.stringify({ name: String(name), data: data||{}, ts: Date.now() });
+            if (navigator.sendBeacon) {
+              var blob = new Blob([payload], { type: 'application/json' });
+              navigator.sendBeacon('/analytics', blob);
+            } else {
+              console.log('[analytics]', name, data||{});
+            }
+            var store = JSON.parse(localStorage.getItem('dtedu_analytics')||'[]');
+            store.push({ name: name, data: data||{}, ts: Date.now() });
+            localStorage.setItem('dtedu_analytics', JSON.stringify(store.slice(-100)));
+          } catch (err) { console.warn('analytics error', err); }
+        };
+
+        // Track CTA
+        var cta = document.getElementById('cta-login');
+        if (cta) {
+          cta.addEventListener('click', function(){ analyticsTrack('cta_login_click'); });
+        }
+
+        // Error handling for dynamic interactions
+        window.addEventListener('error', function(ev){
+          analyticsTrack('runtime_error', { message: ev.message, filename: ev.filename, lineno: ev.lineno });
+        });
+        window.addEventListener('unhandledrejection', function(ev){
+          analyticsTrack('promise_rejection', { reason: String(ev.reason) });
+        });
+      })();
+    </script>
+  </body>
+</html>
