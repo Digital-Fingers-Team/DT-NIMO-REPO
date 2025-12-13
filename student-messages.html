@@ -775,6 +775,17 @@
         document.body.classList.add("dark-mode");
       }
 
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+      function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (!el) return;
+        const isRTL = document.body.classList.contains("rtl");
+        const nameAr = currentUser && currentUser.name ? currentUser.name : el.textContent;
+        const nameEn = currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+        el.textContent = isRTL ? nameAr : nameEn;
+      }
+
       // إعداد زر الوضع الداكن
       document
         .querySelectorAll("#dark-mode-toggle, #sidebar-dark-mode-toggle")
@@ -811,6 +822,8 @@
       function goBack() {
         window.history.back();
       }
+
+      updateUserName();
 
       const chatMessages = document.getElementById("chatMessages");
       const userInput = document.getElementById("message-input");

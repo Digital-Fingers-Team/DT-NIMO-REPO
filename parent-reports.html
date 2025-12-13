@@ -1112,6 +1112,7 @@
           document.documentElement.dir = "ltr";
           updateLanguage("en");
           localStorage.setItem("language", "en");
+          updateUserName();
         } else {
           document.body.classList.remove("ltr");
           document.body.classList.add("rtl");
@@ -1119,6 +1120,7 @@
           document.documentElement.dir = "rtl";
           updateLanguage("ar");
           localStorage.setItem("language", "ar");
+          updateUserName();
         }
       });
 
@@ -1128,6 +1130,7 @@
         document.documentElement.lang = "en";
         document.documentElement.dir = "ltr";
         updateLanguage("en");
+        updateUserName();
       }
 
       const childTabs = document.querySelectorAll(".child-tab");
@@ -1688,10 +1691,31 @@
         renderAchievements(childName);
       }
 
+      function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (el) {
+          const isRTL = document.body.classList.contains("rtl");
+          const currentUser = JSON.parse(
+            localStorage.getItem("currentUser") || "{}"
+          );
+          el.textContent = isRTL
+            ? currentUser.name
+            : currentUser.nameEn || currentUser.name;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", updateUserName);
+
+      new MutationObserver(() => updateUserName()).observe(document.body, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+
       currentChild = document
         .querySelector(".child-tab.active")
         .getAttribute("data-child");
       loadReportsDataFor(currentChild);
+      updateUserName();
     </script>
   </body>
 </html>

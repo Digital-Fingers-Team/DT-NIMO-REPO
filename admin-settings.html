@@ -954,6 +954,18 @@
       // استعادة الإعدادات المحفوظة
       let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
       let darkMode = localStorage.getItem("darkMode") === "true";
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+      function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (!el) return;
+        const isRTL = document.body.classList.contains("rtl");
+        const nameAr =
+          currentUser && currentUser.name ? currentUser.name : el.textContent;
+        const nameEn =
+          currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+        el.textContent = isRTL ? nameAr : nameEn;
+      }
       let adminSettings = JSON.parse(localStorage.getItem("adminSettings")) || {
         systemLanguage: "ar",
         notifications: true,
@@ -1018,6 +1030,7 @@
         updateDarkModeText();
         updateSidebarPosition();
         updateBackButton();
+        updateUserName();
       }
 
       // إعداد مستمعي الأحداث
@@ -1101,6 +1114,7 @@
 
         // تحديث اتجاه زر العودة
         updateBackButton();
+        updateUserName();
 
         // عرض رسالة نجاح
         setTimeout(() => {

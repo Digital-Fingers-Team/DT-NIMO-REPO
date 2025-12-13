@@ -1223,6 +1223,17 @@
         },
       };
 
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+      function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (!el) return;
+        const isRTL = document.body.classList.contains("rtl");
+        const nameAr = currentUser && currentUser.name ? currentUser.name : el.textContent;
+        const nameEn = currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+        el.textContent = isRTL ? nameAr : nameEn;
+      }
+
       function updateLanguage(lang) {
         const t = translations[lang];
         document.getElementById("page-title").textContent = t.pageTitle;
@@ -1299,6 +1310,7 @@
           updateLanguage("ar");
           localStorage.setItem("language", "ar");
         }
+        updateUserName();
       });
 
       if (localStorage.getItem("language") === "en") {
@@ -1307,6 +1319,7 @@
         document.documentElement.lang = "en";
         document.documentElement.dir = "ltr";
         updateLanguage("en");
+        updateUserName();
       }
 
       let currentChildId = "child1";
@@ -1596,3 +1609,4 @@
     </script>
   </body>
 </html>
+      updateUserName();

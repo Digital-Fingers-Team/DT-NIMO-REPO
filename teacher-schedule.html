@@ -1442,6 +1442,23 @@
       updateSidebarPosition();
       updateBackButton();
       updateWeekNavButtons();
+      function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (el) {
+          const isRTL = document.body.classList.contains("rtl");
+          const currentUser = JSON.parse(
+            localStorage.getItem("currentUser") || "{}"
+          );
+          el.textContent = isRTL
+            ? currentUser.name
+            : currentUser.nameEn || currentUser.name;
+        }
+      }
+      updateUserName();
+      new MutationObserver(() => updateUserName()).observe(document.body, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
 
       // إضافة تفاعل للنقر على الحصص
       document.querySelectorAll(".class-slot").forEach((slot) => {

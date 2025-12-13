@@ -694,7 +694,7 @@
 
       <div class="main-content">
         <div class="header">
-          <h1 id="page-title">شات بوت - مساعد الذكاء الاصطناعي</h1>
+          <h1 id="page-title">Chat with AI - راسل أي شخص</h1>
           <div class="header-actions">
             <button class="clear-btn" onclick="clearChat()">
               <i class="fas fa-trash"></i>
@@ -780,6 +780,10 @@
         },
       };
 
+      const currentUser = JSON.parse(
+        localStorage.getItem("currentUser") || "{}"
+      );
+
       function updateLanguage(lang) {
         const t = translations[lang];
         document.getElementById("page-title").textContent = t.pageTitle;
@@ -807,6 +811,17 @@
         // تحديث النص البديل لحقل الإدخال
         document.getElementById("message-input").placeholder =
           lang === "ar" ? "اكتب رسالتك هنا..." : "Type your message here...";
+      }
+
+      function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (!el) return;
+        const isRTL = document.body.classList.contains("rtl");
+        const nameAr =
+          currentUser && currentUser.name ? currentUser.name : el.textContent;
+        const nameEn =
+          currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+        el.textContent = isRTL ? nameAr : nameEn;
       }
 
       const darkModeToggle = document.getElementById("dark-mode-toggle");
@@ -858,6 +873,7 @@
           localStorage.setItem("language", "ar");
         }
         updateDarkModeText();
+        updateUserName();
       });
 
       if (localStorage.getItem("language") === "en") {
@@ -866,6 +882,7 @@
         document.documentElement.lang = "en";
         document.documentElement.dir = "ltr";
         updateLanguage("en");
+        updateUserName();
       }
 
       function updateDarkModeText() {
@@ -895,13 +912,15 @@
           icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
         });
       })();
+      updateUserName();
 
       const chatMessages = document.getElementById("chatMessages");
       const userInput = document.getElementById("message-input");
       const sendBtn = document.getElementById("sendBtn");
       const contactsListEl = document.getElementById("contactsList");
       const activeContactNameEl = document.getElementById("activeContactName");
-      const currentUserRole = "parent";
+      const currentUserRole =
+        currentUser && currentUser.type ? currentUser.type : "parent";
       const roles = [
         { id: "admin", name: "الإدارة" },
         { id: "teacher", name: "المعلم" },

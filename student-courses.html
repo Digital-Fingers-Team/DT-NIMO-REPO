@@ -1607,9 +1607,19 @@
           updateDarkModeText();
         }
 
-        // تطبيق اللغة
-        document.body.className = savedLanguage === "ar" ? "rtl" : "ltr";
-        updateLanguage(savedLanguage);
+      // تطبيق اللغة
+      document.body.className = savedLanguage === "ar" ? "rtl" : "ltr";
+      updateLanguage(savedLanguage);
+
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      (function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (!el) return;
+        const isRTL = document.body.classList.contains("rtl");
+        const nameAr = currentUser && currentUser.name ? currentUser.name : el.textContent;
+        const nameEn = currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+        el.textContent = isRTL ? nameAr : nameEn;
+      })();
 
         // تهيئة قاعدة البيانات
         try {

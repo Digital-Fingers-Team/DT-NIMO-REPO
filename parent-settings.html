@@ -1163,8 +1163,29 @@
           document.documentElement.dir = isRTL ? "rtl" : "ltr";
           updateLanguage(this.value);
           localStorage.setItem("language", this.value);
+          updateUserName();
         });
       }
+
+      function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (el) {
+          const isRTL = document.body.classList.contains("rtl");
+          const currentUser = JSON.parse(
+            localStorage.getItem("currentUser") || "{}"
+          );
+          el.textContent = isRTL
+            ? currentUser.name
+            : currentUser.nameEn || currentUser.name;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", updateUserName);
+
+      new MutationObserver(() => updateUserName()).observe(document.body, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
     </script>
   </body>
 </html>

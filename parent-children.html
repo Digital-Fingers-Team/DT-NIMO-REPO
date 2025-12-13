@@ -611,7 +611,7 @@
           </div>
           <div class="logo-text">DT Edu</div>
           <div class="user-info">
-            <div class="user-name">ولي الأمر</div>
+            <div class="user-name" id="user-name">ولي الأمر</div>
             <div class="user-type">Parent</div>
           </div>
         </div>
@@ -1065,6 +1065,26 @@
           closeModal("childDetailsModal");
         }
       };
+
+      function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (el) {
+          const isRTL = document.body.classList.contains("rtl");
+          const currentUser = JSON.parse(
+            localStorage.getItem("currentUser") || "{}"
+          );
+          el.textContent = isRTL
+            ? currentUser.name
+            : currentUser.nameEn || currentUser.name;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", updateUserName);
+
+      new MutationObserver(() => updateUserName()).observe(document.body, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
     </script>
   </body>
 </html>

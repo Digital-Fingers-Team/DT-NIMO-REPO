@@ -2094,9 +2094,12 @@
       // ============================================
 
       function updateUserInfo() {
-        if (currentUser.name) {
-          document.getElementById("user-name").textContent = currentUser.name;
-        }
+        const el = document.getElementById("user-name");
+        if (!el) return;
+        const isRTL = document.body.classList.contains("rtl");
+        const nameAr = currentUser && currentUser.name ? currentUser.name : el.textContent;
+        const nameEn = currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+        el.textContent = isRTL ? nameAr : nameEn;
       }
 
       function initEvents() {

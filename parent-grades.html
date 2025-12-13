@@ -860,6 +860,17 @@
         },
       };
 
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+
+      function updateUserName() {
+        const el = document.getElementById("user-name");
+        if (!el) return;
+        const isRTL = document.body.classList.contains("rtl");
+        const nameAr = currentUser && currentUser.name ? currentUser.name : el.textContent;
+        const nameEn = currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+        el.textContent = isRTL ? nameAr : nameEn;
+      }
+
       let performanceChart;
       let currentChild = "أحمد محمد";
 
@@ -965,6 +976,7 @@
           updateLanguage("ar");
           localStorage.setItem("language", "ar");
         }
+        updateUserName();
       });
 
       if (localStorage.getItem("language") === "en") {
@@ -973,6 +985,7 @@
         document.documentElement.lang = "en";
         document.documentElement.dir = "ltr";
         updateLanguage("en");
+        updateUserName();
       }
 
       const childTabs = document.querySelectorAll(".child-tab");
@@ -1241,3 +1254,4 @@
     </script>
   </body>
 </html>
+      updateUserName();

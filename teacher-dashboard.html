@@ -10,6 +10,8 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="db.js"></script>
     <style>
       /* أنماط CSS الشاملة - تم دمج الأنماط من النظامين */
       :root {
@@ -3091,11 +3093,30 @@
       // ============================================
 
       function updateUserInfo() {
-        if (currentUser.name) {
-          document.getElementById("user-name").textContent = currentUser.name;
-          document.getElementById("user-type").textContent = currentUser.subject
-            ? `معلم ${getSubjectName(currentUser.subject)}`
-            : "معلم";
+        const nameEl = document.getElementById("user-name");
+        if (nameEl) {
+          const isRTL = document.body.classList.contains("rtl");
+          const nameAr =
+            currentUser && currentUser.name
+              ? currentUser.name
+              : nameEl.textContent;
+          const nameEn =
+            currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+          nameEl.textContent = isRTL ? nameAr : nameEn;
+        }
+        const typeEl = document.getElementById("user-type");
+        if (typeEl) {
+          const isRTL = document.body.classList.contains("rtl");
+          if (currentUser.subject && subjects[currentUser.subject]) {
+            const subjName = isRTL
+              ? subjects[currentUser.subject].ar
+              : subjects[currentUser.subject].en;
+            typeEl.textContent = isRTL
+              ? `معلم ${subjName}`
+              : `Teacher ${subjName}`;
+          } else {
+            typeEl.textContent = isRTL ? "معلم" : "Teacher";
+          }
         }
       }
 
@@ -4238,12 +4259,42 @@
       // وظائف النظام المتكامل
       // ============================================
 
-      function loadAttendanceList() {
+      async function ensureDBOpen() {
+        if (!window.db) return;
+        if (!window.__dbReady) {
+          await db.open();
+          window.__dbReady = true;
+        }
+      }
+
+      function getDayNames(dateStr) {
+        const d = new Date(dateStr);
+        const ar = [
+          "الأحد",
+          "الاثنين",
+          "الثلاثاء",
+          "الأربعاء",
+          "الخميس",
+          "الجمعة",
+          "السبت",
+        ][d.getDay()];
+        const en = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ][d.getDay()];
+        return { ar, en };
+      }
+
+      async function loadAttendanceList() {
         const classValue = document.getElementById("attendance-class").value;
         const attendanceList = document.getElementById("attendance-list");
-
+        const date = document.getElementById("attendance-date").value;
         if (!attendanceList) return;
-
         attendanceList.innerHTML = "";
 
         const filteredStudents = students.filter(
@@ -4251,26 +4302,57 @@
         );
         currentAttendanceData = {};
 
-        filteredStudents.forEach((student) => {
-          currentAttendanceData[student.id] = "present";
+        await ensureDBOpen();
+        let existingMap = {};
+        if (window.db && filteredStudents.length) {
+          const ids = filteredStudents.map((s) => String(s.id));
+          const records = await db.attendanceRecords
+            .where("childId")
+            .anyOf(ids)
+            .toArray();
+          records.forEach((r) => {
+            if (r.date === date) existingMap[r.childId] = r.status;
+          });
+        }
 
+        filteredStudents.forEach((student) => {
+          const initialStatus = existingMap[String(student.id)] || "present";
+          currentAttendanceData[student.id] = initialStatus;
           const row = document.createElement("tr");
           row.innerHTML = `
                     <td>${student.name}</td>
                     <td>${student.seat}</td>
                     <td id="status-${student.id}">
-                        <span class="status-present">حاضر</span>
+                        <span class="${
+                          initialStatus === "present"
+                            ? "status-present"
+                            : initialStatus === "absent"
+                            ? "status-absent"
+                            : "status-late"
+                        }">${
+            initialStatus === "present"
+              ? "حاضر"
+              : initialStatus === "absent"
+              ? "غائب"
+              : "متأخر"
+          }</span>
                     </td>
                     <td>
-                        <button class="status-btn status-present active" onclick="setAttendanceStatus(${student.id}, 'present')">
-                            حاضر
-                        </button>
-                        <button class="status-btn status-absent" onclick="setAttendanceStatus(${student.id}, 'absent')">
-                            غائب
-                        </button>
-                        <button class="status-btn status-late" onclick="setAttendanceStatus(${student.id}, 'late')">
-                            متأخر
-                        </button>
+                        <button class="status-btn status-present ${
+                          initialStatus === "present" ? "active" : ""
+                        }" onclick="setAttendanceStatus(${
+            student.id
+          }, 'present')">حاضر</button>
+                        <button class="status-btn status-absent ${
+                          initialStatus === "absent" ? "active" : ""
+                        }" onclick="setAttendanceStatus(${
+            student.id
+          }, 'absent')">غائب</button>
+                        <button class="status-btn status-late ${
+                          initialStatus === "late" ? "active" : ""
+                        }" onclick="setAttendanceStatus(${
+            student.id
+          }, 'late')">متأخر</button>
                     </td>
                 `;
           attendanceList.appendChild(row);
@@ -4281,32 +4363,24 @@
         currentAttendanceData[studentId] = status;
 
         const statusElement = document.getElementById(`status-${studentId}`);
-        const buttons = document.querySelectorAll(
-          `#status-${student.id} + td .status-btn`
-        );
-
+        const buttons = statusElement
+          ? statusElement.parentElement.querySelectorAll(".status-btn")
+          : [];
         if (!statusElement) return;
-
-        const statusText = {
-          present: "حاضر",
-          absent: "غائب",
-          late: "متأخر",
-        };
-
+        const statusText = { present: "حاضر", absent: "غائب", late: "متأخر" };
         const statusClass = {
           present: "status-present",
           absent: "status-absent",
           late: "status-late",
         };
-
         statusElement.innerHTML = `<span class="${statusClass[status]}">${statusText[status]}</span>`;
-
         buttons.forEach((btn) => {
           btn.classList.remove("active");
-          if (btn.textContent.includes(statusText[status])) {
-            btn.classList.add("active");
-          }
         });
+        const activeBtn = statusElement.parentElement.querySelector(
+          `.status-btn.${statusClass[status]}`
+        );
+        if (activeBtn) activeBtn.classList.add("active");
       }
 
       function markAllPresent() {
@@ -4315,62 +4389,109 @@
         });
       }
 
-      function saveAttendance() {
+      async function saveAttendance() {
         const date = document.getElementById("attendance-date").value;
         const classCode = document.getElementById("attendance-class").value;
         const period = document.getElementById("attendance-period").value;
-
         if (!date || !classCode) {
           showToast("error", "يرجى تحديد التاريخ والفصل");
           return;
         }
-
-        const attendanceRecord = {
-          id: Date.now(),
-          teacherId: currentTeacherId,
-          date: date,
-          class: classCode,
-          period: period,
-          students: currentAttendanceData,
-          recordedAt: new Date().toISOString(),
-        };
-
-        const attendanceRecords = JSON.parse(
-          localStorage.getItem("attendanceRecords") || "[]"
-        );
-        attendanceRecords.push(attendanceRecord);
-        localStorage.setItem(
-          "attendanceRecords",
-          JSON.stringify(attendanceRecords)
-        );
-
-        showToast("success", "تم حفظ بيانات الحضور بنجاح!");
+        await ensureDBOpen();
+        const day = getDayNames(date);
+        const filteredStudents = students.filter((s) => s.class === classCode);
+        for (const student of filteredStudents) {
+          const status = currentAttendanceData[student.id] || "present";
+          const existing = window.db
+            ? await db.attendanceRecords
+                .where("childId")
+                .equals(String(student.id))
+                .and((r) => r.date === date)
+                .first()
+            : null;
+          const record = {
+            childId: String(student.id),
+            date,
+            checkIn: "-",
+            checkOut: "-",
+            status,
+            dayAr: day.ar,
+            dayEn: day.en,
+            noteAr: "-",
+            noteEn: "-",
+          };
+          if (existing && existing.id) {
+            await db.attendanceRecords.update(existing.id, record);
+          } else {
+            await db.attendanceRecords.add(record);
+          }
+          const stats = await db.attendanceStats
+            .where("childId")
+            .equals(String(student.id))
+            .first();
+          let presentDays = (stats && stats.presentDays) || 0;
+          let absentDays = (stats && stats.absentDays) || 0;
+          let lateDays = (stats && stats.lateDays) || 0;
+          if (existing && existing.status !== status) {
+            if (existing.status === "present" && presentDays > 0) presentDays--;
+            if (existing.status === "absent" && absentDays > 0) absentDays--;
+            if (existing.status === "late" && lateDays > 0) lateDays--;
+          }
+          if (!existing) {
+            if (status === "present") presentDays++;
+            else if (status === "absent") absentDays++;
+            else if (status === "late") lateDays++;
+          } else if (existing.status !== status) {
+            if (status === "present") presentDays++;
+            else if (status === "absent") absentDays++;
+            else if (status === "late") lateDays++;
+          }
+          const total = presentDays + absentDays + lateDays;
+          const rate =
+            total > 0 ? Math.round((presentDays / total) * 100) + "%" : "0%";
+          await db.attendanceStats.put({
+            childId: String(student.id),
+            rate,
+            presentDays,
+            absentDays,
+            lateDays,
+          });
+        }
+        showToast("success", "تم حفظ بيانات الحضور في قاعدة البيانات بنجاح!");
+        const presentCount = Object.values(currentAttendanceData).filter(
+          (s) => s === "present"
+        ).length;
+        const totalCount = Object.keys(currentAttendanceData).length;
+        const attendanceRate = totalCount
+          ? Math.round((presentCount / totalCount) * 100)
+          : 0;
+        document.getElementById(
+          "attendance-value"
+        ).textContent = `${attendanceRate}%`;
         closeModal("attendance-modal");
-        updateAttendanceStats();
       }
 
-      function updateAttendanceStats() {
-        const attendanceRecords = JSON.parse(
-          localStorage.getItem("attendanceRecords") || "[]"
-        );
-        const todayRecords = attendanceRecords.filter(
-          (record) =>
-            record.date === new Date().toISOString().split("T")[0] &&
-            record.teacherId === currentTeacherId
-        );
-
-        if (todayRecords.length > 0) {
-          const latestRecord = todayRecords[todayRecords.length - 1];
-          const presentCount = Object.values(latestRecord.students).filter(
-            (status) => status === "present"
-          ).length;
-          const totalCount = Object.keys(latestRecord.students).length;
-          const attendanceRate = Math.round((presentCount / totalCount) * 100);
-
-          document.getElementById(
-            "attendance-value"
-          ).textContent = `${attendanceRate}%`;
-        }
+      async function updateAttendanceStats() {
+        await ensureDBOpen();
+        const classCode = document.getElementById("attendance-class").value;
+        const date = new Date().toISOString().split("T")[0];
+        const filteredStudents = students.filter((s) => s.class === classCode);
+        const ids = filteredStudents.map((s) => String(s.id));
+        const records = await db.attendanceRecords
+          .where("childId")
+          .anyOf(ids)
+          .toArray();
+        const todays = records.filter((r) => r.date === date);
+        const presentCount = todays.filter(
+          (r) => r.status === "present"
+        ).length;
+        const totalCount = filteredStudents.length;
+        const attendanceRate = totalCount
+          ? Math.round((presentCount / totalCount) * 100)
+          : 0;
+        document.getElementById(
+          "attendance-value"
+        ).textContent = `${attendanceRate}%`;
       }
 
       function loadArchiveList() {

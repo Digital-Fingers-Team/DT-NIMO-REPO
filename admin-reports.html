@@ -944,6 +944,7 @@
         // استعادة اللغة ووضع التصميم
         let currentLanguage = localStorage.getItem('currentLanguage') || 'ar';
         let darkMode = localStorage.getItem('darkMode') === 'true';
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
         // تهيئة Dexie والجدول نفسه المستخدم في لوحة التحكم
         const db = new Dexie('DTEduDB');
@@ -976,6 +977,16 @@
         if (darkMode) {
             document.body.classList.add('dark-mode');
         }
+
+        function updateUserName() {
+            const el = document.getElementById('user-name');
+            if (!el) return;
+            const isRTL = document.body.classList.contains('rtl');
+            const nameAr = currentUser && currentUser.name ? currentUser.name : el.textContent;
+            const nameEn = currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+            el.textContent = isRTL ? nameAr : nameEn;
+        }
+        updateUserName();
 
         // متغيرات للرسم البياني
         let studentsByGradeChart = null;
@@ -1313,6 +1324,7 @@
         // تهيئة البيانات عند التحميل
         async function bootstrapReportsPage() {
             updateLanguage();
+            updateUserName();
             updateDarkModeText();
             createSuccessRatesChart();
 

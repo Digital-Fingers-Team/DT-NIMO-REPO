@@ -2457,5 +2457,21 @@
       updateBackButton();
       loadProgressTable();
     </script>
+    <script>
+      function updateUserName() {
+        var el = document.getElementById('user-name');
+        if (!el) return;
+        var isRTL = document.body.classList.contains('rtl');
+        var raw = localStorage.getItem('currentUser') || '{}';
+        var data;
+        try { data = JSON.parse(raw); } catch (e) { data = {}; }
+        var nameAR = data.name;
+        var nameEN = data.nameEn || data.name;
+        el.textContent = isRTL ? (nameAR || el.textContent) : (nameEN || el.textContent);
+      }
+      updateUserName();
+      var o = new MutationObserver(function() { updateUserName(); });
+      o.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    </script>
   </body>
 </html>
