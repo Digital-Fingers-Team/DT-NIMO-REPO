@@ -800,14 +800,18 @@
         },
       };
 
-      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      const currentUser = JSON.parse(
+        localStorage.getItem("currentUser") || "{}"
+      );
 
       function updateUserName() {
         const el = document.getElementById("user-name");
         if (!el) return;
         const isRTL = document.body.classList.contains("rtl");
-        const nameAr = currentUser && currentUser.name ? currentUser.name : el.textContent;
-        const nameEn = currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
+        const nameAr =
+          currentUser && currentUser.name ? currentUser.name : el.textContent;
+        const nameEn =
+          currentUser && currentUser.nameEn ? currentUser.nameEn : nameAr;
         el.textContent = isRTL ? nameAr : nameEn;
       }
 
@@ -1167,12 +1171,29 @@
           noteAr: r.noteAr,
           noteEn: r.noteEn,
         }));
+        const presentDays = records.filter(
+          (r) => r.status === "present"
+        ).length;
+        const absentDays = records.filter((r) => r.status === "absent").length;
+        const lateDays = records.filter((r) => r.status === "late").length;
+        const totalDays = presentDays + absentDays + lateDays;
+        const computedRate =
+          totalDays > 0
+            ? Math.round((presentDays / totalDays) * 100) + "%"
+            : "0%";
+        await db.attendanceStats.put({
+          childId,
+          rate: computedRate,
+          presentDays,
+          absentDays,
+          lateDays,
+        });
         childrenData[childId] = {
           stats: {
-            rate: (stats && stats.rate) || "0%",
-            present: (stats && stats.presentDays) || 0,
-            absent: (stats && stats.absentDays) || 0,
-            late: (stats && stats.lateDays) || 0,
+            rate: computedRate,
+            present: presentDays,
+            absent: absentDays,
+            late: lateDays,
           },
           records: mappedRecords,
         };
@@ -1234,4 +1255,4 @@
     </script>
   </body>
 </html>
-      updateUserName();
+updateUserName();
