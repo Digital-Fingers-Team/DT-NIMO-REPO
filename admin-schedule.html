@@ -929,6 +929,25 @@
                 padding: 20px;
             }
         }
+
+        /* رسالة التنبيه المخصصة */
+        .toast-alert {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1100;
+            font-weight: bold;
+            animation: fadeInUp 0.3s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 	<link rel="stylesheet" href="responsive.css">
 </head>
@@ -1427,26 +1446,19 @@
                     // توزيع المواد بشكل مختلف لكل فصل
                     let subjectIndex;
                     if (classId === '7') {
-                        // الصف السابع: جدول متوازن
                         subjectIndex = (periodIndex * 2 + day) % subjects.length;
                     } else if (classId === '8') {
-                        // الصف الثامن: تركيز على العلوم والرياضيات
                         subjectIndex = (periodIndex * 3 + day * 2) % subjects.length;
                     } else if (classId === '9') {
-                        // الصف التاسع: جدول تحضيري للمرحلة الثانوية
                         subjectIndex = (periodIndex + day * 4) % subjects.length;
                     } else if (classId === '10') {
-                        // الصف العاشر: جدول ثانوي عام
                         subjectIndex = (periodIndex * 4 + day * 3) % subjects.length;
                     } else if (classId === '11') {
-                        // الصف الحادي عشر: تركيز على التخصصات العلمية
                         subjectIndex = (periodIndex * 5 + day * 2) % subjects.length;
                     } else {
-                        // الصف الثاني عشر: جدول تخرج
                         subjectIndex = (periodIndex * 3 + day * 5) % subjects.length;
                     }
 
-                    // تأكد من عدم تكرار المادة في نفس اليوم أكثر من مرة
                     if (day > 0 && classes.includes(subjects[subjectIndex])) {
                         subjectIndex = (subjectIndex + 1) % subjects.length;
                     }
@@ -1469,7 +1481,6 @@
                 };
             });
 
-            // إضافة تفاصيل للفسحة والفارغ
             details['break'] = { teacher: '', room: '' };
             details['empty'] = { teacher: '', room: '' };
 
@@ -1477,6 +1488,59 @@
                 periods: periods,
                 details: details
             };
+        }
+
+        // دالة التحقق من عدم وجود تعارض (نفس المعلم أو نفس المادة في نفس الوقت عبر جميع الصفوف)
+        function checkConflict(editingClass, periodIndex, dayIndex, newSubject, newTeacher) {
+            if (newSubject === 'break' || newSubject === 'empty') return null; // لا يوجد تعارض للفسحة أو الفارغ
+            
+            const conflictMessage = [];
+            const periodTime = scheduleData[editingClass].periods[periodIndex].time;
+            
+            // المرور على جميع الصفوف
+            for (let classId in scheduleData) {
+                const classData = scheduleData[classId];
+                // نفس الفترة الزمنية (نفس رقم الحصة)
+                const targetPeriod = classData.periods[periodIndex];
+                if (!targetPeriod) continue;
+                
+                // التحقق من كل يوم (0-4)
+                for (let d = 0; d < targetPeriod.classes.length; d++) {
+                    const classType = targetPeriod.classes[d];
+                    if (classType === 'break' || classType === 'empty') continue;
+                    
+                    const details = classData.details[classType];
+                    const teacher = details?.teacher;
+                    
+                    // التحقق من تعارض المعلم: نفس المعلم في نفس الوقت ولكن في صف أو يوم مختلف
+                    if (newTeacher && teacher === newTeacher) {
+                        // إذا كان نفس الصف ونفس اليوم -> نفس الحصة، لا مشكلة
+                        if (classId === editingClass && d === dayIndex) continue;
+                        conflictMessage.push(`المعلم "${newTeacher}" مشغول في نفس الوقت (${periodTime}) في الصف ${classId} يوم ${getDayName(d)} بمادة ${getSubjectName(classType)}`);
+                    }
+                    
+                    // التحقق من تعارض المادة: نفس المادة في نفس الوقت في صفوف مختلفة
+                    if (classType === newSubject && classId !== editingClass) {
+                        conflictMessage.push(`المادة "${getSubjectName(newSubject)}` + `" مقررة في نفس الوقت (${periodTime}) في الصف ${classId} يوم ${getDayName(d)}`);
+                    }
+                }
+            }
+            
+            return conflictMessage.length > 0 ? conflictMessage : null;
+        }
+        
+        function getDayName(dayIndex) {
+            const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+            return days[dayIndex];
+        }
+
+        function showToast(message, isError = true) {
+            const toast = document.createElement('div');
+            toast.className = 'toast-alert';
+            toast.style.background = isError ? '#e74c3c' : '#2ecc71';
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
         }
 
         // تحديث ملخص الجدول لكل فصل
@@ -1494,12 +1558,10 @@
                 });
             });
 
-            // تحديث أرقام الملخص
             document.getElementById('total-classes').textContent = totalClasses;
             document.getElementById('total-subjects').textContent = uniqueSubjects.size;
             document.getElementById('weekly-hours').textContent = Math.floor(totalClasses * 45 / 60);
 
-            // تحديث الحصة التالية
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
@@ -1508,14 +1570,10 @@
             classData.periods.forEach(period => {
                 const [startTime, endTime] = period.time.split(' - ');
                 const [startHour, startMin] = startTime.split(':').map(Number);
-                const [endHour, endMin] = endTime.split(':').map(Number);
-
                 const periodStart = startHour * 60 + startMin;
-                const periodEnd = endHour * 60 + endMin;
                 const currentTime = currentHour * 60 + currentMinute;
 
                 if (currentTime < periodStart) {
-                    // ابحث عن أول مادة غير فارغة في هذه الفترة
                     period.classes.forEach(cls => {
                         if (cls !== 'break' && cls !== 'empty' && nextClass === 'لا توجد') {
                             nextClass = getSubjectName(cls);
@@ -1527,46 +1585,34 @@
             document.getElementById('next-class').textContent = nextClass;
         }
 
-        // إعداد زر الوضع الداكن
         document.querySelectorAll('#header-dark-mode-toggle, #sidebar-dark-mode-toggle').forEach(btn => {
             btn.addEventListener('click', function () {
-                // تبديل الوضع الداكن
                 darkMode = !darkMode;
-
-                // تحديث الوضع الداكن في التخزين المحلي
                 localStorage.setItem('darkMode', darkMode);
-
-                // تحديث الوضع الداكن في الصفحة
                 if (darkMode) {
                     document.body.classList.add('dark-mode');
                 } else {
                     document.body.classList.remove('dark-mode');
                 }
-
-                // تحديث نص الزر
                 updateDarkModeText();
             });
         });
 
-        // إعداد زر تسجيل الخروج
         document.getElementById('logout-link').addEventListener('click', function (e) {
             e.preventDefault();
             localStorage.removeItem('currentUser');
             window.location.href = 'login.html';
         });
 
-        // إعداد زر العودة
         function goBack() {
             window.location.href = 'admin-dashboard.html';
         }
 
-        // إعداد زر التعديل
         document.getElementById('edit-schedule-btn').addEventListener('click', function () {
             isEditing = !isEditing;
             updateEditMode();
         });
 
-        // تصدير الجدول إلى PDF
         async function exportSchedulePDF() {
             const table = document.querySelector('.schedule-table');
             const canvas = await html2canvas(table, { scale: 2 });
@@ -1581,7 +1627,6 @@
             pdf.save(`جدول-الصف-${currentClass}.pdf`);
         }
 
-        // تصدير الجدول إلى Excel
         function exportScheduleExcel() {
             const table = document.querySelector('.schedule-table');
             const wb = XLSX.utils.table_to_book(table, { sheet: 'Schedule' });
@@ -1591,7 +1636,6 @@
         document.getElementById('export-pdf-btn').addEventListener('click', exportSchedulePDF);
         document.getElementById('export-excel-btn').addEventListener('click', exportScheduleExcel);
 
-        // تحديث وضع التعديل
         function updateEditMode() {
             const editBtn = document.getElementById('edit-schedule-btn');
             const editText = document.getElementById('edit-text');
@@ -1600,8 +1644,6 @@
                 editBtn.style.background = 'var(--primary)';
                 editBtn.style.color = 'white';
                 editText.textContent = currentLanguage === 'ar' ? 'إنهاء التعديل' : 'Finish Editing';
-
-                // إضافة class للتعديل على جميع الحصص
                 document.querySelectorAll('.class-slot').forEach(slot => {
                     slot.classList.add('editable');
                 });
@@ -1609,172 +1651,101 @@
                 editBtn.style.background = 'rgba(253, 126, 20, 0.1)';
                 editBtn.style.color = '#fd7e14';
                 editText.textContent = currentLanguage === 'ar' ? 'تعديل الجدول' : 'Edit Schedule';
-
-                // إزالة class التعديل من جميع الحصص
                 document.querySelectorAll('.class-slot').forEach(slot => {
                     slot.classList.remove('editable');
                 });
             }
         }
 
-        // إعداد التنقل بين الأسابيع
         let currentWeek = 0;
-
         document.getElementById('prev-week').addEventListener('click', function () {
             currentWeek--;
             updateWeekDisplay();
         });
-
         document.getElementById('next-week').addEventListener('click', function () {
             currentWeek++;
             updateWeekDisplay();
         });
-
-        // إعداد فلتر الفصول
         document.getElementById('class-filter').addEventListener('change', function () {
             currentClass = this.value;
             renderSchedule();
             updateSummary();
         });
 
-        // تحديث عرض الأسبوع
         function updateWeekDisplay() {
             const today = new Date();
             const startDate = new Date(today);
             startDate.setDate(today.getDate() + currentWeek * 7 - today.getDay());
-
             const endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + 4); // الأحد إلى الخميس
-
-            const options = { month: 'long', day: 'numeric' };
+            endDate.setDate(startDate.getDate() + 4);
             const weekText = `${startDate.getDate()} - ${endDate.getDate()} ${getMonthName(startDate.getMonth())} ${startDate.getFullYear()}`;
-
             document.getElementById('current-week').textContent = `الأسبوع الدراسي: ${weekText}`;
         }
 
-        // الحصول على اسم الشهر
         function getMonthName(monthIndex) {
-            const months = [
-                'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-                'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-            ];
+            const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
             return months[monthIndex];
         }
 
-        // الحصول على اسم المادة
         function getSubjectName(classType) {
             const subjects = {
-                'math': 'رياضيات',
-                'science': 'علوم',
-                'arabic': 'لغة عربية',
-                'english': 'لغة إنجليزية',
-                'history': 'تاريخ',
-                'geography': 'جغرافيا',
-                'islamic': 'تربية إسلامية',
-                'physics': 'فيزياء',
-                'chemistry': 'كيمياء',
-                'biology': 'أحياء',
-                'computer': 'حاسوب',
-                'art': 'فنون',
-                'sport': 'تربية رياضية'
+                'math': 'رياضيات', 'science': 'علوم', 'arabic': 'لغة عربية', 'english': 'لغة إنجليزية',
+                'history': 'تاريخ', 'geography': 'جغرافيا', 'islamic': 'تربية إسلامية', 'physics': 'فيزياء',
+                'chemistry': 'كيمياء', 'biology': 'أحياء', 'computer': 'حاسوب', 'art': 'فنون', 'sport': 'تربية رياضية'
             };
             return subjects[classType] || classType;
         }
 
-        // عرض الجدول
         function renderSchedule() {
             const scheduleBody = document.getElementById('schedule-body');
             scheduleBody.innerHTML = '';
-
             const classData = scheduleData[currentClass];
 
             classData.periods.forEach((period, periodIndex) => {
                 const row = document.createElement('tr');
-
-                // عمود الوقت
                 const timeCell = document.createElement('td');
                 timeCell.innerHTML = `<strong>${period.time}</strong>`;
                 row.appendChild(timeCell);
 
-                // الحصص لكل يوم
                 period.classes.forEach((classType, dayIndex) => {
                     const classCell = document.createElement('td');
                     const classDetail = classData.details[classType];
-
                     let classHTML = '';
                     if (classType === 'empty') {
-                        classHTML = `
-                            <div class="class-slot empty" data-period="${periodIndex}" data-day="${dayIndex}">
-                                <div class="class-info">
-                                    <div class="subject-name">-</div>
-                                </div>
-                            </div>
-                        `;
+                        classHTML = `<div class="class-slot empty" data-period="${periodIndex}" data-day="${dayIndex}"><div class="class-info"><div class="subject-name">-</div></div></div>`;
                     } else if (classType === 'break') {
-                        classHTML = `
-                            <div class="class-slot break" data-period="${periodIndex}" data-day="${dayIndex}">
-                                <div class="class-info">
-                                    <div class="subject-name">فسحة</div>
-                                </div>
-                            </div>
-                        `;
+                        classHTML = `<div class="class-slot break" data-period="${periodIndex}" data-day="${dayIndex}"><div class="class-info"><div class="subject-name">فسحة</div></div></div>`;
                     } else {
-                        classHTML = `
-                            <div class="class-slot ${classType}" data-period="${periodIndex}" data-day="${dayIndex}">
-                                <div class="class-info">
-                                    <div class="subject-name">${getSubjectName(classType)}</div>
-                                    <div class="teacher-name">${classDetail.teacher}</div>
-                                    <div class="class-room">${classDetail.room}</div>
-                                </div>
-                            </div>
-                        `;
+                        classHTML = `<div class="class-slot ${classType}" data-period="${periodIndex}" data-day="${dayIndex}"><div class="class-info"><div class="subject-name">${getSubjectName(classType)}</div><div class="teacher-name">${classDetail.teacher}</div><div class="class-room">${classDetail.room}</div></div></div>`;
                     }
-
                     classCell.innerHTML = classHTML;
                     row.appendChild(classCell);
                 });
-
                 scheduleBody.appendChild(row);
             });
 
-            // تحديث عنوان الجدول
-            document.getElementById('header-title').textContent = 
-                currentLanguage === 'ar' 
-                    ? `الجدول المدرسي - الصف ${currentClass}`
-                    : `School Schedule - Grade ${currentClass}`;
-
-            // إضافة تفاعل النقر على الحصص
+            document.getElementById('header-title').textContent = currentLanguage === 'ar' ? `الجدول المدرسي - الصف ${currentClass}` : `School Schedule - Grade ${currentClass}`;
             document.querySelectorAll('.class-slot').forEach(slot => {
                 slot.addEventListener('click', function () {
-                    if (isEditing) {
-                        openEditModal(this);
-                    } else {
-                        showClassDetails(this);
-                    }
+                    if (isEditing) openEditModal(this);
+                    else showClassDetails(this);
                 });
             });
         }
 
-        // فتح نافذة التعديل
         function openEditModal(slot) {
             currentEditingSlot = slot;
             const periodIndex = parseInt(slot.dataset.period);
             const dayIndex = parseInt(slot.dataset.day);
-
             const classData = scheduleData[currentClass];
             const classType = classData.periods[periodIndex].classes[dayIndex];
             const classDetail = classData.details[classType];
-
-            // تعبئة النموذج
             document.getElementById('edit-subject').value = classType;
             document.getElementById('edit-teacher').value = classDetail.teacher || '';
             document.getElementById('edit-room').value = classDetail.room || '';
-
-            // فتح النافذة
             document.getElementById('edit-class-modal').style.display = 'flex';
         }
 
-        // إغلاق النافذة
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
@@ -1791,225 +1762,107 @@
 
         async function ensureAllClassesSynced() {
             const classes = ['7', '8', '9', '10', '11', '12'];
-            for (const cls of classes) {
-                await syncClassToDB(cls);
-            }
+            for (const cls of classes) await syncClassToDB(cls);
         }
 
         function addParentNotification(cls, subject) {
             const list = JSON.parse(localStorage.getItem('parentNotifications') || '[]');
-            const note = {
-                id: Date.now(),
-                classId: cls,
-                message: `تم تحديث جدول الصف ${cls}: ${getSubjectName(subject)}`,
-                timestamp: new Date().toISOString()
-            };
+            const note = { id: Date.now(), classId: cls, message: `تم تحديث جدول الصف ${cls}: ${getSubjectName(subject)}`, timestamp: new Date().toISOString() };
             list.unshift(note);
             localStorage.setItem('parentNotifications', JSON.stringify(list));
             scheduleChannel.postMessage({ type: 'parent-notification', payload: note });
         }
 
-        // إعداد نموذج التعديل
         document.getElementById('edit-class-form').addEventListener('submit', async function (e) {
             e.preventDefault();
-
             const subject = document.getElementById('edit-subject').value;
             const teacher = document.getElementById('edit-teacher').value;
             const room = document.getElementById('edit-room').value;
-
             if (!subject) {
-                showToast('error', currentLanguage === 'ar' ? 'يرجى اختيار المادة الدراسية' : 'Please select a subject');
+                showToast(currentLanguage === 'ar' ? 'يرجى اختيار المادة الدراسية' : 'Please select a subject');
                 return;
             }
-
-            // تحديث البيانات
             const periodIndex = parseInt(currentEditingSlot.dataset.period);
             const dayIndex = parseInt(currentEditingSlot.dataset.day);
-
+            
+            // التحقق من التعارض قبل الحفظ
+            const conflicts = checkConflict(currentClass, periodIndex, dayIndex, subject, teacher);
+            if (conflicts && conflicts.length > 0) {
+                const msg = conflicts.join('\n');
+                showToast(msg, true);
+                return;
+            }
+            
             scheduleData[currentClass].periods[periodIndex].classes[dayIndex] = subject;
-            scheduleData[currentClass].details[subject] = {
-                teacher: teacher,
-                room: room
-            };
-
-            // حفظ البيانات
+            scheduleData[currentClass].details[subject] = { teacher, room };
             localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
             await syncClassToDB(currentClass);
             addParentNotification(currentClass, subject);
-
-            // إعادة عرض الجدول
             renderSchedule();
             updateSummary();
-
-            // إغلاق النافذة
             closeModal('edit-class-modal');
-
-            // عرض رسالة نجاح
-            showToast('success', currentLanguage === 'ar' ? 'تم تعديل الحصة بنجاح!' : 'Class updated successfully!');
+            showToast(currentLanguage === 'ar' ? 'تم تعديل الحصة بنجاح!' : 'Class updated successfully!', false);
         });
 
-        // إغلاق النوافذ المنبثقة عند النقر خارجها
         document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', function (e) {
-                if (e.target === this) {
-                    this.style.display = 'none';
-                }
-            });
+            modal.addEventListener('click', function (e) { if (e.target === this) this.style.display = 'none'; });
         });
 
-        // عرض تفاصيل الحصة
         function showClassDetails(slot) {
             const periodIndex = parseInt(slot.dataset.period);
             const dayIndex = parseInt(slot.dataset.day);
-
             const classData = scheduleData[currentClass];
             const classType = classData.periods[periodIndex].classes[dayIndex];
             const classDetail = classData.details[classType];
-
             if (classType === 'empty' || classType === 'break') return;
-
             const subject = getSubjectName(classType);
             const teacher = classDetail.teacher;
             const room = classDetail.room;
-
             let message = `${subject}`;
             if (teacher) message += `\nالمعلم: ${teacher}`;
             if (room) message += `\nالفصل: ${room}`;
-
-            showToast('info', message.replace(/\n/g, ' • '));
+            showToast(message.replace(/\n/g, ' • '), false);
         }
 
-        // تحديث النصوص حسب اللغة الحالية
         function updateLanguage() {
-            const translations = {
-                'ar': {
-                    'header-title': `الجدول المدرسي - الصف ${currentClass}`,
-                    'menu-dashboard': 'لوحة التحكم',
-                    'menu-users': 'إدارة المستخدمين',
-                    'menu-reports': 'التقارير والإحصائيات',
-                    'menu-schedule': 'الجدول المدرسي',
-                    'menu-messages': 'الرسائل',
-                    'menu-settings': 'إعدادات النظام',
-                    'total-classes-label': 'إجمالي الحصص أسبوعياً',
-                    'total-subjects-label': 'عدد المواد الدراسية',
-                    'weekly-hours-label': 'ساعة دراسة أسبوعياً',
-                    'next-class-label': 'الحصة التالية',
-                    'time-header': 'الوقت',
-                    'sunday': 'الأحد',
-                    'monday': 'الإثنين',
-                    'tuesday': 'الثلاثاء',
-                    'wednesday': 'الأربعاء',
-                    'thursday': 'الخميس',
-                    'prev-week-text': 'الأسبوع السابق',
-                    'next-week-text': 'الأسبوع القادم',
-                    'edit-text': 'تعديل الجدول',
-                    'edit-class-title': 'تعديل الحصة الدراسية',
-                    'cancel-text': 'إلغاء',
-                    'save-class-text': 'حفظ التغييرات',
-                    'logout-text': 'تسجيل الخروج',
-                    'dark-mode-text': 'الوضع الداكن',
-                    'dark-mode-btn-text': 'الوضع الداكن',
-                    'back-text': 'العودة'
-                },
-                'en': {
-                    'header-title': `School Schedule - Grade ${currentClass}`,
-                    'menu-dashboard': 'Dashboard',
-                    'menu-users': 'Users Management',
-                    'menu-reports': 'Reports & Statistics',
-                    'menu-schedule': 'School Schedule',
-                    'menu-messages': 'Messages',
-                    'menu-settings': 'System Settings',
-                    'total-classes-label': 'Total Classes Weekly',
-                    'total-subjects-label': 'Number of Subjects',
-                    'weekly-hours-label': 'Weekly Study Hours',
-                    'next-class-label': 'Next Class',
-                    'time-header': 'Time',
-                    'sunday': 'Sunday',
-                    'monday': 'Monday',
-                    'tuesday': 'Tuesday',
-                    'wednesday': 'Wednesday',
-                    'thursday': 'Thursday',
-                    'prev-week-text': 'Previous Week',
-                    'next-week-text': 'Next Week',
-                    'edit-text': 'Edit Schedule',
-                    'edit-class-title': 'Edit Class',
-                    'cancel-text': 'Cancel',
-                    'save-class-text': 'Save Changes',
-                    'logout-text': 'Logout',
-                    'dark-mode-text': 'Dark Mode',
-                    'dark-mode-btn-text': 'Dark Mode',
-                    'back-text': 'Back'
-                }
+            const translations = { 'ar': { 'header-title': `الجدول المدرسي - الصف ${currentClass}`, 'menu-dashboard': 'لوحة التحكم', 'menu-users': 'إدارة المستخدمين', 'menu-reports': 'التقارير والإحصائيات', 'menu-schedule': 'الجدول المدرسي', 'menu-messages': 'الرسائل', 'menu-settings': 'إعدادات النظام', 'total-classes-label': 'إجمالي الحصص أسبوعياً', 'total-subjects-label': 'عدد المواد الدراسية', 'weekly-hours-label': 'ساعة دراسة أسبوعياً', 'next-class-label': 'الحصة التالية', 'time-header': 'الوقت', 'sunday': 'الأحد', 'monday': 'الإثنين', 'tuesday': 'الثلاثاء', 'wednesday': 'الأربعاء', 'thursday': 'الخميس', 'prev-week-text': 'الأسبوع السابق', 'next-week-text': 'الأسبوع القادم', 'edit-text': 'تعديل الجدول', 'edit-class-title': 'تعديل الحصة الدراسية', 'cancel-text': 'إلغاء', 'save-class-text': 'حفظ التغييرات', 'logout-text': 'تسجيل الخروج', 'dark-mode-text': 'الوضع الداكن', 'dark-mode-btn-text': 'الوضع الداكن', 'back-text': 'العودة' },
+                'en': { 'header-title': `School Schedule - Grade ${currentClass}`, 'menu-dashboard': 'Dashboard', 'menu-users': 'Users Management', 'menu-reports': 'Reports & Statistics', 'menu-schedule': 'School Schedule', 'menu-messages': 'Messages', 'menu-settings': 'System Settings', 'total-classes-label': 'Total Classes Weekly', 'total-subjects-label': 'Number of Subjects', 'weekly-hours-label': 'Weekly Study Hours', 'next-class-label': 'Next Class', 'time-header': 'Time', 'sunday': 'Sunday', 'monday': 'Monday', 'tuesday': 'Tuesday', 'wednesday': 'Wednesday', 'thursday': 'Thursday', 'prev-week-text': 'Previous Week', 'next-week-text': 'Next Week', 'edit-text': 'Edit Schedule', 'edit-class-title': 'Edit Class', 'cancel-text': 'Cancel', 'save-class-text': 'Save Changes', 'logout-text': 'Logout', 'dark-mode-text': 'Dark Mode', 'dark-mode-btn-text': 'Dark Mode', 'back-text': 'Back' }
             };
-
-            // تطبيق الترجمات
-            Object.keys(translations[currentLanguage]).forEach(key => {
-                const element = document.getElementById(key);
-                if (element) {
-                    element.textContent = translations[currentLanguage][key];
-                }
-            });
+            Object.keys(translations[currentLanguage]).forEach(key => { const el = document.getElementById(key); if (el) el.textContent = translations[currentLanguage][key]; });
         }
 
-        // تحديث نص زر الوضع الداكن
         function updateDarkModeText() {
-            const darkModeText = currentLanguage === 'ar'
-                ? (darkMode ? 'الوضع الفاتح' : 'الوضع الداكن')
-                : (darkMode ? 'Light Mode' : 'Dark Mode');
-
+            const darkModeText = currentLanguage === 'ar' ? (darkMode ? 'الوضع الفاتح' : 'الوضع الداكن') : (darkMode ? 'Light Mode' : 'Dark Mode');
             document.getElementById('dark-mode-text').textContent = darkModeText;
             document.getElementById('dark-mode-btn-text').textContent = darkModeText;
-
-            // تحديث الأيقونة
             const icons = document.querySelectorAll('#header-dark-mode-toggle i, #sidebar-dark-mode-toggle i');
-            icons.forEach(icon => {
-                icon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
-            });
+            icons.forEach(icon => { icon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon'; });
         }
 
-        // تحديث اتجاه القائمة حسب اللغة
         function updateSidebarPosition() {
             const sidebar = document.querySelector('.sidebar');
             const mainContent = document.querySelector('.main-content');
-
             if (currentLanguage === 'ar') {
-                sidebar.style.right = '0';
-                sidebar.style.left = 'auto';
-                mainContent.style.marginRight = 'var(--sidebar-width)';
-                mainContent.style.marginLeft = '0';
+                sidebar.style.right = '0'; sidebar.style.left = 'auto';
+                mainContent.style.marginRight = 'var(--sidebar-width)'; mainContent.style.marginLeft = '0';
             } else {
-                sidebar.style.left = '0';
-                sidebar.style.right = 'auto';
-                mainContent.style.marginLeft = 'var(--sidebar-width)';
-                mainContent.style.marginRight = '0';
+                sidebar.style.left = '0'; sidebar.style.right = 'auto';
+                mainContent.style.marginLeft = 'var(--sidebar-width)'; mainContent.style.marginRight = '0';
             }
         }
 
-        // تحديث اتجاه زر العودة
         function updateBackButton() {
             const backIcon = document.querySelector('#back-btn i');
-            if (currentLanguage === 'ar') {
-                backIcon.className = 'fas fa-arrow-right';
-            } else {
-                backIcon.className = 'fas fa-arrow-left';
-            }
+            if (currentLanguage === 'ar') backIcon.className = 'fas fa-arrow-right';
+            else backIcon.className = 'fas fa-arrow-left';
         }
 
-        // تحديث اتجاه أزرار التنقل بين الأسابيع
         function updateWeekNavButtons() {
-            const prevWeekIcon = document.querySelector('#prev-week i');
-            const nextWeekIcon = document.querySelector('#next-week i');
-
-            if (currentLanguage === 'ar') {
-                prevWeekIcon.className = 'fas fa-chevron-right';
-                nextWeekIcon.className = 'fas fa-chevron-left';
-            } else {
-                prevWeekIcon.className = 'fas fa-chevron-left';
-                nextWeekIcon.className = 'fas fa-chevron-right';
-            }
+            const prevIcon = document.querySelector('#prev-week i'), nextIcon = document.querySelector('#next-week i');
+            if (currentLanguage === 'ar') { prevIcon.className = 'fas fa-chevron-right'; nextIcon.className = 'fas fa-chevron-left'; }
+            else { prevIcon.className = 'fas fa-chevron-left'; nextIcon.className = 'fas fa-chevron-right'; }
         }
 
-        // تحديث اللغة والوضع الداكن عند تحميل الصفحة
         updateLanguage();
         updateDarkModeText();
         updateWeekDisplay();
@@ -2019,26 +1872,14 @@
         renderSchedule();
         updateSummary();
         ensureAllClassesSynced();
-
-        // إضافة تنسيق لحصص اليوم الحالي
-        function highlightCurrentDay() {
+        setTimeout(() => {
             const today = new Date().getDay();
-            // تحويل يوم الأسبوع من النظام الغربي (الأحد=0) إلى النظام العربي (الأحد=0، الاثنين=1، إلخ)
-            const arabicDayIndex = today === 0 ? 0 : today - 1; // الأحد = 0، الاثنين = 1، الخ
-            
+            const arabicDayIndex = today === 0 ? 0 : today - 1;
             const dayCells = document.querySelectorAll('.schedule-table tbody td');
-            dayCells.forEach((cell, index) => {
-                if (index % 6 === arabicDayIndex + 1) { // +1 لأن العمود الأول هو الوقت
-                    cell.classList.add('current-day');
-                }
-            });
-        }
-
-        // تشغيل التظليل عند تحميل الصفحة
-        setTimeout(highlightCurrentDay, 100);
+            dayCells.forEach((cell, index) => { if (index % 6 === arabicDayIndex + 1) cell.classList.add('current-day'); });
+        }, 100);
     </script>
 	<script src="responsive.js"></script>
 </body>
 
 </html>
-
