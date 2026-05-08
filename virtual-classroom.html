@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل الافتراضي - DT Edu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --primary-dark: #3a56c5;
+            --secondary: #6c5ce7;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #2d3436;
+            --light: #f8f9fa;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            color: var(--white);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .classroom-header {
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        .class-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .class-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .teacher-name {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .live-badge {
+            background: var(--danger);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Main Layout */
+        .classroom-main {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        /* Video Section */
+        .video-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .video-container {
+            background: #252545;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            box-shadow: var(--shadow);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .video-container.teacher-video {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #252545;
+            z-index: 1;
+        }
+
+        .video-placeholder i {
+            font-size: 60px;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .participant-name {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            z-index: 2;
+        }
+
+        /* Side Panel (Chat & Participants) */
+        .side-panel {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+        }
+
+        .panel-tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .panel-content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        /* Chat */
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            max-width: 85%;
+            align-self: flex-start;
+            font-size: 14px;
+        }
+
+        .message.me {
+            background: var(--primary);
+            align-self: flex-end;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .message-sender {
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .message.me .message-sender {
+            color: white;
+        }
+
+        .message-time {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .message.me .message-time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Unified Sidebar Integration */
+        .classroom-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        body.rtl .sidebar { border-left: 1px solid rgba(255,255,255,0.1); }
+        
+        .sidebar-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .logo img { width: 40px; }
+
+        .sidebar-menu { list-style: none; padding: 0 15px; }
+        .menu-item { margin-bottom: 5px; border-radius: 8px; overflow: hidden; }
+        .menu-item a { display: flex; align-items: center; padding: 10px 15px; color: white; text-decoration: none; font-size: 14px; }
+        .menu-item a:hover, .menu-item.active a { background: rgba(255,255,255,0.1); }
+        .menu-item i { margin-left: 10px; width: 20px; text-align: center; }
+
+        .classroom-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+            position: relative;
+        }
+
+        .chat-input-container {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Controls */
+        .classroom-controls {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .control-btn.active {
+            background: var(--primary);
+        }
+
+        .control-btn.danger {
+            background: var(--danger);
+        }
+
+        .control-btn.danger:hover {
+            background: #c0392b;
+        }
+
+        /* Participants List */
+        .participant-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            margin-bottom: 8px;
+        }
+
+        .participant-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .participant-info {
+            flex: 1;
+        }
+
+        .participant-role {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .participant-status {
+            display: flex;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .side-panel {
+                display: none; /* Hide on mobile by default */
+            }
+            .video-container.teacher-video {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+        }
+    </style>
+</head>
+<body class="rtl">
+    <div class="classroom-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="classroom-sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="logo.png" alt="Logo" />
+                </div>
+                <div class="logo-text">DT Edu</div>
+            </div>
+            <ul class="sidebar-menu" id="dynamic-menu">
+                <!-- Will be populated by JS -->
+            </ul>
+        </div>
+
+        <div class="classroom-content">
+            <div class="classroom-header">
+                <div class="class-info">
+                    <button class="control-btn" onclick="toggleSidebar()" style="margin-left: 15px; width: 40px; height: 40px;">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="live-badge">
+                        <i class="fas fa-circle"></i>
+                        <span>مباشر</span>
+                    </div>
+                    <div>
+                        <div class="class-title" id="class-title">جاري تحميل الحصة...</div>
+                        <div class="teacher-name" id="teacher-name">...</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="control-btn" onclick="toggleParticipants()">
+                        <i class="fas fa-users"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="classroom-main">
+                <div class="video-grid" id="video-grid">
+                    <!-- Main Video (Teacher or Screen) -->
+                    <div class="video-container teacher-video">
+                        <div class="video-placeholder" id="main-placeholder">
+                            <i class="fas fa-user-tie"></i>
+                            <span id="placeholder-text">بانتظار بدء البث...</span>
+                        </div>
+                        <video id="main-video" autoplay playsinline></video>
+                        <div class="participant-name" id="main-participant-name">المعلم</div>
+                    </div>
+
+                    <!-- Self View (Small) -->
+                    <div class="video-container" id="self-view-container">
+                        <video id="self-video" autoplay playsinline muted></video>
+                        <div class="participant-name">أنت</div>
+                    </div>
+                </div>
+
+                <div class="side-panel" id="side-panel">
+                    <div class="panel-tabs">
+                        <div class="panel-tab active" onclick="showTab('chat')">المحادثة</div>
+                        <div class="panel-tab" onclick="showTab('participants')">المشاركون</div>
+                    </div>
+                    <div class="panel-content" id="panel-content">
+                        <!-- Chat View -->
+                        <div id="chat-view" class="chat-messages">
+                            <!-- Messages will appear here -->
+                        </div>
+
+                        <!-- Participants View -->
+                        <div id="participants-view" style="display: none; padding: 15px;">
+                            <div class="participant-item">
+                                <div class="participant-avatar" style="background: var(--accent);">م</div>
+                                <div class="participant-info">
+                                    <div id="teacher-name-list">المعلم</div>
+                                    <div class="participant-role">مقدم الحصة</div>
+                                </div>
+                                <div class="participant-status">
+                                    <i class="fas fa-microphone"></i>
+                                    <i class="fas fa-video"></i>
+                                </div>
+                            </div>
+                            <div id="students-list">
+                                <!-- Simulated students -->
+                                <div class="participant-item">
+                                    <div class="participant-avatar">أ</div>
+                                    <div class="participant-info">
+                                        <div>أحمد محمود</div>
+                                        <div class="participant-role">طالب</div>
+                                    </div>
+                                    <div class="participant-status"><i class="fas fa-microphone-slash"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-container" id="chat-input-container">
+                        <input type="text" class="chat-input" placeholder="اكتب رسالة...">
+                        <button class="send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="classroom-controls">
+                <button class="control-btn active" id="mic-btn" onclick="toggleMic()">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="control-btn active" id="video-btn" onclick="toggleVideo()">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button class="control-btn" id="screen-btn" onclick="toggleScreenShare()" style="display: none;">
+                    <i class="fas fa-desktop"></i>
+                </button>
+                <button class="control-btn danger" onclick="leaveClass()">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <script src="db.js"></script>
+    <script>
+        let localStream;
+        let screenStream;
+        let isMicOn = true;
+        let isVideoOn = true;
+        let isScreenSharing = false;
+        let currentClass = null;
+        let messages = [];
+        let classroomChannel;
+
+        // Get class ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const classId = urlParams.get('id');
+
+        async function initClassroom() {
+            if (!classId) {
+                alert("خطأ: لم يتم تحديد حصة");
+                window.history.back();
+                return;
+            }
+
+            currentClass = await db.onlineClasses.get(Number(classId));
+            if (!currentClass) {
+                alert("خطأ: الحصة غير موجودة");
+                window.history.back();
+                return;
+            }
+
+            // Initialize Real-time Channel
+            classroomChannel = new BroadcastChannel(`classroom_${classId}`);
+            classroomChannel.onmessage = (event) => {
+                if (event.data.type === 'chat') {
+                    addMessageToUI(event.data.message, false);
+                }
+            };
+
+            document.getElementById('class-title').textContent = currentClass.title;
+            document.getElementById('teacher-name').textContent = currentClass.teacherName;
+            document.getElementById('teacher-name-list').textContent = currentClass.teacherName;
+            
+            // Get current user for chat
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{"name": "زائر", "type": "student"}');
+            window.userName = currentUser.name;
+
+            // Populate Menu based on user type
+            populateMenu(currentUser.type);
+
+            const isTeacher = currentClass.teacherName === currentUser.name || currentUser.type === 'teacher'; 
+            
+            if (isTeacher) {
+                document.getElementById('main-participant-name').textContent = "المعلم (أنت)";
+                document.getElementById('screen-btn').style.display = 'flex';
+                await initTeacherMedia();
+            } else {
+                document.getElementById('main-participant-name').textContent = currentClass.teacherName;
+                document.getElementById('screen-btn').style.display = 'none';
+                await initStudentMedia();
+            }
+
+            // Load existing messages from DB
+            loadChatHistory();
+
+            // Init Chat Listeners
+            document.querySelector('.send-btn').onclick = sendMessage;
+            document.querySelector('.chat-input').onkeypress = (e) => {
+                if (e.key === 'Enter') sendMessage();
+            };
+        }
+
+        async function loadChatHistory() {
+            const history = await db.classroomMessages
+                .where('classId').equals(Number(classId))
+                .sortBy('timestamp');
+            
+            const chatView = document.getElementById('chat-view');
+            chatView.innerHTML = '';
+            history.forEach(msg => {
+                addMessageToUI(msg, msg.sender === window.userName);
+            });
+        }
+
+        function populateMenu(type) {
+            const menu = document.getElementById('dynamic-menu');
+            let links = [];
+            if (type === 'admin') {
+                 links = [
+                     { h: 'admin-dashboard.html', i: 'fa-home', t: 'الرئيسية' },
+                     { h: 'admin-online-classes.html', i: 'fa-video', t: 'التعلم عن بعد' },
+                     { h: 'classroom.html', i: 'fa-chalkboard', t: 'الفصل الدراسي' },
+                     { h: 'admin-users.html', i: 'fa-users', t: 'المستخدمين' }
+                 ];
+             } else if (type === 'teacher') {
+                 links = [
+                     { h: 'teacher-dashboard.html', i: 'fa-home', t: 'الرئيسية' },
+                     { h: 'teacher-online-classes.html', i: 'fa-video', t: 'التعلم عن بعد' },
+                     { h: 'classroom.html', i: 'fa-chalkboard', t: 'الفصل الدراسي' },
+                     { h: 'teacher-schedule.html', i: 'fa-calendar', t: 'جدولي' }
+                 ];
+            } else {
+                links = [
+                    { h: 'student-dashboard.html', i: 'fa-home', t: 'الرئيسية' },
+                    { h: 'student-online-classes.html', i: 'fa-video', t: 'التعلم عن بعد' },
+                    { h: 'student-courses.html', i: 'fa-book', t: 'مقرراتي' }
+                ];
+            }
+
+            menu.innerHTML = links.map(l => `
+                <li class="menu-item">
+                    <a href="${l.h}"><i class="fas ${l.i}"></i> <span>${l.t}</span></a>
+                </li>
+            `).join('') + `
+                <li class="menu-item" style="margin-top: 20px;">
+                    <a href="login.html"><i class="fas fa-sign-out-alt"></i> <span>خروج</span></a>
+                </li>
+            `;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('classroom-sidebar');
+            sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function sendMessage() {
+            const input = document.querySelector('.chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const msg = {
+                classId: Number(classId),
+                sender: window.userName,
+                text: text,
+                time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+                timestamp: Date.now()
+            };
+
+            // Save to Dexie
+            await db.classroomMessages.add(msg);
+
+            // Broadcast to other tabs
+            classroomChannel.postMessage({ type: 'chat', message: msg });
+
+            addMessageToUI(msg, true);
+            input.value = '';
+        }
+
+        function addMessageToUI(msg, isMe) {
+            const chatView = document.getElementById('chat-view');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isMe ? 'me' : ''}`;
+            msgDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">${msg.sender}</span>
+                    <span class="message-time">${msg.time}</span>
+                </div>
+                <div class="message-text">${msg.text}</div>
+            `;
+            chatView.appendChild(msgDiv);
+            chatView.scrollTop = chatView.scrollHeight;
+        }
+
+        function showTab(tab) {
+            const chatView = document.getElementById('chat-view');
+            const participantsView = document.getElementById('participants-view');
+            const input = document.getElementById('chat-input-container');
+            const tabs = document.querySelectorAll('.panel-tab');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'chat') {
+                chatView.style.display = 'flex';
+                participantsView.style.display = 'none';
+                input.style.display = 'flex';
+                tabs[0].classList.add('active');
+            } else {
+                chatView.style.display = 'none';
+                participantsView.style.display = 'block';
+                input.style.display = 'none';
+                tabs[1].classList.add('active');
+            }
+        }
+
+        async function initTeacherMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('main-video').srcObject = localStream;
+                document.getElementById('self-video').srcObject = localStream;
+                document.getElementById('main-placeholder').style.display = 'none';
+            } catch (err) {
+                console.error("Error accessing media devices:", err);
+                alert("يرجى السماح بالوصول إلى الكاميرا والميكروفون لبدء الحصة");
+            }
+        }
+
+        async function initStudentMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('self-video').srcObject = localStream;
+                document.getElementById('placeholder-text').textContent = "بانتظار بدء المعلم للبث...";
+            } catch (err) {
+                console.error("Error accessing media devices:", err);
+            }
+        }
+
+        function toggleMic() {
+            isMicOn = !isMicOn;
+            if (localStream) {
+                localStream.getAudioTracks()[0].enabled = isMicOn;
+            }
+            const btn = document.getElementById('mic-btn');
+            btn.classList.toggle('active');
+            btn.innerHTML = isMicOn ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
+        }
+
+        function toggleVideo() {
+            isVideoOn = !isVideoOn;
+            if (localStream) {
+                localStream.getVideoTracks()[0].enabled = isVideoOn;
+            }
+            const btn = document.getElementById('video-btn');
+            btn.classList.toggle('active');
+            btn.innerHTML = isVideoOn ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
+            
+            if (currentClass && currentClass.teacherName === window.userName) {
+                document.getElementById('main-placeholder').style.display = isVideoOn ? 'none' : 'flex';
+            }
+        }
+
+        async function toggleScreenShare() {
+            if (!isScreenSharing) {
+                try {
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                    document.getElementById('main-video').srcObject = screenStream;
+                    isScreenSharing = true;
+                    document.getElementById('screen-btn').classList.add('active');
+                    
+                    screenStream.getVideoTracks()[0].onended = () => {
+                        stopScreenShare();
+                    };
+                } catch (err) {
+                    console.error("Error screen sharing:", err);
+                }
+            } else {
+                stopScreenShare();
+            }
+        }
+
+        function stopScreenShare() {
+            if (screenStream) {
+                screenStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('main-video').srcObject = localStream;
+            isScreenSharing = false;
+            document.getElementById('screen-btn').classList.remove('active');
+        }
+
+        function leaveClass() {
+            if (confirm("هل أنت متأكد من مغادرة الحصة؟")) {
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                }
+                window.history.back();
+            }
+        }
+
+        function toggleParticipants() {
+            const sidePanel = document.getElementById('side-panel');
+            sidePanel.style.display = sidePanel.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        window.onload = initClassroom;
+    </script>
+</body>
+</html>

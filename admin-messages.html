@@ -616,24 +616,6 @@
           padding: 15px;
         }
 
-        .sidebar {
-          width: 70px;
-          right: 0;
-        }
-
-        body.ltr .sidebar {
-          left: 0;
-        }
-
-        .main-content {
-          margin-right: 70px;
-        }
-
-        body.ltr .main-content {
-          margin-left: 70px;
-          margin-right: 0;
-        }
-
         .chat-header {
           flex-direction: column;
           gap: 10px;
@@ -689,6 +671,12 @@
             </a>
           </li>
           <li class="menu-item">
+            <a href="admin-online-classes.html">
+              <i class="fas fa-video"></i>
+              <span>نظام التعلم عن بعد</span>
+            </a>
+          </li>
+          <li class="menu-item">
             <a href="classroom.html">
               <i class="fas fa-chalkboard"></i>
               <span>الفصل الدراسي</span>
@@ -702,7 +690,7 @@
           </li>
           <li class="menu-item">
             <a href="admin-settings.html">
-              <i class="fas fa-cog"></i>
+              <i class="fas fa-cogs"></i>
               <span id="menu-settings">إعدادات النظام</span>
             </a>
           </li>
@@ -773,7 +761,9 @@
       </div>
     </div>
 
-    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <script src="db.js"></script>
+    <script src="core.js"></script>
     <script>
       // استعادة اللغة المحفوظة
       let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
@@ -829,26 +819,38 @@
       const sendBtn = document.getElementById("sendBtn");
       const contactsListEl = document.getElementById("contactsList");
       const activeContactNameEl = document.getElementById("activeContactName");
-      const currentUserRole = "admin";
-      const AI_CONTACT = { id: "ai", name: "Chat with AI" };
-      const AI_API_URL = "https://api.openai.com/v1/chat/completions";
-      const AI_MODEL = "gpt-3.5-turbo";
-      const AI_API_KEY = ""; // ضع مفتاح واجهة الذكاء الاصطناعي هنا
-      const roles = [
-        { id: "admin", name: "الإدارة" },
-        { id: "teacher", name: "المعلم" },
-        { id: "student", name: "الطالب" },
-        { id: "parent", name: "ولي الأمر" },
-      ];
-      const contacts = [
-        AI_CONTACT,
-        ...roles.filter((r) => r.id !== currentUserRole),
-      ];
-      const db = new Dexie("messagingDB");
-      db.version(1).stores({
-        messages: "++id,sender,receiver,timestamp,status",
-      });
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{"name":"مدير النظام","type":"admin"}');
+      const currentUserRole = currentUser.type;
+      
+      const AI_CONTACT = { id: "ai", name: "DT Edu AI Assistant", avatar: "🤖" };
+      let contacts = [AI_CONTACT];
+      
+      // Use messagingDB from db.js
+      const db_msg = window.messagingDB;
+      const db_school = window.db; // SchoolDB contains users
       let activeContact = null;
+
+      async function initializeChat() {
+        try {
+          // جلب المستخدمين من قاعدة بيانات المدرسة
+          const allUsers = await db_school.users.toArray();
+          
+          // تصفية المستخدمين (في صفحة الإدارة يظهر الجميع ما عدا الحالي)
+          const otherUsers = allUsers
+            .filter(u => u.email !== currentUser.email)
+            .map(u => ({
+              id: u.email,
+              name: u.name,
+              avatar: u.avatar || u.name[0],
+              type: u.type
+            }));
+          
+          contacts = [AI_CONTACT, ...otherUsers];
+          renderContacts();
+        } catch (error) {
+          console.error("Chat init error:", error);
+        }
+      }
 
       function renderContacts() {
         contactsListEl.innerHTML = "";
@@ -858,12 +860,22 @@
           item.dataset.id = c.id;
           const av = document.createElement("div");
           av.className = "avatar";
-          av.textContent = c.id === "ai" ? "AI" : c.name[0];
-          const name = document.createElement("div");
-          name.className = "contact-name";
-          name.textContent = c.name;
+          av.textContent = c.avatar.length > 2 ? "" : c.avatar;
+          if(c.avatar.length > 2) {
+            const img = document.createElement('img');
+            img.src = c.avatar;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.borderRadius = '50%';
+            av.appendChild(img);
+          }
+          
+          const info = document.createElement("div");
+          info.className = "contact-name";
+          info.innerHTML = `<div>${c.name}</div><small style="font-size:10px; opacity:0.7">${c.type || ''}</small>`;
+          
           item.appendChild(av);
-          item.appendChild(name);
+          item.appendChild(info);
           item.addEventListener("click", () => setActiveContact(c));
           contactsListEl.appendChild(item);
         });
@@ -872,13 +884,11 @@
       function appendBubble(message, { autoScroll = true } = {}) {
         const bubble = document.createElement("div");
         bubble.className =
-          "message " + (message.sender === currentUserRole ? "user" : "bot");
+          "message " + (message.sender === currentUser.email ? "user" : "bot");
         bubble.textContent = message.content;
         const ts = document.createElement("div");
         ts.className = "timestamp";
-        ts.textContent = new Date(message.timestamp).toLocaleString(
-          document.documentElement.lang === "ar" ? "ar" : "en"
-        );
+        ts.textContent = new Date(message.timestamp).toLocaleString();
         bubble.appendChild(ts);
         chatMessages.appendChild(bubble);
         if (autoScroll) {
@@ -888,17 +898,17 @@
 
       async function loadConversation() {
         if (!activeContact) return;
-        const msgs = await db.messages
-          .orderBy("timestamp")
+        const msgs = await db_msg.messages
+          .where('timestamp').above(0) // Ensure ordering
           .filter(
             (m) =>
-              (m.sender === currentUserRole &&
+              (m.sender === currentUser.email &&
                 m.receiver === activeContact.id) ||
-              (m.sender === activeContact.id && m.receiver === currentUserRole)
+              (m.sender === activeContact.id && m.receiver === currentUser.email)
           )
           .toArray();
         chatMessages.innerHTML = "";
-        msgs.forEach((m) => appendBubble(m, { autoScroll: false }));
+        msgs.sort((a,b) => a.timestamp - b.timestamp).forEach((m) => appendBubble(m, { autoScroll: false }));
         chatMessages.scrollTop = chatMessages.scrollHeight;
         [...contactsListEl.children].forEach((el) =>
           el.classList.toggle("active", el.dataset.id === activeContact.id)
@@ -910,6 +920,8 @@
         activeContactNameEl.textContent = contact.name;
         loadConversation();
       }
+
+      initializeChat();
 
       async function getAiReply(userMessage) {
         if (!AI_API_KEY) {

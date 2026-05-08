@@ -646,7 +646,24 @@
         .back-btn:hover {
             background-color: #c0392b;
         }
+        
+        .footer-credit {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(0, 0, 0, 0.5);
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        body.dark-mode .footer-credit {
+            color: rgba(255, 255, 255, 0.5);
+        }
     </style>
+	<link rel="stylesheet" href="responsive.css">
 </head>
 <body class="rtl">
     <div id="scene-container"></div>
@@ -774,6 +791,10 @@
         <h2 data-ar="جاري تحميل نظام التوأمة الرقمية للفصل الدراسي..." data-en="Loading Digital Twin Classroom System..."></h2>
     </div>
 
+    <div class="footer-credit">
+        تنفيذ من فريق الأنامل الرقمية digital fingers team
+    </div>
+
     <!-- تضمين مكتبة Three.js -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
@@ -793,7 +814,7 @@
         document.body.className = currentLanguage === 'ar' ? 'rtl' : 'ltr';
         
         // بيانات المدرسين حسب المواد
-        const teachersData = {
+        const allTeachersData = {
             'arabic': {
                 id: 'arabic_teacher',
                 ar: {
@@ -908,31 +929,16 @@
                     teachingMethods: ["Storytelling", "Historical Source Analysis", "Field Trips"],
                     specialties: ["Islamic History", "History of Civilizations", "Contemporary History"]
                 }
-            },
-            'philosophy': {
-                id: 'philosophy_teacher',
-                ar: {
-                    name: "د. نها الفكر",
-                    age: 55,
-                    subject: "الفلسفة",
-                    experience: "30 سنة",
-                    education: "دكتوراه في الفلسفة",
-                    achievements: "مؤلفة كتب في الفلسفة الإسلامية والفكر النقدي",
-                    teachingMethods: ["الحوار السقراطي", "التفكير النقدي", "المناظرات الفلسفية"],
-                    specialties: ["الفلسفة الإسلامية", "الفلسفة الغربية", "المنطق"]
-                },
-                en: {
-                    name: "Dr. Noha Al-Fikr",
-                    age: 55,
-                    subject: "Philosophy",
-                    experience: "30 years",
-                    education: "PhD in Philosophy",
-                    achievements: "Author of books on Islamic philosophy and critical thinking",
-                    teachingMethods: ["Socratic Dialogue", "Critical Thinking", "Philosophical Debates"],
-                    specialties: ["Islamic Philosophy", "Western Philosophy", "Logic"]
-                }
             }
         };
+
+        // تصفية بيانات المدرسين بناءً على مادة المعلم المسجل
+        let teachersData = {};
+        if (currentUser.type === 'teacher' && currentUser.subject && allTeachersData[currentUser.subject]) {
+            teachersData[currentUser.subject] = allTeachersData[currentUser.subject];
+        } else {
+            teachersData = allTeachersData;
+        }
         
         // بيانات العناصر (يمكن استبدالها بتحميل من ملف JSON خارجي لاحقاً)
         const elementsData = {
@@ -1513,26 +1519,26 @@
                     type: "سبورة ذكية تفاعلية",
                     dimensions: "200 × 120 سم",
                     features: ["شاشة لمس", "اتصال بالإنترنت", "عرض الوسائط المتعددة"],
-                    installed: "2022",
+                    installed: "2025",
                     manufacturer: "شركة التقنيات التعليمية المتطورة",
                     status: {
                         power: "متصل",
                         network: "متصل",
                         calibration: "مضبوطة",
-                        lastMaintenance: "2023-06-15"
+                        lastMaintenance: "2025-06-15"
                     }
                 },
                 en: {
                     type: "Interactive Smart Board",
                     dimensions: "200 × 120 cm",
                     features: ["Touch Screen", "Internet Connection", "Multimedia Display"],
-                    installed: "2022",
+                    installed: "2025",
                     manufacturer: "Advanced Educational Technology Company",
                     status: {
                         power: "Connected",
                         network: "Connected",
                         calibration: "Calibrated",
-                        lastMaintenance: "2023-06-15"
+                        lastMaintenance: "2025-06-15"
                     }
                 }
             },
@@ -1542,16 +1548,14 @@
                     english: "اللغة الإنجليزية",
                     math: "الرياضيات",
                     science: "العلوم",
-                    history: "التاريخ",
-                    philosophy: "الفلسفة"
+                    history: "التاريخ"
                 },
                 en: {
                     arabic: "Arabic",
                     english: "English",
                     math: "Mathematics",
                     science: "Science",
-                    history: "History",
-                    philosophy: "Philosophy"
+                    history: "History"
                 }
             },
             classroom: {
@@ -1602,8 +1606,8 @@
                         timeRemaining: "25 دقيقة"
                     },
                     maintenance: {
-                        lastCleaning: "2023-09-10",
-                        nextInspection: "2023-10-15",
+                        lastCleaning: "2025-09-10",
+                        nextInspection: "2025-10-15",
                         issues: []
                     }
                 },
@@ -1654,13 +1658,30 @@
                         timeRemaining: "25 minutes"
                     },
                     maintenance: {
-                        lastCleaning: "2023-09-10",
-                        nextInspection: "2023-10-15",
+                        lastCleaning: "2025-09-10",
+                        nextInspection: "2025-10-15",
                         issues: []
                     }
                 }
             }
         };
+
+        // تحديث بيانات الفصل بناءً على مادة المعلم
+        if (currentUser.type === 'teacher' && currentUser.subject) {
+            const subjectMap = {
+                math: { ar: "الرياضيات", en: "Mathematics" },
+                science: { ar: "العلوم", en: "Science" },
+                arabic: { ar: "اللغة العربية", en: "Arabic Language" },
+                english: { ar: "اللغة الإنجليزية", en: "English Language" },
+                history: { ar: "التاريخ", en: "History" }
+            };
+            
+            const sub = subjectMap[currentUser.subject];
+            if (sub) {
+                elementsData.classroom.ar.schedule.current = sub.ar;
+                elementsData.classroom.en.schedule.current = sub.en;
+            }
+        }
 
         // بيانات توصيات الذكاء الاصطناعي
         const aiRecommendations = {
@@ -1860,22 +1881,6 @@
                             description: "استخدام الخطوط الزمنية البصرية لفهم تسلسل الأحداث والعلاقات بينها."
                         }
                     ]
-                },
-                "الفلسفة": {
-                    methods: [
-                        {
-                            title: "الحوار السقراطي",
-                            description: "استخدام الأسئلة المفتوحة والنقاش لتعميق التفكير وتحليل المفاهيم."
-                        },
-                        {
-                            title: "تحليل النصوص",
-                            description: "قراءة وتحليل النصوص الفلسفية الأصلية ومناقشة الأفكار الرئيسية."
-                        },
-                        {
-                            title: "المناظرات الفلسفية",
-                            description: "تنظيم مناظرات حول القضايا الفلسفية لتطوير مهارات الحجاج والتفكير النقدي."
-                        }
-                    ]
                 }
             },
             en: {
@@ -1958,22 +1963,6 @@
                             description: "Use visual timelines to understand the sequence of events and relationships between them."
                         }
                     ]
-                },
-                "Philosophy": {
-                    methods: [
-                        {
-                            title: "Socratic Dialogue",
-                            description: "Use open-ended questions and discussion to deepen thinking and analyze concepts."
-                        },
-                        {
-                            title: "Text Analysis",
-                            description: "Read and analyze original philosophical texts and discuss key ideas."
-                        },
-                        {
-                            title: "Philosophical Debates",
-                            description: "Organize debates on philosophical issues to develop argumentation and critical thinking skills."
-                        }
-                    ]
                 }
             }
         };
@@ -2036,7 +2025,7 @@
         let bookTooltip;
         let aiActive = false;
         let twinActive = false;
-        let currentTeacher = 'math'; // المدرس الحالي (الرياضيات كافتراضي)
+        let currentTeacher = currentUser && currentUser.subject ? currentUser.subject : 'math'; // المدرس الحالي بناءً على المستخدم المسجل
         let bookLabels = []; // لتخزين تسميات الكتب
 
         // تهيئة المشهد
@@ -2200,8 +2189,10 @@
             const subjectKeys = Object.keys(subjects);
             
             subjectKeys.forEach((key, index) => {
-                const bookPosition = classroom[`book_${key}`].position;
-                createBookLabel(bookPosition.x, bookPosition.y, bookPosition.z, subjects[key]);
+                if (classroom[`book_${key}`]) {
+                    const bookPosition = classroom[`book_${key}`].position;
+                    createBookLabel(bookPosition.x, bookPosition.y, bookPosition.z, subjects[key]);
+                }
             });
         }
 
@@ -2563,14 +2554,13 @@
 
         // إنشاء كتب المواد
         function createSubjectBooks() {
-            const subjectKeys = ['arabic', 'english', 'math', 'science', 'history', 'philosophy'];
+            const subjectKeys = ['arabic', 'english', 'math', 'science', 'history'];
             const bookColors = [
                 0xf44336, // أحمر
                 0x2196f3, // أزرق
                 0x4caf50, // أخضر
                 0xff9800, // برتقالي
-                0x9c27b0, // أرجواني
-                0x795548  // بني
+                0x9c27b0  // أرجواني
             ];
             
             // إنشاء كتاب لكل مادة
@@ -2749,8 +2739,7 @@
                 'english': 0x3f51b5,   // أزرق داكن
                 'math': 0x1560bd,      // أزرق متوسط
                 'science': 0x00897b,   // أخضر مزرق
-                'history': 0x6d4c41,   // بني داكن
-                'philosophy': 0x5e35b1 // بنفسجي
+                'history': 0x6d4c41    // بني داكن
             };
             
             return colors[subject] || 0x1560bd;
@@ -3084,7 +3073,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">${getTranslatedText('آخر معايرة:', 'Last Calibration:')}</span>
-                            <span class="info-value">2023-08-15</span>
+                            <span class="info-value">2025-08-15</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">${getTranslatedText('الحالة:', 'Status:')}</span>
@@ -3110,7 +3099,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">${getTranslatedText('آخر معايرة:', 'Last Calibration:')}</span>
-                            <span class="info-value">2023-09-01</span>
+                            <span class="info-value">2025-09-01</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">${getTranslatedText('الحالة:', 'Status:')}</span>
@@ -3136,7 +3125,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">${getTranslatedText('آخر معايرة:', 'Last Calibration:')}</span>
-                            <span class="info-value">2023-07-20</span>
+                            <span class="info-value">2025-07-20</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">${getTranslatedText('الحالة:', 'Status:')}</span>
@@ -3166,7 +3155,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">${getTranslatedText('آخر معايرة:', 'Last Calibration:')}</span>
-                            <span class="info-value">2023-08-10</span>
+                            <span class="info-value">2025-08-10</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">${getTranslatedText('الحالة:', 'Status:')}</span>
@@ -3429,15 +3418,6 @@
                     <h4>${getTranslatedText('توصيات لتدريس المواد المفضلة للطالب:', 'Recommendations for Teaching Student\'s Preferred Subjects:')}</h4>
             `;
 
-
-
-
-
-
-
-
-
-
             // إضافة توصيات لكل مادة من مواد الطالب
             studentData.subjects.forEach(subject => {
                 const subjectMethods = getSubjectMethods(subject);
@@ -3498,8 +3478,6 @@
             aiContent.innerHTML = content;
         }
 
-
-
         // الحصول على طرق تدريس المادة
         function getSubjectMethods(subject) {
             // البحث عن المادة في قائمة المواد
@@ -3510,7 +3488,6 @@
             }
             return null;
         }
-
 
         // معالجة تغيير حجم النافذة
         function onWindowResize() {
@@ -3546,5 +3523,7 @@
         // بدء التطبيق
         init();
     </script>
+	<script src="responsive.js"></script>
 </body>
 </html>
+

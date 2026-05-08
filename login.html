@@ -674,38 +674,10 @@
     </div>
     <div id="toast-container" class="toast-container"></div>
 
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <script src="db.js"></script>
     <script src="core.js"></script>
     <script>
-        // تعريف قاعدة البيانات باستخدام Dexie
-        const db = new Dexie('DTEduDB');
-
-        // تعريف الجداول والمفاتيح (نفس التعريف في admin-users)
-        db.version(3)
-            .stores({
-                users: '++id, name, email, type, class, status, registrationDate, avatar, password',
-                logs: '++id, userId, action, details, timestamp',
-                statistics: 'id, value'
-            })
-            .upgrade(async (tx) => {
-                // ترقية قاعدة البيانات: إضافة جدول الإحصائيات إذا لزم الأمر
-                try {
-                    const stats = await tx.table('statistics').toArray();
-                    if (stats.length === 0) {
-                        await tx.table('statistics').bulkAdd([
-                            { id: 'students', value: 0 },
-                            { id: 'teachers', value: 0 },
-                            { id: 'parents', value: 0 },
-                            { id: 'admins', value: 0 },
-                            { id: 'totalUsers', value: 0 },
-                            { id: 'pendingPreps', value: 0 },
-                        ]);
-                        console.log('تم تهيئة جدول الإحصائيات');
-                    }
-                } catch (error) {
-                    console.error('خطأ في ترقية قاعدة البيانات:', error);
-                }
-            });
-
         // بيانات المستخدمين الثابتة (للتوافق مع النظام القديم)
         const staticUsers = [
             // مدير
@@ -1039,13 +1011,50 @@
             window.location.href = targetPage;
         }
 
-        // تهيئة قاعدة البيانات عند تحميل الصفحة
+        // تهيئة قاعدة البيانات واستعادة بيانات المستخدم
         async function initializeDatabase() {
             try {
-                await db.open();
-                console.log('تم فتح قاعدة البيانات بنجاح');
+                // التأكد من أن قاعدة البيانات مفتوحة
+                if (!db.isOpen()) {
+                    await db.open();
+                }
+                
+                // بذر المستخدمين الثابتين في قاعدة البيانات إذا كانت فارغة
+                const count = await db.users.count();
+                if (count === 0) {
+                    const usersToSeed = staticUsers.map(u => ({
+                        name: u.name,
+                        email: u.username.includes('@') ? u.username : u.username + "@dtedu.com",
+                        password: u.password,
+                        type: u.type,
+                        subject: u.subject || '',
+                        status: 'active',
+                        registrationDate: new Date().toISOString().split('T')[0],
+                        avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) + '&background=random'
+                    }));
+                    await db.users.bulkAdd(usersToSeed);
+                    console.log('تم إضافة ' + usersToSeed.length + ' مستخدم ثابت إلى قاعدة البيانات');
+                } else if (count < staticUsers.length) {
+                    // تحديث المستخدمين إذا نقصوا (مثلاً عند إضافة مستخدمين جدد للمصفوفة الثابتة)
+                    for (const u of staticUsers) {
+                        const email = u.username.includes('@') ? u.username : u.username + "@dtedu.com";
+                        const exists = await db.users.where('email').equals(email).first();
+                        if (!exists) {
+                            await db.users.add({
+                                name: u.name,
+                                email: email,
+                                password: u.password,
+                                type: u.type,
+                                subject: u.subject || '',
+                                status: 'active',
+                                registrationDate: new Date().toISOString().split('T')[0],
+                                avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) + '&background=random'
+                            });
+                        }
+                    }
+                }
             } catch (error) {
-                console.error('خطأ في فتح قاعدة البيانات:', error);
+                console.error('فشل تهيئة قاعدة البيانات:', error);
             }
         }
 

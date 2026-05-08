@@ -904,18 +904,6 @@
                 padding: 15px;
             }
 
-            .sidebar {
-                width: 70px;
-            }
-
-            body.rtl .main-content {
-                margin-right: 70px;
-            }
-
-            body.ltr .main-content {
-                margin-left: 70px;
-            }
-
             .schedule-table {
                 min-width: 1000px;
             }
@@ -949,6 +937,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
+    <script src="core.js"></script>
 	<link rel="stylesheet" href="responsive.css">
 </head>
 
@@ -999,6 +988,12 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a href="admin-online-classes.html">
+                        <i class="fas fa-video"></i>
+                        <span>نظام التعلم عن بعد</span>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a href="classroom.html">
                         <i class="fas fa-chalkboard"></i>
                         <span>الفصل الدراسي</span>
@@ -1012,7 +1007,7 @@
                 </li>
                 <li class="menu-item">
                     <a href="admin-settings.html">
-                        <i class="fas fa-cog"></i>
+                        <i class="fas fa-cogs"></i>
                         <span id="menu-settings">إعدادات النظام</span>
                     </a>
                 </li>
@@ -1215,14 +1210,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="db.js"></script>
     <script src="core.js"></script>
     <script>
-        const db = new Dexie('DTEduDB');
-        db.version(3).stores({
-            users: '++id, name, email, type, class, status, registrationDate, avatar, password',
-            logs: '++id, userId, action, details, timestamp',
-            'admin-schedule': 'classId, updatedAt'
-        });
         const scheduleChannel = new BroadcastChannel('schedule-sync');
         // استعادة اللغة المحفوظة
         let currentLanguage = localStorage.getItem('currentLanguage') || 'ar';

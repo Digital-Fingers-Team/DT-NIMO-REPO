@@ -684,18 +684,6 @@
           padding: 15px;
         }
 
-        .sidebar {
-          width: 70px;
-        }
-
-        body.rtl .main-content {
-          margin-right: 70px;
-        }
-
-        body.ltr .main-content {
-          margin-left: 70px;
-        }
-
         .ai-stats {
           grid-template-columns: 1fr;
         }
@@ -728,15 +716,15 @@
             </a>
           </li>
           <li class="menu-item">
-            <a href="teacher-schedule.html">
-              <i class="fas fa-calendar-alt"></i>
-              <span id="menu-schedule">الجدول الدراسي</span>
-            </a>
-          </li>
-          <li class="menu-item">
             <a href="teacher-courses.html">
               <i class="fas fa-book"></i>
               <span id="menu-courses">المقررات الدراسية</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="teacher-online-classes.html">
+              <i class="fas fa-video"></i>
+              <span>نظام التعلم عن بعد</span>
             </a>
           </li>
           <li class="menu-item">
@@ -755,6 +743,12 @@
             <a href="teacher-messages.html">
               <i class="fas fa-comments"></i>
               <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="teacher-schedule.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-schedule">الجدول الدراسي</span>
             </a>
           </li>
           <li class="menu-item">
@@ -828,7 +822,9 @@
       </div>
     </div>
 
-    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <script src="db.js"></script>
+    <script src="core.js"></script>
     <script>
       // استعادة اللغة المحفوظة
       let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
@@ -906,23 +902,36 @@
       const sendBtn = document.getElementById("sendBtn");
       const contactsListEl = document.getElementById("contactsList");
       const activeContactNameEl = document.getElementById("activeContactName");
-      const currentUserRole = "teacher";
-      const roles = [
-        { id: "admin", name: "الإدارة" },
-        { id: "teacher", name: "المعلم" },
-        { id: "student", name: "الطالب" },
-        { id: "parent", name: "ولي الأمر" },
-      ];
-      const contacts = roles.filter((r) => r.id !== currentUserRole);
-      const db = new Dexie("messagingDB");
-      db.version(1).stores({
-        messages: "++id,sender,receiver,timestamp,status",
-      });
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{"name":"المعلم","type":"teacher","email":"teacher@dtedu.com"}');
+      const currentUserRole = currentUser.type;
+      
+      let contacts = [];
       let activeContact = null;
       let lastLoadedTimestamp = null;
       let refreshInterval = null;
       let isLoadingConversation = false;
       let isSendingMessage = false;
+
+      // Use messagingDB and SchoolDB from db.js
+      const db_msg = window.messagingDB;
+      const db_school = window.db;
+
+      async function initializeChat() {
+        try {
+          const allUsers = await db_school.users.toArray();
+          contacts = allUsers
+            .filter(u => u.email !== currentUser.email)
+            .map(u => ({
+              id: u.email,
+              name: u.name,
+              avatar: u.avatar || u.name[0],
+              type: u.type
+            }));
+          renderContacts();
+        } catch (error) {
+          console.error("Chat init error:", error);
+        }
+      }
 
       function renderContacts() {
         contactsListEl.innerHTML = "";
@@ -932,12 +941,18 @@
           item.dataset.id = c.id;
           const av = document.createElement("div");
           av.className = "avatar";
-          av.textContent = c.name[0];
-          const name = document.createElement("div");
-          name.className = "contact-name";
-          name.textContent = c.name;
+          av.textContent = (c.avatar && c.avatar.length > 2) ? "" : (c.avatar || c.name[0]);
+          if(c.avatar && c.avatar.length > 2) {
+            const img = document.createElement('img');
+            img.src = c.avatar;
+            img.style.width = '100%'; img.style.height = '100%'; img.style.borderRadius = '50%';
+            av.appendChild(img);
+          }
+          const info = document.createElement("div");
+          info.className = "contact-name";
+          info.innerHTML = `<div>${c.name}</div><small style="font-size:10px; opacity:0.7">${c.type || ''}</small>`;
           item.appendChild(av);
-          item.appendChild(name);
+          item.appendChild(info);
           item.addEventListener("click", () => setActiveContact(c));
           contactsListEl.appendChild(item);
         });
@@ -946,13 +961,11 @@
       function appendBubble(message, { autoScroll = true } = {}) {
         const bubble = document.createElement("div");
         bubble.className =
-          "message " + (message.sender === currentUserRole ? "user" : "bot");
+          "message " + (message.sender === currentUser.email ? "user" : "bot");
         bubble.textContent = message.content;
         const ts = document.createElement("div");
         ts.className = "timestamp";
-        ts.textContent = new Date(message.timestamp).toLocaleString(
-          document.documentElement.lang === "ar" ? "ar" : "en"
-        );
+        ts.textContent = new Date(message.timestamp).toLocaleString();
         bubble.appendChild(ts);
         chatMessages.appendChild(bubble);
         if (autoScroll) {
@@ -965,23 +978,22 @@
         
         isLoadingConversation = true;
         try {
-          let query = db.messages
-            .orderBy("timestamp")
+          let msgs = await db_msg.messages
             .filter(
               (m) =>
-                (m.sender === currentUserRole &&
+                (m.sender === currentUser.email &&
                   m.receiver === activeContact.id) ||
-                (m.sender === activeContact.id && m.receiver === currentUserRole)
-            );
+                (m.sender === activeContact.id && m.receiver === currentUser.email)
+            )
+            .toArray();
+
+          msgs.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
 
           if (forceReload || !lastLoadedTimestamp) {
             chatMessages.innerHTML = "";
-            lastLoadedTimestamp = null;
           } else {
-            query = query.filter(m => m.timestamp > lastLoadedTimestamp);
+            msgs = msgs.filter(m => new Date(m.timestamp) > new Date(lastLoadedTimestamp));
           }
-
-          const msgs = await query.toArray();
           
           if (msgs.length > 0) {
             msgs.forEach((m) => appendBubble(m, { autoScroll: true }));
@@ -1019,22 +1031,23 @@
         isSendingMessage = true;
         try {
           const msg = {
-            sender: currentUserRole,
+            sender: currentUser.email,
             receiver: activeContact.id,
             content,
             timestamp: new Date().toISOString(),
             status: "sent",
           };
           
-          await db.messages.add(msg);
+          await db_msg.messages.add(msg);
           userInput.value = "";
           
-          // تحديث المحادثة فوراً لجلب الرسالة الجديدة
           await loadConversation(false);
         } finally {
           isSendingMessage = false;
         }
       }
+
+      initializeChat();
       userInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();

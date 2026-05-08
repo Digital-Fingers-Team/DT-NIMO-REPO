@@ -804,18 +804,6 @@
           padding: 15px;
         }
 
-        .sidebar {
-          width: 70px;
-        }
-
-        body.rtl .main-content {
-          margin-right: 70px;
-        }
-
-        body.ltr .main-content {
-          margin-left: 70px;
-        }
-
         .header h1 {
           font-size: 22px;
         }
@@ -934,6 +922,7 @@
         }
       }
     </style>
+    <script src="core.js"></script>
   	<link rel="stylesheet" href="responsive.css">
 </head>
 
@@ -1062,12 +1051,17 @@
             </a>
           </li>
           <li class="menu-item">
+            <a href="admin-online-classes.html">
+              <i class="fas fa-video"></i>
+              <span>نظام التعلم عن بعد</span>
+            </a>
+          </li>
+          <li class="menu-item">
             <a href="classroom.html">
               <i class="fas fa-chalkboard"></i>
               <span>الفصل الدراسي</span>
             </a>
           </li>
-
           <li class="menu-item">
             <a href="admin-messages.html">
               <i class="fas fa-comments"></i>
@@ -1238,49 +1232,10 @@
       </div>
     </div>
 
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <script src="db.js"></script>
+    <script src="core.js"></script>
     <script>
-      // تعريف قاعدة البيانات باستخدام Dexie
-      const db = new Dexie("DTEduDB");
-
-      // تعريف الجداول والمفاتيح (النسخة المحدثة)
-      db.version(3)
-        .stores({
-          users:
-            "++id, name, email, type, class, status, registrationDate, avatar, password",
-          logs: "++id, userId, action, details, timestamp",
-          statistics: "id, value",
-        })
-        .upgrade(async (tx) => {
-          // ترقية قاعدة البيانات: إضافة جدول الإحصائيات إذا لزم الأمر
-          try {
-            const stats = await tx.table("statistics").toArray();
-            if (stats.length === 0) {
-              await tx.table("statistics").bulkAdd([
-                { id: "students", value: 0 },
-                { id: "teachers", value: 0 },
-                { id: "parents", value: 0 },
-                { id: "admins", value: 0 },
-                { id: "totalUsers", value: 0 },
-                { id: "pendingPreps", value: 0 },
-              ]);
-              console.log("تم تهيئة جدول الإحصائيات");
-            }
-          } catch (error) {
-            console.error("خطأ في ترقية قاعدة البيانات:", error);
-          }
-        });
-
-      function showToast(type, message) {
-        const container = document.getElementById("toast-container");
-        const toast = document.createElement("div");
-        toast.className = "toast toast-" + type;
-        toast.textContent = message;
-        container.appendChild(toast);
-        setTimeout(() => {
-          toast.remove();
-        }, 4000);
-      }
-
       // استعادة اللغة المحفوظة
       let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
 

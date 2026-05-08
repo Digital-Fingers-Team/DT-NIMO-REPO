@@ -1055,20 +1055,9 @@
           padding: 20px;
           width: 95%;
         }
-
-        .sidebar {
-          width: 70px;
-        }
-
-        body.rtl .main-content {
-          margin-right: 70px;
-        }
-
-        body.ltr .main-content {
-          margin-left: 70px;
-        }
       }
     </style>
+    <script src="core.js"></script>
   </head>
 
   <body class="rtl">
@@ -1115,6 +1104,12 @@
             <a href="admin-schedule.html">
               <i class="fas fa-calendar-alt"></i>
               <span id="menu-schedule">الجدول المدرسي</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="admin-online-classes.html">
+              <i class="fas fa-video"></i>
+              <span>نظام التعلم عن بعد</span>
             </a>
           </li>
           <li class="menu-item">
@@ -1541,38 +1536,9 @@
       </div>
     </div>
 
+    <script src="db.js"></script>
+    <script src="core.js"></script>
     <script>
-      // تعريف قاعدة البيانات باستخدام Dexie (نفس التعريف)
-      const db = new Dexie("DTEduDB");
-
-      // تعريف الجداول والمفاتيح (نسخة محدثة)
-      db.version(3)
-        .stores({
-          users:
-            "++id, name, email, type, class, status, registrationDate, avatar, password",
-          logs: "++id, userId, action, details, timestamp",
-          statistics: "id, value",
-        })
-        .upgrade(async (tx) => {
-          // ترقية قاعدة البيانات: إضافة جدول الإحصائيات إذا لزم الأمر
-          try {
-            const stats = await tx.table("statistics").toArray();
-            if (stats.length === 0) {
-              await tx.table("statistics").bulkAdd([
-                { id: "students", value: 0 },
-                { id: "teachers", value: 0 },
-                { id: "parents", value: 0 },
-                { id: "admins", value: 0 },
-                { id: "totalUsers", value: 0 },
-                { id: "pendingPreps", value: 0 },
-              ]);
-              console.log("تم تهيئة جدول الإحصائيات");
-            }
-          } catch (error) {
-            console.error("خطأ في ترقية قاعدة البيانات:", error);
-          }
-        });
-
       // استعادة اللغة المحفوظة
       let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
 

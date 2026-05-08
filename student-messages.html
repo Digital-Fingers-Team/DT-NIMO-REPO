@@ -615,26 +615,9 @@
         .main-content {
           padding: 15px;
         }
-
-        .sidebar {
-          width: 70px;
-          right: 0;
-        }
-
-        body.ltr .sidebar {
-          left: 0;
-        }
-
-        .main-content {
-          margin-right: 70px;
-        }
-
-        body.ltr .main-content {
-          margin-left: 70px;
-          margin-right: 0;
-        }
       }
     </style>
+
   </head>
   <body class="rtl">
     <div class="dashboard-container">
@@ -661,21 +644,15 @@
             </a>
           </li>
           <li class="menu-item">
-            <a href="student-schedule.html">
-              <i class="fas fa-calendar-alt"></i>
-              <span id="menu-schedule">الجدول الدراسي</span>
-            </a>
-          </li>
-          <li class="menu-item">
             <a href="student-courses.html">
               <i class="fas fa-book"></i>
               <span id="menu-courses">المقررات الدراسية</span>
-              <span
-                class="notification-badge"
-                id="courses-badge"
-                style="display: none"
-                >3</span
-              >
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="student-online-classes.html">
+              <i class="fas fa-video"></i>
+              <span>نظام التعلم عن بعد</span>
             </a>
           </li>
           <li class="menu-item">
@@ -688,12 +665,12 @@
             <a href="student-messages.html">
               <i class="fas fa-comments"></i>
               <span id="menu-messages">الرسائل</span>
-              <span
-                class="notification-badge"
-                id="messages-badge"
-                style="display: none"
-                >5</span
-              >
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="student-schedule.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-schedule">الجدول الدراسي</span>
             </a>
           </li>
           <li class="menu-item">
@@ -761,8 +738,13 @@
       </div>
     </div>
 
-    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <script src="db.js"></script>
+    <script src="core.js"></script>
     <script>
+      // Use messagingDB from db.js
+      const db = window.messagingDB;
+
       // استعادة اللغة المحفوظة
       let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
 
@@ -830,20 +812,33 @@
       const sendBtn = document.getElementById("sendBtn");
       const contactsListEl = document.getElementById("contactsList");
       const activeContactNameEl = document.getElementById("activeContactName");
-      const currentUserRole = "student";
-      const roles = [
-        { id: "admin", name: "الإدارة" },
-        { id: "teacher", name: "المعلم" },
-        { id: "student", name: "الطالب" },
-        { id: "parent", name: "ولي الأمر" },
-      ];
-      const contacts = roles.filter((r) => r.id !== currentUserRole);
-      const db = new Dexie("messagingDB");
-      db.version(1).stores({
-        messages: "++id,sender,receiver,timestamp,status",
-      });
+      
+      const currentUserRole = currentUser.type;
+      let contacts = [];
       let activeContact = null;
       sendBtn.disabled = true;
+
+      const db_msg = window.messagingDB;
+      const db_school = window.db;
+
+      async function initializeChat() {
+        try {
+          const allUsers = await db_school.users.toArray();
+          // الطالب يرى الإدارة والمعلمين فقط
+          contacts = allUsers
+            .filter(u => u.email !== currentUser.email && (u.type === 'admin' || u.type === 'teacher'))
+            .map(u => ({
+              id: u.email,
+              name: u.name,
+              avatar: u.avatar || u.name[0],
+              type: u.type
+            }));
+          renderContacts();
+        } catch (error) {
+          console.error("Chat init error:", error);
+        }
+      }
+
       function renderContacts() {
         contactsListEl.innerHTML = "";
         contacts.forEach((c) => {
@@ -852,46 +847,44 @@
           item.dataset.id = c.id;
           const av = document.createElement("div");
           av.className = "avatar";
-          av.textContent = c.name[0];
-          const name = document.createElement("div");
-          name.className = "contact-name";
-          name.textContent = c.name;
+          av.textContent = (c.avatar && c.avatar.length > 2) ? "" : (c.avatar || c.name[0]);
+          if(c.avatar && c.avatar.length > 2) {
+            const img = document.createElement('img');
+            img.src = c.avatar;
+            img.style.width = '100%'; img.style.height = '100%'; img.style.borderRadius = '50%';
+            av.appendChild(img);
+          }
+          const info = document.createElement("div");
+          info.className = "contact-name";
+          info.innerHTML = `<div>${c.name}</div><small style="font-size:10px; opacity:0.7">${c.type === 'admin' ? 'الإدارة' : 'معلم'}</small>`;
           item.appendChild(av);
-          item.appendChild(name);
+          item.appendChild(info);
           item.addEventListener("click", () => setActiveContact(c));
           contactsListEl.appendChild(item);
         });
       }
+
       async function loadConversation() {
         if (!activeContact) return;
-        const msgs = await db.messages
-          .orderBy("timestamp")
+        const msgs = await db_msg.messages
           .filter(
             (m) =>
-              (m.sender === currentUserRole &&
+              (m.sender === currentUser.email &&
                 m.receiver === activeContact.id) ||
-              (m.sender === activeContact.id && m.receiver === currentUserRole)
+              (m.sender === activeContact.id && m.receiver === currentUser.email)
           )
           .toArray();
+        
+        msgs.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
         chatMessages.innerHTML = "";
         for (const m of msgs) {
-          if (
-            m.sender === activeContact.id &&
-            m.receiver === currentUserRole &&
-            m.status !== "seen" &&
-            m.id
-          ) {
-            await db.messages.update(m.id, { status: "seen" });
-          }
           const b = document.createElement("div");
           b.className =
-            "message " + (m.sender === currentUserRole ? "user" : "bot");
+            "message " + (m.sender === currentUser.email ? "user" : "bot");
           b.textContent = m.content;
           const ts = document.createElement("div");
           ts.className = "timestamp";
-          ts.textContent = new Date(m.timestamp).toLocaleString(
-            document.documentElement.lang === "ar" ? "ar" : "en"
-          );
+          ts.textContent = new Date(m.timestamp).toLocaleString();
           b.appendChild(ts);
           chatMessages.appendChild(b);
         }
@@ -900,24 +893,31 @@
           el.classList.toggle("active", el.dataset.id === activeContact.id)
         );
       }
+
       function setActiveContact(c) {
         activeContact = c;
         activeContactNameEl.textContent = c.name;
         sendBtn.disabled = false;
         loadConversation();
       }
+
       async function sendMessage() {
         const content = userInput.value.trim();
         if (!content || !activeContact) return;
         const msg = {
-          sender: currentUserRole,
+          sender: currentUser.email,
           receiver: activeContact.id,
           content,
           timestamp: new Date().toISOString(),
           status: "sent",
         };
-        await db.messages.add(msg);
+        await db_msg.messages.add(msg);
         userInput.value = "";
+        await loadConversation();
+      }
+
+      initializeChat();
+      setInterval(() => loadConversation(), 3000);
         const b = document.createElement("div");
         b.className = "message user";
         b.textContent = msg.content;

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الحصص الأونلاين - المعلم</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --primary-dark: #3a56c5;
+            --secondary: #6c5ce7;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #2d3436;
+            --light: #f8f9fa;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* التصميم الرئيسي */
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+        }
+
+        /* الشريط الجانبي */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        body.rtl .sidebar { right: 0; }
+        body.rtl .main-content { margin-right: var(--sidebar-width); }
+        body.ltr .sidebar { left: 0; }
+        body.ltr .main-content { margin-left: var(--sidebar-width); margin-right: 0; }
+
+        .sidebar-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: white;
+            margin-bottom: 15px;
+        }
+
+        .logo img {
+            width: 50px;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .user-info {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .user-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .user-type {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 15px;
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            margin-bottom: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .menu-item a:hover,
+        .menu-item.active a {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .menu-item i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+            margin-left: 10px;
+        }
+
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: auto;
+        }
+
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Classes Grid */
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .class-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border-top: 5px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .class-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .class-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .class-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-upcoming {
+            background: rgba(74, 108, 247, 0.1);
+            color: var(--primary);
+        }
+
+        .badge-live {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .class-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .class-details {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .class-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 500px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            body.rtl .main-content { margin-right: 0; }
+            .classes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="rtl">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="logo.png" alt="Logo" />
+                </div>
+                <div class="logo-text">DT Edu</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-name">أ. محمد علي</div>
+                    <div class="user-type" id="user-type">معلم</div>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="teacher-dashboard.html">
+                        <i class="fas fa-home"></i>
+                        <span id="menu-dashboard">لوحة التحكم</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-courses.html">
+                        <i class="fas fa-book"></i>
+                        <span id="menu-courses">المقررات الدراسية</span>
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a href="teacher-online-classes.html">
+                        <i class="fas fa-video"></i>
+                        <span>نظام التعلم عن بعد</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="classroom.html">
+                        <i class="fas fa-chalkboard"></i>
+                        <span>الفصل الدراسي</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-progress.html">
+                        <i class="fas fa-chart-bar"></i>
+                        <span id="menu-progress">التقدم الدراسي</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-messages.html">
+                        <i class="fas fa-comments"></i>
+                        <span id="menu-messages">الرسائل</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-schedule.html">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="menu-schedule">الجدول الدراسي</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-settings.html">
+                        <i class="fas fa-cog"></i>
+                        <span id="menu-settings">الإعدادات</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="login.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>تسجيل الخروج</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>إدارة الحصص الأونلاين</h1>
+            <button class="btn btn-primary" onclick="openModal()">
+                <i class="fas fa-plus"></i>
+                <span>جدولة حصة جديدة</span>
+            </button>
+        </div>
+
+        <div class="classes-grid" id="classes-grid">
+            <!-- Classes will be loaded here dynamically -->
+        </div>
+    </div>
+
+    <!-- Modal for new class -->
+    <div id="classModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 25px;" id="modalTitle">جدولة حصة جديدة</h2>
+            <form id="classForm" onsubmit="event.preventDefault(); saveClass();">
+                <input type="hidden" id="classId">
+                <div class="form-group">
+                    <label>عنوان الحصة</label>
+                    <input type="text" id="title" class="form-control" placeholder="مثلاً: مراجعة الفيزياء" required>
+                </div>
+                <div class="form-group">
+                    <label>المادة</label>
+                    <select id="subject" class="form-control">
+                        <option>الرياضيات</option>
+                        <option>الفيزياء</option>
+                        <option>الكيمياء</option>
+                        <option>اللغة العربية</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>التاريخ</label>
+                    <input type="date" id="date" class="form-control" required>
+                </div>
+                <div class="row" style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>وقت البدء</label>
+                        <input type="time" id="startTime" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>وقت الانتهاء</label>
+                        <input type="time" id="endTime" class="form-control" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">حفظ</button>
+                    <button type="button" class="btn" onclick="closeModal()" style="flex: 1; justify-content: center; background: #eee;">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <script src="db.js"></script>
+    <script src="core.js"></script>
+    <script>
+        const teacherName = "أ. محمد علي"; // Mock current teacher
+
+        document.addEventListener('DOMContentLoaded', loadClasses);
+
+        function openModal(id = null) {
+            if (id) {
+                document.getElementById('modalTitle').textContent = "تعديل الحصة";
+                db.onlineClasses.get(id).then(cls => {
+                    document.getElementById('classId').value = cls.id;
+                    document.getElementById('title').value = cls.title;
+                    document.getElementById('subject').value = cls.subject;
+                    document.getElementById('date').value = cls.date;
+                    document.getElementById('startTime').value = cls.startTime;
+                    document.getElementById('endTime').value = cls.endTime;
+                    document.getElementById('classModal').style.display = 'flex';
+                });
+            } else {
+                document.getElementById('modalTitle').textContent = "جدولة حصة جديدة";
+                document.getElementById('classForm').reset();
+                document.getElementById('classId').value = "";
+                document.getElementById('classModal').style.display = 'flex';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('classModal').style.display = 'none';
+        }
+
+        async function saveClass() {
+            const id = document.getElementById('classId').value;
+            const classData = {
+                title: document.getElementById('title').value,
+                subject: document.getElementById('subject').value,
+                date: document.getElementById('date').value,
+                startTime: document.getElementById('startTime').value,
+                endTime: document.getElementById('endTime').value,
+                teacherName: teacherName,
+                status: 'upcoming'
+            };
+
+            if (id) {
+                await db.onlineClasses.update(Number(id), classData);
+                showToast("success", "تم تحديث الحصة بنجاح");
+            } else {
+                await db.onlineClasses.add(classData);
+                showToast("success", "تم جدولة الحصة بنجاح");
+            }
+
+            closeModal();
+            loadClasses();
+        }
+
+        async function loadClasses() {
+            const classes = await db.onlineClasses.where('teacherName').equals(teacherName).toArray();
+            const grid = document.getElementById('classes-grid');
+            grid.innerHTML = '';
+
+            if (classes.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #777;">لا توجد حصص مجدولة حالياً</div>';
+                return;
+            }
+
+            classes.forEach(cls => {
+                const now = new Date();
+                const classDate = new Date(cls.date + 'T' + cls.startTime);
+                const classEndTime = new Date(cls.date + 'T' + cls.endTime);
+                
+                let statusBadge = '<span class="class-badge badge-upcoming">قادمة</span>';
+                let actionBtn = `<button class="btn" style="flex: 1; justify-content: center; background: #eee; color: #777; cursor: not-allowed;"><span>بانتظار الموعد</span></button>`;
+
+                if (now >= classDate && now <= classEndTime) {
+                    statusBadge = '<span class="class-badge badge-live">جارية الآن</span>';
+                    actionBtn = `<a href="virtual-classroom.html?id=${cls.id}" class="btn btn-primary" style="flex: 1; justify-content: center;"><i class="fas fa-sign-in-alt"></i><span>دخول الحصة</span></a>`;
+                } else if (now > classEndTime) {
+                    statusBadge = '<span class="class-badge" style="background: #eee; color: #777;">منتهية</span>';
+                    actionBtn = `<button class="btn" style="flex: 1; justify-content: center; background: #eee; color: #777; cursor: not-allowed;"><span>انتهت الحصة</span></button>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'class-card';
+                if (now >= classDate && now <= classEndTime) card.style.borderTopColor = 'var(--danger)';
+                else if (now > classEndTime) card.style.borderTopColor = '#ccc';
+
+                card.innerHTML = `
+                    <div class="class-header">
+                        ${statusBadge}
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="openModal(${cls.id})" style="background: none; border: none; color: var(--primary); cursor: pointer;"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteClass(${cls.id})" style="background: none; border: none; color: var(--danger); cursor: pointer;"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="class-title">${cls.title}</div>
+                    <div class="class-details">
+                        <div class="detail-item"><i class="far fa-calendar"></i> <span>${cls.date}</span></div>
+                        <div class="detail-item"><i class="far fa-clock"></i> <span>${cls.startTime} - ${cls.endTime}</span></div>
+                        <div class="detail-item"><i class="fas fa-book"></i> <span>${cls.subject}</span></div>
+                    </div>
+                    <div class="class-actions">
+                        ${actionBtn}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function deleteClass(id) {
+            if (confirm("هل أنت متأكد من حذف هذه الحصة؟")) {
+                await db.onlineClasses.delete(id);
+                showToast("info", "تم حذف الحصة");
+                loadClasses();
+            }
+        }
+    </script>
+</body>
+</html>

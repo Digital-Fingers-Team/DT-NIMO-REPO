@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <script src="db.js"></script>
     <style>
         :root { 
             --primary: #4a6cf7;
@@ -674,24 +675,6 @@
                 padding: 15px;
             }
             
-            .sidebar {
-                width: 70px;
-                right: 0;
-            }
-            
-            body.ltr .sidebar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-right: 70px;
-            }
-            
-            body.ltr .main-content {
-                margin-left: 70px;
-                margin-right: 0;
-            }
-            
             .stat-card {
                 padding: 20px;
             }
@@ -701,6 +684,7 @@
             }
         }
     </style>
+    <script src="core.js"></script>
 	<link rel="stylesheet" href="responsive.css">
 </head>
 <body class="rtl">
@@ -750,6 +734,12 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a href="admin-online-classes.html">
+                        <i class="fas fa-video"></i>
+                        <span>نظام التعلم عن بعد</span>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a href="classroom.html">
                         <i class="fas fa-chalkboard"></i>
                         <span>الفصل الدراسي</span>
@@ -763,11 +753,8 @@
                 </li>
                 <li class="menu-item">
                     <a href="admin-settings.html">
-                        <i class="fas fa-cog"></i>
-                        <span id="menu-settings">
-                        إعدادات النظام
-                            
-                        </span>
+                        <i class="fas fa-cogs"></i>
+                        <span id="menu-settings">إعدادات النظام</span>
                     </a>
                 </li>
             </ul>
@@ -942,36 +929,12 @@
     </div>
 
     <script>
-        // استعادة اللغة ووضع التصميم
+        // استعادة اللغة المحفوظة
         let currentLanguage = localStorage.getItem('currentLanguage') || 'ar';
+
+        // استعادة وضع التصميم المحفوظ
         let darkMode = localStorage.getItem('darkMode') === 'true';
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-
-        // تهيئة Dexie والجدول نفسه المستخدم في لوحة التحكم
-        const db = new Dexie('DTEduDB');
-        db.version(3)
-            .stores({
-                users: "++id, name, email, type, class, status, registrationDate, avatar, password",
-                logs: "++id, userId, action, details, timestamp",
-                statistics: "id, value"
-            })
-            .upgrade(async (tx) => {
-                try {
-                    const stats = await tx.table('statistics').toArray();
-                    if (stats.length === 0) {
-                        await tx.table('statistics').bulkAdd([
-                            { id: 'students', value: 0 },
-                            { id: 'teachers', value: 0 },
-                            { id: 'parents', value: 0 },
-                            { id: 'admins', value: 0 },
-                            { id: 'totalUsers', value: 0 },
-                            { id: 'pendingPreps', value: 0 }
-                        ]);
-                    }
-                } catch (error) {
-                    console.error('خطأ في ترقية قاعدة البيانات:', error);
-                }
-            });
 
         // تحديث اتجاه الصفحة
         document.body.className = currentLanguage === 'ar' ? 'rtl' : 'ltr';

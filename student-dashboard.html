@@ -1167,20 +1167,9 @@
           padding: 20px;
           width: 100%;
         }
-
-        .sidebar {
-          width: 70px;
-        }
-
-        body.rtl .main-content {
-          margin-right: 70px;
-        }
-
-        body.ltr .main-content {
-          margin-left: 70px;
-        }
       }
     </style>
+    <script src="core.js"></script>
   	<link rel="stylesheet" href="responsive.css">
 </head>
 
@@ -1209,21 +1198,15 @@
             </a>
           </li>
           <li class="menu-item">
-            <a href="student-schedule.html">
-              <i class="fas fa-calendar-alt"></i>
-              <span id="menu-schedule">الجدول الدراسي</span>
-            </a>
-          </li>
-          <li class="menu-item">
             <a href="student-courses.html">
               <i class="fas fa-book"></i>
               <span id="menu-courses">المقررات الدراسية</span>
-              <span
-                class="notification-badge"
-                id="courses-badge"
-                style="display: none"
-                >3</span
-              >
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="student-online-classes.html">
+              <i class="fas fa-video"></i>
+              <span>نظام التعلم عن بعد</span>
             </a>
           </li>
           <li class="menu-item">
@@ -1236,12 +1219,12 @@
             <a href="student-messages.html">
               <i class="fas fa-comments"></i>
               <span id="menu-messages">الرسائل</span>
-              <span
-                class="notification-badge"
-                id="messages-badge"
-                style="display: none"
-                >5</span
-              >
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="student-schedule.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-schedule">الجدول الدراسي</span>
             </a>
           </li>
           <li class="menu-item">
@@ -2659,7 +2642,7 @@
             ? "جاري فتح الفصل الدراسي..."
             : "Opening classroom..."
         );
-        // في التطبيق الحقيقي: window.location.href = 'classroom.html';
+        // في التطبيق الحقيقي: window.location.href = 'interactive-classroom.html';
       }
 
       function openPreviewModal(fileName, fileContent, fileType) {

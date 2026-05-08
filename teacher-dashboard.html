@@ -1564,18 +1564,6 @@
           width: 100%;
         }
 
-        .sidebar {
-          width: 80px;
-        }
-
-        body.rtl .main-content {
-          margin-right: 80px;
-        }
-
-        body.ltr .main-content {
-          margin-left: 80px;
-        }
-
         .stats-cards {
           gap: 15px;
         }
@@ -1599,6 +1587,7 @@
         }
       }
     </style>
+    <script src="core.js"></script>
   </head>
   <body class="rtl">
     <div class="dashboard-container">
@@ -1625,16 +1614,15 @@
             </a>
           </li>
           <li class="menu-item">
-            <a href="teacher-schedule.html">
-              <i class="fas fa-calendar-alt"></i>
-              <span id="menu-schedule">الجدول الدراسي</span>
-            </a>
-          </li>
-          <li class="menu-item">
             <a href="teacher-courses.html">
               <i class="fas fa-book"></i>
               <span id="menu-courses">المقررات الدراسية</span>
-              <span class="notification-badge">3</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="teacher-online-classes.html">
+              <i class="fas fa-video"></i>
+              <span>نظام التعلم عن بعد</span>
             </a>
           </li>
           <li class="menu-item">
@@ -1653,6 +1641,12 @@
             <a href="teacher-messages.html">
               <i class="fas fa-comments"></i>
               <span id="menu-messages">الرسائل</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="teacher-schedule.html">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="menu-schedule">الجدول الدراسي</span>
             </a>
           </li>
           <li class="menu-item">

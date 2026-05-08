@@ -536,35 +536,6 @@
       }
 
       @media (max-width: 992px) {
-        .sidebar {
-          width: 80px;
-        }
-        .sidebar-header .logo-text,
-        .user-info,
-        .menu-item span {
-          display: none;
-        }
-        body.rtl .main-content {
-          margin-right: 80px;
-        }
-        body.ltr .main-content {
-          margin-left: 80px;
-        }
-        .menu-item a {
-          justify-content: center;
-          padding: 15px;
-        }
-        .menu-item i {
-          margin: 0;
-          font-size: 20px;
-        }
-      }
-
-      @media (max-width: 768px) {
-        .header {
-          flex-direction: column;
-          gap: 15px;
-        }
         .message {
           max-width: 85%;
         }
@@ -573,15 +544,6 @@
       @media (max-width: 576px) {
         .main-content {
           padding: 15px;
-        }
-        .sidebar {
-          width: 70px;
-        }
-        body.rtl .main-content {
-          margin-right: 70px;
-        }
-        body.ltr .main-content {
-          margin-left: 70px;
         }
         .chat-header {
           flex-direction: column;
@@ -614,56 +576,56 @@
           </li>
           <li class="menu-item">
             <a href="parent-children.html">
-              <i class="fas fa-child"></i>
-              <span id="menu-children">الأبناء</span>
+              <i class="fas fa-users"></i>
+              <span>الأبناء</span>
             </a>
           </li>
           <li class="menu-item">
             <a href="parent-homework.html">
-              <i class="fas fa-clipboard-list"></i>
-              <span id="menu-homework">الواجبات المنزلية</span>
+              <i class="fas fa-book-open"></i>
+              <span>الواجبات المدرسية</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-attendance.html">
+              <i class="fas fa-user-check"></i>
+              <span>الحضور والغياب</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="parent-grades.html">
+              <i class="fas fa-graduation-cap"></i>
+              <span>الدرجات والنتائج</span>
             </a>
           </li>
           <li class="menu-item">
             <a href="parent-calendar.html">
               <i class="fas fa-calendar-alt"></i>
-              <span id="menu-calendar">الجدول والفعاليات</span>
-            </a>
-          </li>
-          <li class="menu-item">
-            <a href="parent-attendance.html">
-              <i class="fas fa-calendar-check"></i>
-              <span id="menu-attendance">الحضور والغياب</span>
-            </a>
-          </li>
-          <li class="menu-item">
-            <a href="parent-grades.html">
-              <i class="fas fa-chart-line"></i>
-              <span id="menu-grades">الدرجات والتقييمات</span>
-            </a>
-          </li>
-          <li class="menu-item active">
-            <a href="parent-messages.html">
-              <i class="fas fa-comments"></i>
-              <span id="menu-messages">الرسائل</span>
+              <span>التقويم الدراسي</span>
             </a>
           </li>
           <li class="menu-item">
             <a href="parent-payments.html">
               <i class="fas fa-money-bill-wave"></i>
-              <span id="menu-payments">المدفوعات</span>
+              <span>المدفوعات</span>
             </a>
           </li>
           <li class="menu-item">
             <a href="parent-reports.html">
               <i class="fas fa-file-alt"></i>
-              <span id="menu-reports">التقارير</span>
+              <span>التقارير</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="parent-messages.html">
+              <i class="fas fa-comments"></i>
+              <span>الرسائل</span>
             </a>
           </li>
           <li class="menu-item">
             <a href="parent-settings.html">
               <i class="fas fa-cog"></i>
-              <span id="menu-settings">الإعدادات</span>
+              <span>الإعدادات</span>
             </a>
           </li>
         </ul>
@@ -739,7 +701,9 @@
       </div>
     </div>
 
-    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <script src="db.js"></script>
+    <script src="core.js"></script>
     <script>
       const translations = {
         ar: {
@@ -928,10 +892,8 @@
         { id: "parent", name: "ولي الأمر" },
       ];
       const contacts = roles.filter((r) => r.id !== currentUserRole);
-      const db = new Dexie("messagingDB");
-      db.version(1).stores({
-        messages: "++id,sender,receiver,timestamp,status",
-      });
+      // Use messagingDB from db.js
+      const db = window.messagingDB;
       let activeContact = null;
       function renderContacts() {
         contactsListEl.innerHTML = "";
