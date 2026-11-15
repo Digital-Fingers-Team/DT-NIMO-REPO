@@ -58,11 +58,53 @@
   });
   window.courseVideosDB = courseVideosDB;
 
+  // --- Uploads Database (lesson preps / homework / exams) ---
+  // Finds the intended recipient on the same device and keeps the actual file
+  // as a Blob. IndexedDB (Dexie) is used instead of localStorage because a
+  // localStorage quota (~5MB) cannot reliably hold real file contents.
+  const uploadsDB = new Dexie('uploadsDB');
+  uploadsDB.version(1).stores({
+    files: '++id, type, subject, class, teacherName, teacherId, recipient, status, uploadDate'
+  });
+  window.uploadsDB = uploadsDB;
+
+  // --- Shared upload helpers ---
+  // Saves the real file as a Blob in IndexedDB so it actually reaches the
+  // recipient instead of failing when localStorage runs out of quota.
+  window.saveUploadFile = function (record, blob) {
+    const data = Object.assign({}, record, { fileBlob: blob || null });
+    delete data.id;
+    return window.uploadsDB.files.add(data);
+  };
+  // Reads uploads back (optionally filtered by type) for the recipient page.
+  window.getUploadFiles = function (type) {
+    const table = window.uploadsDB.files;
+    return type ? table.where('type').equals(type).toArray() : table.toArray();
+  };
+  // Deletes a single stored upload by its primary key.
+  window.deleteUploadFile = function (id) {
+    return window.uploadsDB.files.delete(id);
+  };
+
   // --- Payments Database ---
   const paymentsDB = new Dexie('PaymentsDB');
   paymentsDB.version(2).stores({
     payments: '++id, parentName, studentName, amount, status, date, invoiceId, description, paymentMethod, timestamp'
   });
   window.paymentsDB = paymentsDB;
+
+  // --- Shared user identity key (used by messaging so sender/receiver match) ---
+  // SchoolDB stores every user's email as <username>@dtedu.com, so we derive the
+  // same key from the logged-in user regardless of how they signed in.
+  window.getUserKey = function (user) {
+    if (!user) return "";
+    if (user.email) return user.email;
+    if (user.username) {
+      return user.username.indexOf("@") !== -1
+        ? user.username
+        : user.username + "@dtedu.com";
+    }
+    return user.name || "";
+  };
 
 })();

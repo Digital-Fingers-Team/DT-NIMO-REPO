@@ -12,9 +12,9 @@
     <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
     <style>
       :root {
-        --primary: #0a325c;
-        --primary-dark: #1a2a6c;
-        --secondary: #00b894;
+        --primary: #4a6cf7;
+        --primary-dark: #3a56d4;
+        --secondary: #6c5ce7;
         --accent: #00b894;
         --success: #27ae60;
         --warning: #f39c12;
@@ -69,8 +69,8 @@
         width: var(--sidebar-width);
         background: linear-gradient(
           180deg,
-          #0a325c 0%,
-          #1a2a6c 100%
+          var(--primary) 0%,
+          var(--secondary) 100%
         );
         color: white;
         padding: 20px 0;
@@ -1576,7 +1576,7 @@
         },
       };
 
-      let currentLanguage = "ar";
+      let currentLanguage = localStorage.getItem("currentLanguage") || "ar";
 
       // تحديث اللغة
       function updateLanguage(lang) {
@@ -2198,13 +2198,12 @@
           document.body.classList.add("dark-mode");
         }
 
-        if (localStorage.getItem("language") === "en") {
-          document.body.classList.remove("rtl");
-          document.body.classList.add("ltr");
-          document.documentElement.lang = "en";
-          document.documentElement.dir = "ltr";
-          currentLanguage = "en";
-        }
+        // تطبيق اتجاه اللغة الموحّد مع بقية صفحات المشروع
+        const isEnglish = currentLanguage === "en";
+        document.body.classList.toggle("ltr", isEnglish);
+        document.body.classList.toggle("rtl", !isEnglish);
+        document.documentElement.lang = isEnglish ? "en" : "ar";
+        document.documentElement.dir = isEnglish ? "ltr" : "rtl";
 
         updateLanguage(currentLanguage);
 
@@ -2448,7 +2447,7 @@
           document.documentElement.lang = "en";
           document.documentElement.dir = "ltr";
           updateLanguage("en");
-          localStorage.setItem("language", "en");
+          localStorage.setItem("currentLanguage", "en");
         } else {
           // التبديل إلى العربية
           document.body.classList.remove("ltr");
@@ -2456,7 +2455,7 @@
           document.documentElement.lang = "ar";
           document.documentElement.dir = "rtl";
           updateLanguage("ar");
-          localStorage.setItem("language", "ar");
+          localStorage.setItem("currentLanguage", "ar");
         }
       }
     </script>

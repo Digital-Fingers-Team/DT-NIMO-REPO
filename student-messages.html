@@ -813,7 +813,7 @@
       const contactsListEl = document.getElementById("contactsList");
       const activeContactNameEl = document.getElementById("activeContactName");
       
-      const currentUserRole = currentUser.type;
+      const myKey = window.getUserKey(currentUser);
       let contacts = [];
       let activeContact = null;
       sendBtn.disabled = true;
@@ -826,7 +826,7 @@
           const allUsers = await db_school.users.toArray();
           // الطالب يرى الإدارة والمعلمين فقط
           contacts = allUsers
-            .filter(u => u.email !== currentUser.email && (u.type === 'admin' || u.type === 'teacher'))
+            .filter(u => u.email !== myKey && (u.type === 'admin' || u.type === 'teacher'))
             .map(u => ({
               id: u.email,
               name: u.name,
@@ -869,9 +869,9 @@
         const msgs = await db_msg.messages
           .filter(
             (m) =>
-              (m.sender === currentUser.email &&
+              (m.sender === myKey &&
                 m.receiver === activeContact.id) ||
-              (m.sender === activeContact.id && m.receiver === currentUser.email)
+              (m.sender === activeContact.id && m.receiver === myKey)
           )
           .toArray();
         
@@ -880,7 +880,7 @@
         for (const m of msgs) {
           const b = document.createElement("div");
           b.className =
-            "message " + (m.sender === currentUser.email ? "user" : "bot");
+            "message " + (m.sender === myKey ? "user" : "bot");
           b.textContent = m.content;
           const ts = document.createElement("div");
           ts.className = "timestamp";
@@ -905,7 +905,7 @@
         const content = userInput.value.trim();
         if (!content || !activeContact) return;
         const msg = {
-          sender: currentUser.email,
+          sender: myKey,
           receiver: activeContact.id,
           content,
           timestamp: new Date().toISOString(),
@@ -918,37 +918,14 @@
 
       initializeChat();
       setInterval(() => loadConversation(), 3000);
-        const b = document.createElement("div");
-        b.className = "message user";
-        b.textContent = msg.content;
-        const ts = document.createElement("div");
-        ts.className = "timestamp";
-        ts.textContent = new Date(msg.timestamp).toLocaleString(
-          document.documentElement.lang === "ar" ? "ar" : "en"
-        );
-        b.appendChild(ts);
-        chatMessages.appendChild(b);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
       userInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") sendMessage();
       });
       sendBtn.addEventListener("click", sendMessage);
-      renderContacts();
-      if (contacts.length) setActiveContact(contacts[0]);
 
       function clearChat() {
         chatMessages.innerHTML = "";
       }
-
-      // إرسال الرسالة بالضغط على Enter
-      document
-        .getElementById("message-input")
-        .addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            sendMessage();
-          }
-        });
 
       // حركة اهتزاز
       const style = document.createElement("style");

@@ -10,6 +10,8 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+    <script src="db.js"></script>
     <style>
       :root {
         --primary: #4a6cf7;
@@ -2021,7 +2023,6 @@
           '{"id":"student1","name":"أحمد الطالب","type":"student","class":"10a","email":"student@dtedu.com"}'
       );
       const currentStudentId = currentUser.id || "student1";
-      const currentStudentClass = currentUser.class || "10a";
 
       // بيانات المثال
       const subjects = {
@@ -2272,19 +2273,25 @@
             ],
           };
 
-          // حفظ البيانات في localStorage
-          localStorage.setItem(
-            "teacherAssignments",
-            JSON.stringify(sampleData.teacherAssignments)
-          );
-          localStorage.setItem(
-            "studentSubmissions",
-            JSON.stringify(sampleData.studentSubmissions)
-          );
-          localStorage.setItem(
-            "teacherResources",
-            JSON.stringify(sampleData.teacherResources)
-          );
+          // حفظ البيانات في localStorage (بدون الكتابة فوق بيانات المعلمين الحقيقية)
+          if (!localStorage.getItem("teacherAssignments")) {
+            localStorage.setItem(
+              "teacherAssignments",
+              JSON.stringify(sampleData.teacherAssignments)
+            );
+          }
+          if (!localStorage.getItem("studentSubmissions")) {
+            localStorage.setItem(
+              "studentSubmissions",
+              JSON.stringify(sampleData.studentSubmissions)
+            );
+          }
+          if (!localStorage.getItem("teacherResources")) {
+            localStorage.setItem(
+              "teacherResources",
+              JSON.stringify(sampleData.teacherResources)
+            );
+          }
 
           // علامة أن البيانات تم تهيئتها
           localStorage.setItem("studentDataInitialized", "true");
@@ -2865,7 +2872,6 @@
         // تصفية الواجبات الخاصة بفصل الطالب والتي لم يسلمها بعد
         const availableAssignments = teacherAssignments.filter((assignment) => {
           return (
-            assignment.class === currentStudentClass &&
             !submittedAssignmentIds.includes(assignment.id) &&
             new Date(assignment.dueDate) > new Date()
           );
@@ -2911,23 +2917,9 @@
           return;
         }
 
-        // قراءة الملف كـ Base64
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          saveSubmission(assignmentId, e.target.result, file, notes);
-        };
-
-        reader.onerror = function (error) {
-          console.error("Error reading file:", error);
-          showToast(
-            "error",
-            currentLanguage === "ar"
-              ? "حدث خطأ في قراءة الملف"
-              : "Error reading file"
-          );
-        };
-
-        reader.readAsDataURL(file);
+        // لا نقرأ الملف كـ Base64 داخل localStorage (يتجاوز الحصة ~5MB فيفشل التسليم)،
+        // بل نحفظ الملف نفسه كـ Blob في IndexedDB داخل saveSubmission
+        saveSubmission(assignmentId, null, file, notes);
       }
 
       function saveSubmission(assignmentId, fileContent, file, notes) {
@@ -2965,7 +2957,9 @@
             fileName: file.name,
             fileType: file.type,
             fileSize: file.size,
-            fileContent: fileContent,
+            // الملف الفعلي يُخزَّن كـ Blob في IndexedDB (uploadsDB) وليس هنا،
+            // لأن localStorage محدود (~5MB) ويتسبب في فشل التسليم
+            fileContent: null,
             notes: notes || "",
             submissionDate: new Date().toISOString(),
             status: "submitted",
@@ -2978,11 +2972,37 @@
           // إضافة التسليم الجديد
           studentSubmissions.push(submission);
 
-          // حفظ في localStorage
+          // حفظ في localStorage (البيانات الوصفية فقط)
           localStorage.setItem(
             "studentSubmissions",
             JSON.stringify(studentSubmissions)
           );
+
+          // حفظ ملف الواجب الفعلي كـ Blob في IndexedDB لضمان وصوله للمعلم
+          if (window.saveUploadFile && file) {
+            window
+              .saveUploadFile(
+                {
+                  type: "submission",
+                  subject: assignment.subject || assignment.subjectName || "",
+                  class: assignment.class || assignment.className || "",
+                  teacherName: assignment.teacherName || "",
+                  teacherId: assignment.teacherId || "",
+                  recipient: "teacher",
+                  status: "submitted",
+                  studentId: currentStudentId,
+                  studentName: currentUser.name,
+                  fileName: file.name,
+                  fileType: file.type,
+                  refId: submission.id,
+                  uploadDate: new Date().toISOString(),
+                },
+                file
+              )
+              .catch((err) =>
+                console.error("submission blob save failed:", err)
+              );
+          }
 
           // تحديث إحصائيات الطالب
           loadStudentStats();
@@ -3064,7 +3084,7 @@
             localStorage.getItem("teacherAssignments") || "[]"
           );
           const classAssignments = teacherAssignments.filter(
-            (a) => a.class === currentStudentClass
+            (a) => a.type !== "exam"
           );
 
           // حساب الإحصائيات
@@ -3128,9 +3148,11 @@
       }
 
       function loadHomeworkList() {
-        const activeTab = document.querySelector("#homework-modal .tab.active");
-        const tabName = activeTab
-          ? activeTab.getAttribute("onclick").split("'")[1]
+        const activeContent = document.querySelector(
+          "#homework-modal .tab-content.active"
+        );
+        const tabName = activeContent
+          ? activeContent.id.replace("-tab", "")
           : "pending";
         const filterValue = document.getElementById("homework-filter").value;
         const sortValue = document.getElementById("homework-sort").value;
@@ -3145,7 +3167,7 @@
 
         // تصفية الواجبات الخاصة بفصل الطالب
         let assignments = teacherAssignments.filter(
-          (a) => a.class === currentStudentClass
+          (a) => a.type !== "exam"
         );
 
         // تطبيق فلتر المادة
@@ -3261,6 +3283,12 @@
                         })">
                             <i class="fas fa-download"></i>
                             ${currentLanguage === "ar" ? "تحميل" : "Download"}
+                        </button>
+                        <button class="content-btn" onclick="previewAssignmentFile(${
+                          assignment.id
+                        })">
+                            <i class="fas fa-eye"></i>
+                            ${currentLanguage === "ar" ? "فتح" : "Open"}
                         </button>
                         <button class="upload-btn" onclick="openSubmitAssignment(${
                           assignment.id
@@ -3639,9 +3667,11 @@
       }
 
       function loadReceivedFiles() {
-        const activeTab = document.querySelector("#received-modal .tab.active");
-        const tabName = activeTab
-          ? activeTab.getAttribute("onclick").split("'")[1]
+        const activeContent = document.querySelector(
+          "#received-modal .tab-content.active"
+        );
+        const tabName = activeContent
+          ? activeContent.id.replace("-tab", "")
           : "assignments";
         const filterValue = document.getElementById("received-filter").value;
         const sortValue = document.getElementById("received-sort").value;
@@ -3668,10 +3698,8 @@
           localStorage.getItem("teacherAssignments") || "[]"
         );
 
-        // تصفية الواجبات الخاصة بفصل الطالب
-        let assignments = teacherAssignments.filter(
-          (a) => a.class === currentStudentClass
-        );
+        // عرض كل الواجبات والامتحانات لكل الطلاب بغض النظر عن الفصل أو المعلم
+        let assignments = teacherAssignments;
 
         // تطبيق فلتر المادة
         if (filterValue !== "all") {
@@ -3703,12 +3731,21 @@
           const item = document.createElement("li");
           item.className = "content-item";
 
+          const isExam = assignment.type === "exam";
           const uploadDate = formatDate(assignment.uploadDate, true);
-          const dueDate = formatDate(assignment.dueDate, true);
+          const dueDate = isExam
+            ? formatDate(assignment.date, true)
+            : formatDate(assignment.dueDate, true);
 
           item.innerHTML = `
                     <div style="flex: 1;">
-                        <div class="content-name">${assignment.title}</div>
+                        <div class="content-name">${
+                          isExam
+                            ? `<span style="background: var(--secondary); color:#fff; border-radius:6px; padding:2px 8px; font-size:12px; margin-inline-end:6px;">${
+                                currentLanguage === "ar" ? "امتحان" : "Exam"
+                              }</span>`
+                            : ""
+                        }${assignment.title}</div>
                         <div class="content-meta">
                             <span><strong>${
                               currentLanguage === "ar" ? "المادة:" : "Subject:"
@@ -3722,7 +3759,11 @@
                                 : "Upload Date:"
                             }</strong> ${uploadDate}</span>
                             <span><strong>${
-                              currentLanguage === "ar"
+                              isExam
+                                ? currentLanguage === "ar"
+                                  ? "موعد الامتحان:"
+                                  : "Exam Date:"
+                                : currentLanguage === "ar"
                                 ? "موعد التسليم:"
                                 : "Due Date:"
                             }</strong> ${dueDate}</span>
@@ -3974,7 +4015,7 @@
         });
       }
 
-      function previewAssignmentFile(assignmentId) {
+      async function previewAssignmentFile(assignmentId) {
         try {
           const teacherAssignments = JSON.parse(
             localStorage.getItem("teacherAssignments") || "[]"
@@ -3983,7 +4024,7 @@
             (a) => a.id == assignmentId
           );
 
-          if (!assignment || !assignment.fileContent) {
+          if (!assignment) {
             showToast(
               "error",
               currentLanguage === "ar"
@@ -3993,11 +4034,24 @@
             return;
           }
 
-          openPreviewModal(
-            assignment.fileName,
-            assignment.fileContent,
-            assignment.fileType
-          );
+          // Prefer the file stored in IndexedDB (new uploads have no base64)
+          let content = assignment.fileContent;
+          if (!content) {
+            const blob = await getUploadBlob(assignmentId, "homework");
+            if (blob) content = await blobToDataUrl(blob);
+          }
+
+          if (!content) {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "ملف الواجب غير موجود"
+                : "Assignment file not found"
+            );
+            return;
+          }
+
+          openPreviewModal(assignment.fileName, content, assignment.fileType);
         } catch (error) {
           console.error("Error previewing assignment file:", error);
           showToast(
@@ -4009,14 +4063,14 @@
         }
       }
 
-      function previewResourceFile(resourceId) {
+      async function previewResourceFile(resourceId) {
         try {
           const teacherResources = JSON.parse(
             localStorage.getItem("teacherResources") || "[]"
           );
           const resource = teacherResources.find((r) => r.id == resourceId);
 
-          if (!resource || !resource.fileContent) {
+          if (!resource) {
             showToast(
               "error",
               currentLanguage === "ar"
@@ -4026,11 +4080,24 @@
             return;
           }
 
-          openPreviewModal(
-            resource.fileName,
-            resource.fileContent,
-            resource.fileType
-          );
+          // Prefer the file stored in IndexedDB (new uploads have no base64)
+          let content = resource.fileContent;
+          if (!content) {
+            const blob = await getUploadBlob(resourceId, "resource");
+            if (blob) content = await blobToDataUrl(blob);
+          }
+
+          if (!content) {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "ملف المورد غير موجود"
+                : "Resource file not found"
+            );
+            return;
+          }
+
+          openPreviewModal(resource.fileName, content, resource.fileType);
         } catch (error) {
           console.error("Error previewing resource file:", error);
           showToast(
@@ -4046,7 +4113,7 @@
       // وظائف التنزيل
       // ============================================
 
-      function downloadAssignmentFile(assignmentId) {
+      async function downloadAssignmentFile(assignmentId) {
         try {
           const teacherAssignments = JSON.parse(
             localStorage.getItem("teacherAssignments") || "[]"
@@ -4055,7 +4122,7 @@
             (a) => a.id == assignmentId
           );
 
-          if (!assignment || !assignment.fileContent) {
+          if (!assignment) {
             showToast(
               "error",
               currentLanguage === "ar"
@@ -4065,11 +4132,26 @@
             return;
           }
 
-          downloadBase64File(
-            assignment.fileContent,
-            assignment.fileName,
-            assignment.fileType
-          );
+          if (assignment.fileContent) {
+            downloadBase64File(
+              assignment.fileContent,
+              assignment.fileName,
+              assignment.fileType
+            );
+            return;
+          }
+
+          const blob = await getUploadBlob(assignmentId, "homework");
+          if (!blob) {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "ملف الواجب غير موجود"
+                : "Assignment file not found"
+            );
+            return;
+          }
+          downloadBlobFile(blob, assignment.fileName);
         } catch (error) {
           console.error("Error downloading assignment file:", error);
           showToast(
@@ -4081,7 +4163,7 @@
         }
       }
 
-      function downloadSubmissionFile(submissionId) {
+      async function downloadSubmissionFile(submissionId) {
         try {
           const studentSubmissions = JSON.parse(
             localStorage.getItem("studentSubmissions") || "[]"
@@ -4090,7 +4172,7 @@
             (sub) => sub.id == submissionId
           );
 
-          if (!submission || !submission.fileContent) {
+          if (!submission) {
             showToast(
               "error",
               currentLanguage === "ar"
@@ -4100,11 +4182,28 @@
             return;
           }
 
-          downloadBase64File(
-            submission.fileContent,
-            submission.fileName,
-            submission.fileType
-          );
+          // التسليمات القديمة تحتفظ بالـ Base64 داخل localStorage
+          if (submission.fileContent) {
+            downloadBase64File(
+              submission.fileContent,
+              submission.fileName,
+              submission.fileType
+            );
+            return;
+          }
+
+          // التسليمات الحديثة محفوظة كـ Blob في IndexedDB
+          const blob = await getUploadBlob(submission.id, "submission");
+          if (!blob) {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "ملف التسليم غير موجود"
+                : "Submission file not found"
+            );
+            return;
+          }
+          downloadBlobFile(blob, submission.fileName);
         } catch (error) {
           console.error("Error downloading submission file:", error);
           showToast(
@@ -4116,14 +4215,14 @@
         }
       }
 
-      function downloadResourceFile(resourceId) {
+      async function downloadResourceFile(resourceId) {
         try {
           const teacherResources = JSON.parse(
             localStorage.getItem("teacherResources") || "[]"
           );
           const resource = teacherResources.find((r) => r.id == resourceId);
 
-          if (!resource || !resource.fileContent) {
+          if (!resource) {
             showToast(
               "error",
               currentLanguage === "ar"
@@ -4145,11 +4244,26 @@
             localStorage.setItem("teacherResources", JSON.stringify(resources));
           }
 
-          downloadBase64File(
-            resource.fileContent,
-            resource.fileName,
-            resource.fileType
-          );
+          if (resource.fileContent) {
+            downloadBase64File(
+              resource.fileContent,
+              resource.fileName,
+              resource.fileType
+            );
+            return;
+          }
+
+          const blob = await getUploadBlob(resourceId, "resource");
+          if (!blob) {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "ملف المورد غير موجود"
+                : "Resource file not found"
+            );
+            return;
+          }
+          downloadBlobFile(blob, resource.fileName);
         } catch (error) {
           console.error("Error downloading resource file:", error);
           showToast(
@@ -4163,6 +4277,64 @@
 
       function downloadFile(fileContent, fileName) {
         downloadBase64File(fileContent, fileName);
+      }
+
+      // Reads the real file from IndexedDB (uploadsDB) for records whose
+      // localStorage entry no longer carries the base64 content.
+      async function getUploadBlob(refId, uploadType) {
+        try {
+          if (!window.uploadsDB) return null;
+          let match = null;
+          if (uploadType) {
+            const files = await window.uploadsDB.files
+              .where("type")
+              .equals(uploadType)
+              .toArray();
+            match = files.find((f) => f.refId === refId);
+          }
+          // Fallback: search all uploads by refId (e.g. exams stored under another type)
+          if (!match) {
+            const all = await window.uploadsDB.files.toArray();
+            match = all.find((f) => f.refId === refId);
+          }
+          return match && match.fileBlob ? match.fileBlob : null;
+        } catch (e) {
+          console.error("getUploadBlob error:", e);
+          return null;
+        }
+      }
+
+      function blobToDataUrl(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      // Downloads a Blob directly (used for files stored in IndexedDB).
+      function downloadBlobFile(blob, fileName) {
+        if (typeof saveAs !== "undefined") {
+          saveAs(blob, fileName);
+        } else {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          }, 100);
+        }
+        showToast(
+          "success",
+          currentLanguage === "ar"
+            ? `جاري تحميل الملف: ${fileName}`
+            : `Downloading file: ${fileName}`
+        );
       }
 
       function downloadBase64File(base64Data, fileName, fileType = null) {
@@ -4398,7 +4570,7 @@
         );
 
         const classAssignments = teacherAssignments.filter(
-          (a) => a.class === currentStudentClass
+          (a) => a.type !== "exam"
         );
         const submittedAssignmentIds = studentSubmissions
           .filter((sub) => sub.studentId === currentStudentId)

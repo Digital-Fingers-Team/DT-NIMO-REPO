@@ -105,10 +105,65 @@
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSidebarToggle);
-  } else {
+  // Sidebar User Info (name + role) from the logged-in user
+  var SUBJECT_NAMES = {
+    math: { ar: "الرياضيات", en: "Mathematics" },
+    arabic: { ar: "اللغة العربية", en: "Arabic" },
+    science: { ar: "العلوم", en: "Science" },
+    english: { ar: "الإنجليزية", en: "English" },
+    history: { ar: "التاريخ", en: "History" }
+  };
+
+  function getRoleLabel(user, isRTL) {
+    var type = (user && user.type) || "";
+    if (type === "teacher") {
+      var subj = user.subject && SUBJECT_NAMES[user.subject];
+      if (subj) return isRTL ? "معلم " + subj.ar : "Teacher " + subj.en;
+      return isRTL ? "معلم" : "Teacher";
+    }
+    if (type === "admin") return isRTL ? "مدير المدرسة" : "School Director";
+    if (type === "student") return isRTL ? "طالب" : "Student";
+    if (type === "parent") return isRTL ? "ولي أمر" : "Parent";
+    return "";
+  }
+
+  function updateSidebarUser() {
+    var raw = localStorage.getItem("currentUser");
+    if (!raw) return;
+    var user;
+    try { user = JSON.parse(raw); } catch (e) { return; }
+    if (!user || !user.type) return;
+
+    var isRTL = document.body.classList.contains("rtl") ||
+      (!document.body.classList.contains("ltr") &&
+        (localStorage.getItem("currentLanguage") || "ar") === "ar");
+
+    var nameAr = user.name || "";
+    var nameEn = user.nameEn || nameAr;
+    var displayName = isRTL ? nameAr : nameEn;
+    if (displayName) {
+      document.querySelectorAll(".user-name").forEach(function (el) {
+        el.textContent = displayName;
+      });
+    }
+
+    var role = getRoleLabel(user, isRTL);
+    if (role) {
+      document.querySelectorAll(".user-type").forEach(function (el) {
+        el.textContent = role;
+      });
+    }
+  }
+
+  function initCore() {
     initSidebarToggle();
+    updateSidebarUser();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCore);
+  } else {
+    initCore();
   }
 })();
 

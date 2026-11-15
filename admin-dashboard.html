@@ -2199,7 +2199,7 @@
       }
 
       // دالة لعرض تفاصيل ملف التحضير
-      function viewPrepDetail(prepId) {
+      async function viewPrepDetail(prepId) {
         try {
           const savedPreps = getAllPreparations();
           const prep = savedPreps.find((p) => p.id === prepId);
@@ -2342,8 +2342,30 @@
                     }
                 `;
 
-          // إضافة معاينة الملف إذا كان صورة
-          if (prep.fileContent && prep.fileContent.includes("data:image/")) {
+          // إضافة معاينة الملف إذا كان صورة (من IndexedDB أو base64 القديم)
+          let previewSrc = null;
+          const ft = (prep.fileType || "").toLowerCase();
+          if (ft.indexOf("image") !== -1 || (prep.fileContent && prep.fileContent.indexOf("data:image/") !== -1)) {
+            if (window.uploadsDB) {
+              try {
+                const files = await window.uploadsDB.files
+                  .where("type")
+                  .equals("preparation")
+                  .toArray();
+                const match = files.find((f) => f.refId === prepId);
+                if (match && match.fileBlob) {
+                  previewSrc = URL.createObjectURL(match.fileBlob);
+                }
+              } catch (e) {
+                console.warn("preview load failed", e);
+              }
+            }
+            // fallback للبيانات القديمة المخزنة كـ base64
+            if (!previewSrc && prep.fileContent && prep.fileContent.indexOf("data:image/") !== -1) {
+              previewSrc = prep.fileContent;
+            }
+          }
+          if (previewSrc) {
             prepDetails.innerHTML += `
                         <div class="preview-container">
                             <div style="margin-bottom: 10px; font-weight: 600; color: var(--primary);">
@@ -2353,9 +2375,7 @@
                                     : "File Preview:"
                                 }
                             </div>
-                            <img src="${prep.fileContent}" alt="${
-              prep.fileName
-            }">
+                            <img src="${previewSrc}" alt="${prep.fileName}">
                         </div>
                     `;
           }
@@ -2417,12 +2437,12 @@
       }
 
       // دالة لتحميل ملف التحضير
-      function downloadPrepFile(prepId) {
+      async function downloadPrepFile(prepId) {
         try {
           const savedPreps = getAllPreparations();
           const prep = savedPreps.find((p) => p.id === prepId);
 
-          if (!prep || !prep.fileContent) {
+          if (!prep) {
             showToast(
               "error",
               currentLanguage === "ar"
@@ -2432,24 +2452,46 @@
             return;
           }
 
-          // استخراج معلومات الملف من base64
-          const base64Data = prep.fileContent;
           const fileName = prep.fileName;
 
-          // تحويل base64 إلى Blob
-          const byteString = atob(base64Data.split(",")[1]);
-          const mimeString = base64Data
-            .split(",")[0]
-            .split(":")[1]
-            .split(";")[0];
-          const ab = new ArrayBuffer(byteString.length);
-          const ia = new Uint8Array(ab);
-
-          for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
+          // The real file is stored in IndexedDB as a Blob so any size works
+          let blob = null;
+          if (window.uploadsDB) {
+            const files = await window.uploadsDB.files
+              .where("type")
+              .equals("preparation")
+              .toArray();
+            const match = files.find((f) => f.refId === prepId);
+            if (match && match.fileBlob) {
+              blob = match.fileBlob;
+            }
           }
 
-          const blob = new Blob([ab], { type: mimeString });
+          // Fallback to the base64 content for older records
+          if (!blob && prep.fileContent && prep.fileContent.indexOf(",") !== -1) {
+            const base64Data = prep.fileContent;
+            const byteString = atob(base64Data.split(",")[1]);
+            const mimeString = base64Data
+              .split(",")[0]
+              .split(":")[1]
+              .split(";")[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+            }
+            blob = new Blob([ab], { type: mimeString });
+          }
+
+          if (!blob) {
+            showToast(
+              "error",
+              currentLanguage === "ar"
+                ? "ملف التحضير غير موجود"
+                : "Preparation file not found"
+            );
+            return;
+          }
 
           // استخدام FileSaver.js لتنزيل الملف
           saveAs(blob, fileName);

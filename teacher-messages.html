@@ -903,7 +903,7 @@
       const contactsListEl = document.getElementById("contactsList");
       const activeContactNameEl = document.getElementById("activeContactName");
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{"name":"المعلم","type":"teacher","email":"teacher@dtedu.com"}');
-      const currentUserRole = currentUser.type;
+      const myKey = window.getUserKey(currentUser);
       
       let contacts = [];
       let activeContact = null;
@@ -920,7 +920,7 @@
         try {
           const allUsers = await db_school.users.toArray();
           contacts = allUsers
-            .filter(u => u.email !== currentUser.email)
+            .filter(u => u.email !== myKey)
             .map(u => ({
               id: u.email,
               name: u.name,
@@ -928,6 +928,7 @@
               type: u.type
             }));
           renderContacts();
+          if (contacts.length) setActiveContact(contacts[0]);
         } catch (error) {
           console.error("Chat init error:", error);
         }
@@ -961,7 +962,7 @@
       function appendBubble(message, { autoScroll = true } = {}) {
         const bubble = document.createElement("div");
         bubble.className =
-          "message " + (message.sender === currentUser.email ? "user" : "bot");
+          "message " + (message.sender === myKey ? "user" : "bot");
         bubble.textContent = message.content;
         const ts = document.createElement("div");
         ts.className = "timestamp";
@@ -981,9 +982,9 @@
           let msgs = await db_msg.messages
             .filter(
               (m) =>
-                (m.sender === currentUser.email &&
+                (m.sender === myKey &&
                   m.receiver === activeContact.id) ||
-                (m.sender === activeContact.id && m.receiver === currentUser.email)
+                (m.sender === activeContact.id && m.receiver === myKey)
             )
             .toArray();
 
@@ -1031,7 +1032,7 @@
         isSendingMessage = true;
         try {
           const msg = {
-            sender: currentUser.email,
+            sender: myKey,
             receiver: activeContact.id,
             content,
             timestamp: new Date().toISOString(),
@@ -1055,8 +1056,6 @@
         }
       });
       sendBtn.addEventListener("click", sendMessage);
-      renderContacts();
-      if (contacts.length) setActiveContact(contacts[0]);
 
       function clearChat() {
         chatMessages.innerHTML = "";
@@ -1091,7 +1090,7 @@
             "header-title": "شات بوت - مساعد الذكاء الاصطناعي",
             "menu-dashboard": "لوحة التحكم",
             "menu-schedule": "الجدول الدراسي",
-            "menu-courses": "المقررات الدراسية",
+            "menu-courses": "رفع الفيديو التعليمي",
             "menu-progress": "التقدم الدراسي",
             "menu-messages": "شات بوت",
             "menu-settings": "الإعدادات",
@@ -1109,7 +1108,7 @@
             "header-title": "Chat Bot - AI Assistant",
             "menu-dashboard": "Dashboard",
             "menu-schedule": "Schedule",
-            "menu-courses": "Courses",
+            "menu-courses": "Upload Video",
             "menu-progress": "Progress",
             "menu-messages": "Chat Bot",
             "menu-settings": "Settings",

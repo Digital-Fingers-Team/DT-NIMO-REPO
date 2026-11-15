@@ -1258,28 +1258,44 @@
         }
 
         // تحميل ملف التحضير (نفس المنطق المستخدم في لوحة التحكم)
-        function downloadPrepFile(prepId) {
+        async function downloadPrepFile(prepId) {
             try {
                 const preps = JSON.parse(localStorage.getItem('teacherPreparations') || '[]');
                 const prep = preps.find(p => p.id === prepId);
-                if (!prep || !prep.fileContent) return;
-
-                const base64Data = prep.fileContent;
+                if (!prep) return;
                 const fileName = prep.fileName || 'preparation';
-                const byteString = atob(base64Data.split(",")[1]);
-                const mimeString = base64Data.split(",")[0].split(":")[1].split(";")[0];
-                const ab = new ArrayBuffer(byteString.length);
-                const ia = new Uint8Array(ab);
-                for (let i = 0; i < byteString.length; i++) {
-                    ia[i] = byteString.charCodeAt(i);
+
+                // الملف الحقيقي محفوظ في IndexedDB (uploadsDB) كـ Blob
+                let blob = null;
+                if (window.uploadsDB) {
+                    const files = await window.uploadsDB.files
+                        .where('type')
+                        .equals('preparation')
+                        .toArray();
+                    const match = files.find(f => f.refId === prepId);
+                    if (match && match.fileBlob) blob = match.fileBlob;
                 }
-                const blob = new Blob([ab], { type: mimeString });
+
+                // الرجوع إلى base64 للسجلات القديمة
+                if (!blob && prep.fileContent && prep.fileContent.indexOf(',') !== -1) {
+                    const base64Data = prep.fileContent;
+                    const byteString = atob(base64Data.split(",")[1]);
+                    const mimeString = base64Data.split(",")[0].split(":")[1].split(";")[0];
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+                    blob = new Blob([ab], { type: mimeString });
+                }
+
+                if (!blob) return;
 
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = fileName;
                 link.click();
-                URL.revokeObjectURL(link.href);
+                setTimeout(() => URL.revokeObjectURL(link.href), 1000);
             } catch (error) {
                 console.error('خطأ في تحميل الملف:', error);
             }

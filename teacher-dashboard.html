@@ -1616,7 +1616,7 @@
           <li class="menu-item">
             <a href="teacher-courses.html">
               <i class="fas fa-book"></i>
-              <span id="menu-courses">المقررات الدراسية</span>
+              <span id="menu-courses">رفع الفيديو التعليمي</span>
             </a>
           </li>
           <li class="menu-item">
@@ -3434,46 +3434,70 @@
         const fileInput = document.getElementById("prepFile");
         const file = fileInput.files[0];
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const preparationData = {
-            id: Date.now(),
-            type: formData.type,
-            subject: currentUser.subject || formData.subject,
-            subjectName: getSubjectName(currentUser.subject || formData.subject),
-            title: formData.title,
-            grade: formData.grade,
-            class: formData.class,
-            date: formData.date,
-            description: formData.description,
-            notifyManager: formData.notifyManager,
-            fileName: file.name,
-            fileType: file.type,
-            fileSize: file.size,
-            fileContent: e.target.result,
-            uploadDate: new Date().toISOString(),
-            status: "pending",
-            teacherName: currentUser.name,
-            teacherId: currentTeacherId,
-          };
-
-          const savedPreparations = JSON.parse(
-            localStorage.getItem("teacherPreparations") || "[]"
-          );
-          savedPreparations.push(preparationData);
-          localStorage.setItem(
-            "teacherPreparations",
-            JSON.stringify(savedPreparations)
-          );
-
-          if (formData.notifyManager) {
-            sendNotificationToManager(preparationData);
-          }
-
-          updateTeacherStats();
+        const preparationData = {
+          id: Date.now(),
+          type: formData.type,
+          subject: currentUser.subject || formData.subject,
+          subjectName: getSubjectName(currentUser.subject || formData.subject),
+          title: formData.title,
+          grade: formData.grade,
+          class: formData.class,
+          date: formData.date,
+          description: formData.description,
+          notifyManager: formData.notifyManager,
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          // The base64 content is NOT kept in localStorage (quota is ~5MB and
+          // real files would overflow it). The actual file lives in IndexedDB.
+          fileContent: null,
+          uploadDate: new Date().toISOString(),
+          status: "pending",
+          teacherName: currentUser.name,
+          teacherId: currentTeacherId,
         };
 
-        reader.readAsDataURL(file);
+        // Save the actual file as a Blob in IndexedDB so it reaches the manager
+        if (window.saveUploadFile) {
+          window
+            .saveUploadFile(
+              {
+                refId: preparationData.id,
+                type: "preparation",
+                subject: preparationData.subject,
+                subjectName: preparationData.subjectName,
+                class: preparationData.class,
+                title: preparationData.title,
+                date: preparationData.date,
+                description: preparationData.description,
+                fileName: preparationData.fileName,
+                fileType: preparationData.fileType,
+                fileSize: preparationData.fileSize,
+                teacherName: preparationData.teacherName,
+                teacherId: preparationData.teacherId,
+                recipient: "admin",
+                status: "pending",
+                uploadDate: preparationData.uploadDate,
+              },
+              file
+            )
+            .catch((err) => console.error("uploadsDB save failed:", err));
+        }
+
+        const savedPreparations = JSON.parse(
+          localStorage.getItem("teacherPreparations") || "[]"
+        );
+        savedPreparations.push(preparationData);
+        localStorage.setItem(
+          "teacherPreparations",
+          JSON.stringify(savedPreparations)
+        );
+
+        if (formData.notifyManager) {
+          sendNotificationToManager(preparationData);
+        }
+
+        updateTeacherStats();
       }
 
       function sendNotificationToManager(preparationData) {
@@ -3586,22 +3610,31 @@
             ],
           };
 
-          localStorage.setItem(
-            "teacherPreparations",
-            JSON.stringify(sampleData.teacherPreparations)
-          );
-          localStorage.setItem(
-            "teacherAssignments",
-            JSON.stringify(sampleData.teacherAssignments)
-          );
-          localStorage.setItem(
-            "studentSubmissions",
-            JSON.stringify(sampleData.studentSubmissions)
-          );
-          localStorage.setItem(
-            "teacherResources",
-            JSON.stringify(sampleData.teacherResources)
-          );
+          // حفظ البيانات التجريبية (بدون الكتابة فوق أي بيانات حقيقية موجودة)
+          if (!localStorage.getItem("teacherPreparations")) {
+            localStorage.setItem(
+              "teacherPreparations",
+              JSON.stringify(sampleData.teacherPreparations)
+            );
+          }
+          if (!localStorage.getItem("teacherAssignments")) {
+            localStorage.setItem(
+              "teacherAssignments",
+              JSON.stringify(sampleData.teacherAssignments)
+            );
+          }
+          if (!localStorage.getItem("studentSubmissions")) {
+            localStorage.setItem(
+              "studentSubmissions",
+              JSON.stringify(sampleData.studentSubmissions)
+            );
+          }
+          if (!localStorage.getItem("teacherResources")) {
+            localStorage.setItem(
+              "teacherResources",
+              JSON.stringify(sampleData.teacherResources)
+            );
+          }
           localStorage.setItem("teacherDataInitialized", "true");
         }
       }
@@ -4876,16 +4909,64 @@
           );
           const submission = submissions.find((sub) => sub.id === submissionId);
 
-          if (!submission || !submission.fileContent) {
+          if (!submission) {
             showToast("error", "ملف التسليم غير موجود");
             return;
           }
 
-          downloadBase64File(
-            submission.fileContent,
-            submission.fileName,
-            submission.fileType
-          );
+          // التسليمات القديمة تحتفظ بالـ Base64 داخل localStorage
+          if (submission.fileContent) {
+            downloadBase64File(
+              submission.fileContent,
+              submission.fileName,
+              submission.fileType
+            );
+            return;
+          }
+
+          // التسليمات الحديثة محفوظة كـ Blob في IndexedDB (uploadsDB)
+          if (window.uploadsDB) {
+            window.uploadsDB.files
+              .toArray()
+              .then((files) => {
+                const fileData = files.find((f) => f.refId === submission.id);
+                if (!fileData || !fileData.fileBlob) {
+                  showToast("error", "ملف التسليم غير موجود");
+                  return;
+                }
+
+                // إضافة اسم المادة واسم المعلم لاسم الملف عند التحميل
+                let finalFileName = submission.fileName;
+                if (currentUser.subject && currentUser.name) {
+                  const subjectName = getSubjectName(currentUser.subject);
+                  finalFileName = `${subjectName}_${currentUser.name}_${submission.fileName}`;
+                }
+
+                if (typeof saveAs !== "undefined") {
+                  saveAs(fileData.fileBlob, finalFileName);
+                } else {
+                  const url = window.URL.createObjectURL(fileData.fileBlob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = finalFileName;
+                  document.body.appendChild(a);
+                  a.click();
+                  setTimeout(() => {
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                  }, 100);
+                }
+
+                showToast("success", `جاري تحميل الملف: ${finalFileName}`);
+              })
+              .catch((err) => {
+                console.error("Error reading submission blob:", err);
+                showToast("error", "حدث خطأ في تحميل الملف");
+              });
+            return;
+          }
+
+          showToast("error", "ملف التسليم غير موجود");
         } catch (error) {
           console.error("Error downloading submission file:", error);
           showToast("error", "حدث خطأ في تحميل الملف");
@@ -5288,27 +5369,13 @@
         };
 
         if (file) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            homeworkData.fileName = file.name;
-            homeworkData.fileType = file.type;
-            homeworkData.fileSize = file.size;
-            homeworkData.fileContent = e.target.result;
-
-            saveHomework(homeworkData, notify);
-          };
-
-          reader.onerror = function (error) {
-            console.error("Error reading file:", error);
-            homeworkData.fileName = null;
-            homeworkData.fileType = null;
-            homeworkData.fileSize = null;
-            homeworkData.fileContent = null;
-
-            saveHomework(homeworkData, notify);
-          };
-
-          reader.readAsDataURL(file);
+          // The file itself is stored as a Blob in IndexedDB (not base64 in
+          // localStorage) so it actually reaches the students.
+          homeworkData.fileName = file.name;
+          homeworkData.fileType = file.type;
+          homeworkData.fileSize = file.size;
+          homeworkData.fileContent = null;
+          saveHomework(homeworkData, notify, file);
         } else {
           openFallbackUpload("homework", {
             type: type,
@@ -5323,8 +5390,37 @@
         }
       }
 
-      function saveHomework(homeworkData, notify) {
+      function saveHomework(homeworkData, notify, fileBlob) {
         try {
+          // Save the actual file as a Blob in IndexedDB so it reaches the students
+          if (window.saveUploadFile) {
+            window
+              .saveUploadFile(
+                {
+                  refId: homeworkData.id,
+                  type: "homework",
+                  subject: homeworkData.subject,
+                  subjectName: homeworkData.subjectName,
+                  class: homeworkData.class,
+                  className: homeworkData.className,
+                  title: homeworkData.title,
+                  description: homeworkData.description,
+                  dueDate: homeworkData.dueDate,
+                  maxGrade: homeworkData.maxGrade,
+                  fileName: homeworkData.fileName,
+                  fileType: homeworkData.fileType,
+                  fileSize: homeworkData.fileSize,
+                  teacherName: homeworkData.teacherName,
+                  teacherId: homeworkData.teacherId,
+                  recipient: "students",
+                  status: homeworkData.status,
+                  uploadDate: homeworkData.uploadDate,
+                },
+                fileBlob || null
+              )
+              .catch((err) => console.error("uploadsDB save failed:", err));
+          }
+
           const savedHomeworks = JSON.parse(
             localStorage.getItem("teacherAssignments") || "[]"
           );
@@ -5382,51 +5478,79 @@
           return;
         }
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          try {
-            const examData = {
-              id: Date.now(),
-              teacherId: currentTeacherId,
-              teacherName: currentUser.name,
-              type: "exam",
-              title: title,
-              subject: currentUser.subject || subject,
-              subjectName: getSubjectName(currentUser.subject || subject),
-              date: date,
-              duration: parseInt(duration),
-              fileName: file.name,
-              fileType: file.type,
-              fileSize: file.size,
-              fileContent: e.target.result,
-              uploadDate: new Date().toISOString(),
-              status: "scheduled",
-            };
+        try {
+          const examData = {
+            id: Date.now(),
+            teacherId: currentTeacherId,
+            teacherName: currentUser.name,
+            type: "exam",
+            title: title,
+            subject: currentUser.subject || subject,
+            subjectName: getSubjectName(currentUser.subject || subject),
+            date: date,
+            duration: parseInt(duration),
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            fileContent: null,
+            uploadDate: new Date().toISOString(),
+            status: "scheduled",
+          };
 
-            const savedExams = JSON.parse(
-              localStorage.getItem("teacherExams") || "[]"
-            );
-            savedExams.push(examData);
-            localStorage.setItem("teacherExams", JSON.stringify(savedExams));
+          // Save the actual file as a Blob in IndexedDB so it reaches the students
+          if (window.saveUploadFile) {
+            window
+              .saveUploadFile(
+                {
+                  refId: examData.id,
+                  type: "exam",
+                  subject: examData.subject,
+                  subjectName: examData.subjectName,
+                  title: examData.title,
+                  date: examData.date,
+                  duration: examData.duration,
+                  fileName: examData.fileName,
+                  fileType: examData.fileType,
+                  fileSize: examData.fileSize,
+                  teacherName: examData.teacherName,
+                  teacherId: examData.teacherId,
+                  recipient: "students",
+                  status: "scheduled",
+                  uploadDate: examData.uploadDate,
+                },
+                file
+              )
+              .catch((err) => console.error("uploadsDB save failed:", err));
+          }
 
-            showToast("success", `تم رفع الامتحان "${file.name}" بنجاح!`);
-            closeModal("homework-modal");
-            document.getElementById("exam-form").reset();
-          } catch (error) {
-            console.error("Error saving exam:", error);
-            showToast(
-              "error",
-              "حدث خطأ أثناء حفظ الامتحان. يرجى المحاولة مرة أخرى."
+          const savedExams = JSON.parse(
+            localStorage.getItem("teacherExams") || "[]"
+          );
+          savedExams.push(examData);
+          localStorage.setItem("teacherExams", JSON.stringify(savedExams));
+
+          // أيضاً نضيف الامتحان لقائمة الواجبات ليصل للطلاب وللأرشيف
+          const savedAssignments = JSON.parse(
+            localStorage.getItem("teacherAssignments") || "[]"
+          );
+          if (!savedAssignments.some((a) => a.id === examData.id)) {
+            savedAssignments.push(examData);
+            localStorage.setItem(
+              "teacherAssignments",
+              JSON.stringify(savedAssignments)
             );
           }
-        };
 
-        reader.onerror = function (error) {
-          console.error("Error reading file:", error);
-          showToast("error", "حدث خطأ في قراءة ملف الامتحان.");
-        };
-
-        reader.readAsDataURL(file);
+          showToast("success", `تم رفع الامتحان "${file.name}" بنجاح!`);
+          closeModal("homework-modal");
+          document.getElementById("exam-form").reset();
+        } catch (error) {
+          console.error("Error saving exam:", error);
+          showToast(
+            "error",
+            "حدث خطأ أثناء حفظ الامتحان. يرجى المحاولة مرة أخرى."
+          );
+        }
       }
 
       function submitResourceForm(e) {
@@ -5453,51 +5577,63 @@
           return;
         }
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          try {
-            const resourceData = {
-              id: Date.now(),
-              teacherId: currentTeacherId,
-              teacherName: currentUser.name,
-              title: title,
-              type: type,
-              description: description || "",
-              fileName: file.name,
-              fileType: file.type,
-              fileSize: file.size,
-              fileContent: e.target.result,
-              uploadDate: new Date().toISOString(),
-              downloads: 0,
-            };
+        try {
+          const resourceData = {
+            id: Date.now(),
+            teacherId: currentTeacherId,
+            teacherName: currentUser.name,
+            title: title,
+            type: type,
+            description: description || "",
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            fileContent: null,
+            uploadDate: new Date().toISOString(),
+            downloads: 0,
+          };
 
-            const savedResources = JSON.parse(
-              localStorage.getItem("teacherResources") || "[]"
-            );
-            savedResources.push(resourceData);
-            localStorage.setItem(
-              "teacherResources",
-              JSON.stringify(savedResources)
-            );
-
-            showToast(
-              "success",
-              `تم رفع المورد التعليمي "${file.name}" بنجاح!`
-            );
-            closeModal("resource-modal");
-            document.getElementById("resource-form").reset();
-          } catch (error) {
-            console.error("Error saving resource:", error);
-            showToast("error", "حدث خطأ أثناء حفظ المورد التعليمي.");
+          // Save the actual file as a Blob in IndexedDB so it reaches the students
+          if (window.saveUploadFile) {
+            window
+              .saveUploadFile(
+                {
+                  refId: resourceData.id,
+                  type: "resource",
+                  title: resourceData.title,
+                  description: resourceData.description,
+                  fileName: resourceData.fileName,
+                  fileType: resourceData.fileType,
+                  fileSize: resourceData.fileSize,
+                  teacherName: resourceData.teacherName,
+                  teacherId: resourceData.teacherId,
+                  recipient: "students",
+                  uploadDate: resourceData.uploadDate,
+                },
+                file
+              )
+              .catch((err) => console.error("uploadsDB save failed:", err));
           }
-        };
 
-        reader.onerror = function (error) {
-          console.error("Error reading file:", error);
-          showToast("error", "حدث خطأ في قراءة ملف المورد التعليمي.");
-        };
+          const savedResources = JSON.parse(
+            localStorage.getItem("teacherResources") || "[]"
+          );
+          savedResources.push(resourceData);
+          localStorage.setItem(
+            "teacherResources",
+            JSON.stringify(savedResources)
+          );
 
-        reader.readAsDataURL(file);
+          showToast(
+            "success",
+            `تم رفع المورد التعليمي "${file.name}" بنجاح!`
+          );
+          closeModal("resource-modal");
+          document.getElementById("resource-form").reset();
+        } catch (error) {
+          console.error("Error saving resource:", error);
+          showToast("error", "حدث خطأ أثناء حفظ المورد التعليمي.");
+        }
       }
 
       function saveFallbackFile() {
@@ -5511,6 +5647,7 @@
 
         const base64Content = btoa(unescape(encodeURIComponent(content)));
         const dataUrl = `data:text/plain;base64,${base64Content}`;
+        const textBlob = new Blob([content], { type: "text/plain" });
 
         switch (currentFallbackType) {
           case "preparation":
@@ -5525,7 +5662,8 @@
               currentFallbackData.title,
               currentFallbackData.date,
               currentFallbackData.description,
-              currentFallbackData.notify
+              currentFallbackData.notify,
+              textBlob
             );
             break;
 
@@ -5553,7 +5691,7 @@
               graded: 0,
             };
 
-            saveHomework(homeworkData, currentFallbackData.notify);
+            saveHomework(homeworkData, currentFallbackData.notify, textBlob);
             break;
 
           case "exam":
@@ -5580,6 +5718,43 @@
             );
             savedExams.push(examData);
             localStorage.setItem("teacherExams", JSON.stringify(savedExams));
+
+            // أيضاً نضيف الامتحان لقائمة الواجبات ليصل للطلاب وللأرشيف
+            const examAssignments = JSON.parse(
+              localStorage.getItem("teacherAssignments") || "[]"
+            );
+            if (!examAssignments.some((a) => a.id === examData.id)) {
+              examAssignments.push(examData);
+              localStorage.setItem(
+                "teacherAssignments",
+                JSON.stringify(examAssignments)
+              );
+            }
+
+            if (window.saveUploadFile) {
+              window
+                .saveUploadFile(
+                  {
+                    refId: examData.id,
+                    type: "exam",
+                    subject: examData.subject,
+                    subjectName: examData.subjectName,
+                    title: examData.title,
+                    date: examData.date,
+                    duration: examData.duration,
+                    fileName: examData.fileName,
+                    fileType: examData.fileType,
+                    fileSize: examData.fileSize,
+                    teacherName: examData.teacherName,
+                    teacherId: examData.teacherId,
+                    recipient: "students",
+                    status: "scheduled",
+                    uploadDate: examData.uploadDate,
+                  },
+                  textBlob
+                )
+                .catch((err) => console.error("uploadsDB save failed:", err));
+            }
 
             showToast("success", "تم حفظ الامتحان بنجاح!");
             break;
@@ -5609,6 +5784,27 @@
               JSON.stringify(savedResources)
             );
 
+            if (window.saveUploadFile) {
+              window
+                .saveUploadFile(
+                  {
+                    refId: resourceData.id,
+                    type: "resource",
+                    title: resourceData.title,
+                    description: resourceData.description,
+                    fileName: resourceData.fileName,
+                    fileType: resourceData.fileType,
+                    fileSize: resourceData.fileSize,
+                    teacherName: resourceData.teacherName,
+                    teacherId: resourceData.teacherId,
+                    recipient: "students",
+                    uploadDate: resourceData.uploadDate,
+                  },
+                  textBlob
+                )
+                .catch((err) => console.error("uploadsDB save failed:", err));
+            }
+
             showToast("success", "تم حفظ المورد التعليمي بنجاح!");
             break;
         }
@@ -5623,7 +5819,8 @@
         title,
         date,
         description,
-        notify
+        notify,
+        fileBlob
       ) {
         try {
           const savedPreps = JSON.parse(
@@ -5642,7 +5839,7 @@
             fileName: file ? file.name : "تحضير_بدون_ملف.txt",
             fileType: file ? file.type : "text/plain",
             fileSize: file ? file.size : 1024,
-            fileContent: fileContent,
+            fileContent: null,
             uploadDate: new Date().toISOString(),
             status: "pending",
             reviewedBy: null,
@@ -5655,6 +5852,32 @@
             "teacherPreparations",
             JSON.stringify(savedPreps)
           );
+
+          // Save the actual file as a Blob in IndexedDB so it reaches the manager
+          if (window.saveUploadFile) {
+            window
+              .saveUploadFile(
+                {
+                  refId: prepData.id,
+                  type: "preparation",
+                  subject: prepData.subject,
+                  subjectName: prepData.subjectName,
+                  title: prepData.title,
+                  date: prepData.date,
+                  description: prepData.description,
+                  fileName: prepData.fileName,
+                  fileType: prepData.fileType,
+                  fileSize: prepData.fileSize,
+                  teacherName: prepData.teacherName,
+                  teacherId: prepData.teacherId,
+                  recipient: "admin",
+                  status: "pending",
+                  uploadDate: prepData.uploadDate,
+                },
+                fileBlob || null
+              )
+              .catch((err) => console.error("uploadsDB save failed:", err));
+          }
 
           if (notify) {
             const adminNotifications = JSON.parse(
@@ -5695,49 +5918,39 @@
 
       function viewArchiveFile(fileType, fileId) {
         try {
-          let fileData = null;
-
-          if (fileType === "preparation") {
-            const savedPreps = JSON.parse(
-              localStorage.getItem("teacherPreparations") || "[]"
-            );
-            fileData = savedPreps.find(
-              (f) => f.id === fileId && f.teacherId === currentTeacherId
-            );
-          } else if (fileType === "assignment" || fileType === "exam") {
-            const savedHomeworks = JSON.parse(
-              localStorage.getItem("teacherAssignments") || "[]"
-            );
-            fileData = savedHomeworks.find(
-              (f) => f.id === fileId && f.teacherId === currentTeacherId
-            );
-          } else if (fileType === "resource") {
-            const savedResources = JSON.parse(
-              localStorage.getItem("teacherResources") || "[]"
-            );
-            fileData = savedResources.find(
-              (f) => f.id === fileId && f.teacherId === currentTeacherId
-            );
-          }
-
-          if (!fileData || !fileData.fileContent) {
+          if (!window.uploadsDB) {
             showToast("error", "الملف غير موجود");
             return;
           }
 
-          if (fileData.fileContent.startsWith("data:image/")) {
-            const imageWindow = window.open();
-            imageWindow.document.write(`
-                        <html>
-                            <head><title>${fileData.fileName}</title>
-                            <style>body { margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f5f5f5; }
-                            img { max-width: 100%; max-height: 90vh; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 5px; }</style></head>
-                            <body><img src="${fileData.fileContent}" alt="${fileData.fileName}"></body>
-                        </html>
-                    `);
-          } else {
-            showToast("info", "عرض الملف (قيد التطوير)");
-          }
+          // Map the archive label to the stored upload type
+          const typeMap = {
+            preparation: "preparation",
+            assignment: "homework",
+            exam: "exam",
+            resource: "resource",
+          };
+          const uploadType = typeMap[fileType] || fileType;
+
+          // The real file lives in IndexedDB (as a Blob), so read it there
+          window.uploadsDB.files
+            .where("type")
+            .equals(uploadType)
+            .toArray()
+            .then((files) => {
+              const fileData = files.find((f) => f.refId === fileId);
+              if (!fileData || !fileData.fileBlob) {
+                showToast("error", "الملف غير موجود");
+                return;
+              }
+              const url = URL.createObjectURL(fileData.fileBlob);
+              window.open(url, "_blank");
+              setTimeout(() => URL.revokeObjectURL(url), 60000);
+            })
+            .catch((err) => {
+              console.error("Error viewing archive file:", err);
+              showToast("error", "حدث خطأ في عرض الملف");
+            });
         } catch (error) {
           console.error("Error viewing archive file:", error);
           showToast("error", "حدث خطأ في عرض الملف");

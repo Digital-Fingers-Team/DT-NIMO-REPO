@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>المقررات الدراسية - DT Edu</title>
+    <title>رفع الفيديو التعليمي - DT Edu</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -1004,7 +1004,7 @@
           <li class="menu-item active">
             <a href="teacher-courses.html">
               <i class="fas fa-book"></i>
-              <span id="menu-courses">المقررات الدراسية</span>
+              <span id="menu-courses">رفع الفيديو التعليمي</span>
             </a>
           </li>
           <li class="menu-item">
@@ -1066,7 +1066,7 @@
       <!-- المحتوى الرئيسي -->
       <div class="main-content">
         <div class="header">
-          <h1 id="header-title">المقررات الدراسية للمعلم - نظام DT Edu</h1>
+          <h1 id="header-title">رفع الفيديو التعليمي - نظام DT Edu</h1>
           <div class="header-actions">
             <button
               id="header-dark-mode-toggle"
@@ -1480,8 +1480,9 @@
         <span class="close-btn" onclick="closeModal('content-modal')"
           >&times;</span
         >
-        <h2 class="modal-title" id="content-title">
-          إدارة المحتوى - <span id="content-course"></span>
+        <h2 class="modal-title">
+          <span id="content-title">إدارة المحتوى - </span>
+          <span id="content-course"></span>
         </h2>
         <div id="content-content">
           <div class="form-group">
@@ -1531,6 +1532,33 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- نافذة تعديل تفاصيل الفيديو -->
+    <div id="edit-video-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('edit-video-modal')"
+          >&times;</span
+        >
+        <h2 class="modal-title" id="edit-video-heading">تعديل تفاصيل الفيديو</h2>
+        <form id="edit-video-form">
+          <input type="hidden" id="edit-video-id" />
+          <div class="form-group">
+            <label for="edit-video-title">عنوان الفيديو</label>
+            <input type="text" id="edit-video-title" required />
+          </div>
+          <div class="form-group">
+            <label for="edit-video-description">وصف الفيديو</label>
+            <textarea id="edit-video-description" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="submit-btn">
+              <i class="fas fa-save"></i>
+              <span>حفظ التعديلات</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -1628,26 +1656,39 @@
       }
 
       function filterCoursesByTeacherSubject() {
-        if (!currentUser || !currentUser.subject) return;
-        
-        const subject = currentUser.subject;
-        const courses = document.querySelectorAll('.course-card');
+        const subjects = ["math", "science", "arabic", "english", "history"];
+        const subject = currentUser && currentUser.subject;
+
+        const courses = document.querySelectorAll(".course-card");
+
+        // بلا مادة محددة: إظهار كل البطاقات (حالة احتياطية فقط)
+        if (!subject) {
+          courses.forEach((card) => (card.style.display = "block"));
+          document.getElementById("total-courses").textContent = subjects.length;
+          return;
+        }
+
+        // المنصة تختار المادة تلقائياً من حساب المعلم دون أي اختيار يدوي
+        currentSubject = subject;
         let visibleCount = 0;
-        
-        courses.forEach(card => {
-          const manageBtn = card.querySelector('button[onclick*="openContentModal"]');
+
+        courses.forEach((card) => {
+          const manageBtn = card.querySelector(
+            'button[onclick*="openContentModal"]'
+          );
           if (manageBtn) {
-            const btnSubject = manageBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
+            const match = manageBtn.getAttribute("onclick").match(/'([^']+)'/);
+            const btnSubject = match ? match[1] : null;
             if (btnSubject === subject) {
-              card.style.display = 'block';
+              card.style.display = "block";
               visibleCount++;
             } else {
-              card.style.display = 'none';
+              card.style.display = "none";
             }
           }
         });
-        
-        document.getElementById('total-courses').textContent = visibleCount;
+
+        document.getElementById("total-courses").textContent = visibleCount;
       }
 
       // إعداد مستمعي الأحداث
@@ -1673,6 +1714,12 @@
         document
           .getElementById("upload-form")
           .addEventListener("submit", handleVideoUpload);
+
+        // نموذج تعديل تفاصيل الفيديو
+        const editForm = document.getElementById("edit-video-form");
+        if (editForm) {
+          editForm.addEventListener("submit", saveVideoEdit);
+        }
 
         // زر رفع الملف
         document
@@ -1738,14 +1785,14 @@
       function updateLanguage(language) {
         const translations = {
           ar: {
-            "header-title": "المقررات الدراسية للمعلم - نظام DT Edu",
+            "header-title": "رفع الفيديو التعليمي - نظام DT Edu",
             "menu-dashboard": "لوحة التحكم",
             "menu-schedule": "الجدول الدراسي",
-            "menu-courses": "المقررات الدراسية",
+            "menu-courses": "رفع الفيديو التعليمي",
             "menu-progress": "التقدم الدراسي",
             "menu-messages": "الرسائل",
             "menu-settings": "الإعدادات",
-            "total-courses-label": "إجمالي المقررات",
+            "total-courses-label": "المادة الدراسية",
             "total-videos-label": "فيديوهات مرفوعة",
             "total-students-label": "إجمالي الطلاب",
             "avg-views-label": "متوسط المشاهدات",
@@ -1801,12 +1848,16 @@
 
       // فتح نافذة إدارة المحتوى
       async function openContentModal(subject) {
+        // المادة تأتي تلقائياً من حساب المعلم (لا اختيار يدوي)
+        subject = subject || currentUser.subject || currentSubject;
         currentSubject = subject;
+
         const subjectNames = {
           math: "الرياضيات",
           science: "العلوم",
           arabic: "اللغة العربية",
           english: "اللغة الإنجليزية",
+          history: "التاريخ",
         };
 
         document.getElementById("content-course").textContent =
@@ -1854,6 +1905,11 @@
                             <div class="video-meta">
                                 <span>${date}</span>
                                 ${
+                                  video.teacherName
+                                    ? `<span>المعلم: ${video.teacherName}</span>`
+                                    : ""
+                                }
+                                ${
                                   video.description
                                     ? `<span>${video.description}</span>`
                                     : ""
@@ -1866,6 +1922,12 @@
                             })">
                                 <i class="fas fa-play"></i>
                                 <span>تشغيل</span>
+                            </button>
+                            <button class="video-btn btn-view" onclick="editVideo(${
+                              video.id
+                            })">
+                                <i class="fas fa-pen"></i>
+                                <span>تعديل</span>
                             </button>
                             <button class="video-btn btn-delete" onclick="deleteVideo(${
                               video.id
@@ -2040,6 +2102,60 @@
         }
       }
 
+      // فتح نافذة تعديل تفاصيل الفيديو
+      async function editVideo(videoId) {
+        try {
+          const video = await db.videos.get(videoId);
+          if (!video) {
+            showToast("error", "الفيديو غير موجود");
+            return;
+          }
+
+          document.getElementById("edit-video-id").value = video.id;
+          document.getElementById("edit-video-title").value = video.title || "";
+          document.getElementById("edit-video-description").value =
+            video.description || "";
+          document.getElementById("edit-video-modal").style.display = "flex";
+        } catch (error) {
+          console.error("خطأ في فتح تعديل الفيديو:", error);
+          showToast("error", "حدث خطأ في فتح التعديل");
+        }
+      }
+
+      // حفظ تعديلات الفيديو
+      async function saveVideoEdit(e) {
+        e.preventDefault();
+
+        const videoId = parseInt(document.getElementById("edit-video-id").value);
+        const title = document.getElementById("edit-video-title").value.trim();
+        const description = document
+          .getElementById("edit-video-description")
+          .value.trim();
+
+        if (!title) {
+          showToast("error", "يرجى إدخال عنوان الفيديو");
+          return;
+        }
+
+        try {
+          await db.videos.update(videoId, {
+            title: title,
+            description: description,
+          });
+
+          closeModal("edit-video-modal");
+          showToast("success", "تم تحديث تفاصيل الفيديو بنجاح");
+
+          if (currentSubject) {
+            await loadVideosList(currentSubject);
+            updateCourseStats();
+          }
+        } catch (error) {
+          console.error("خطأ في حفظ تعديل الفيديو:", error);
+          showToast("error", "حدث خطأ في حفظ التعديلات");
+        }
+      }
+
       // تخزين الفيديوهات في localStorage كمصفوفة
       async function uploadVideoFinal(videoData) {
         try {
@@ -2097,11 +2213,14 @@
           document.getElementById("total-videos").textContent = totalVideos;
 
           // تحديث عدد الفيديوهات لكل مادة
-          const subjects = ["math", "science", "arabic", "english"];
+          const subjects = ["math", "science", "arabic", "english", "history"];
           subjects.forEach((subject) => {
-            const count = videos.filter((v) => v.subject === subject).length;
-            document.getElementById(`${subject}-videos-count`).textContent =
-              count;
+            const el = document.getElementById(`${subject}-videos-count`);
+            if (el) {
+              el.textContent = videos.filter(
+                (v) => v.subject === subject
+              ).length;
+            }
           });
         } catch (error) {
           console.error("خطأ في تحديث الإحصائيات:", error);

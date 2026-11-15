@@ -883,18 +883,35 @@
       const sendBtn = document.getElementById("sendBtn");
       const contactsListEl = document.getElementById("contactsList");
       const activeContactNameEl = document.getElementById("activeContactName");
-      const currentUserRole =
-        currentUser && currentUser.type ? currentUser.type : "parent";
-      const roles = [
-        { id: "admin", name: "الإدارة" },
-        { id: "teacher", name: "المعلم" },
-        { id: "student", name: "الطالب" },
-        { id: "parent", name: "ولي الأمر" },
-      ];
-      const contacts = roles.filter((r) => r.id !== currentUserRole);
-      // Use messagingDB from db.js
-      const db = window.messagingDB;
+      const myKey = window.getUserKey(currentUser);
+      let contacts = [];
       let activeContact = null;
+      // Use messagingDB and SchoolDB from db.js
+      const db = window.messagingDB;
+      const db_school = window.db;
+
+      async function initializeChat() {
+        try {
+          const allUsers = await db_school.users.toArray();
+          // ولي الأمر يرى الإدارة والمعلمين
+          contacts = allUsers
+            .filter(
+              (u) =>
+                u.email !== myKey &&
+                (u.type === "admin" || u.type === "teacher")
+            )
+            .map((u) => ({
+              id: u.email,
+              name: u.name,
+              type: u.type,
+            }));
+          renderContacts();
+          if (contacts.length) setActiveContact(contacts[0]);
+        } catch (error) {
+          console.error("Chat init error:", error);
+        }
+      }
+
       function renderContacts() {
         contactsListEl.innerHTML = "";
         contacts.forEach((c) => {
@@ -903,10 +920,12 @@
           item.dataset.id = c.id;
           const av = document.createElement("div");
           av.className = "avatar";
-          av.textContent = c.name[0];
+          av.textContent = c.name ? c.name[0] : "?";
           const name = document.createElement("div");
           name.className = "contact-name";
-          name.textContent = c.name;
+          name.innerHTML = `<div>${c.name}</div><small style="font-size:10px; opacity:0.7">${
+            c.type === "admin" ? "الإدارة" : "معلم"
+          }</small>`;
           item.appendChild(av);
           item.appendChild(name);
           item.addEventListener("click", () => setActiveContact(c));
@@ -916,19 +935,17 @@
       async function loadConversation() {
         if (!activeContact) return;
         const msgs = await db.messages
-          .orderBy("timestamp")
           .filter(
             (m) =>
-              (m.sender === currentUserRole &&
-                m.receiver === activeContact.id) ||
-              (m.sender === activeContact.id && m.receiver === currentUserRole)
+              (m.sender === myKey && m.receiver === activeContact.id) ||
+              (m.sender === activeContact.id && m.receiver === myKey)
           )
           .toArray();
+        msgs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         chatMessages.innerHTML = "";
         msgs.forEach((m) => {
           const b = document.createElement("div");
-          b.className =
-            "message " + (m.sender === currentUserRole ? "user" : "bot");
+          b.className = "message " + (m.sender === myKey ? "user" : "bot");
           b.textContent = m.content;
           const ts = document.createElement("div");
           ts.className = "timestamp";
@@ -952,7 +969,7 @@
         const content = userInput.value.trim();
         if (!content || !activeContact) return;
         const msg = {
-          sender: currentUserRole,
+          sender: myKey,
           receiver: activeContact.id,
           content,
           timestamp: new Date().toISOString(),
@@ -960,37 +977,18 @@
         };
         await db.messages.add(msg);
         userInput.value = "";
-        const b = document.createElement("div");
-        b.className = "message user";
-        b.textContent = msg.content;
-        const ts = document.createElement("div");
-        ts.className = "timestamp";
-        ts.textContent = new Date(msg.timestamp).toLocaleString(
-          document.documentElement.lang === "ar" ? "ar" : "en"
-        );
-        b.appendChild(ts);
-        chatMessages.appendChild(b);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        await loadConversation();
       }
       userInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") sendMessage();
       });
       sendBtn.addEventListener("click", sendMessage);
-      renderContacts();
-      if (contacts.length) setActiveContact(contacts[0]);
+      initializeChat();
+      setInterval(() => loadConversation(), 3000);
 
       function clearChat() {
         chatMessages.innerHTML = "";
       }
-
-      // إرسال الرسالة بالضغط على Enter
-      document
-        .getElementById("message-input")
-        .addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            sendMessage();
-          }
-        });
 
       // حركة اهتزاز
       const style = document.createElement("style");

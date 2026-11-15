@@ -820,7 +820,6 @@
       const contactsListEl = document.getElementById("contactsList");
       const activeContactNameEl = document.getElementById("activeContactName");
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{"name":"مدير النظام","type":"admin"}');
-      const currentUserRole = currentUser.type;
       
       const AI_CONTACT = { id: "ai", name: "DT Edu AI Assistant", avatar: "🤖" };
       let contacts = [AI_CONTACT];
@@ -828,6 +827,7 @@
       // Use messagingDB from db.js
       const db_msg = window.messagingDB;
       const db_school = window.db; // SchoolDB contains users
+      const myKey = window.getUserKey(currentUser);
       let activeContact = null;
 
       async function initializeChat() {
@@ -837,7 +837,7 @@
           
           // تصفية المستخدمين (في صفحة الإدارة يظهر الجميع ما عدا الحالي)
           const otherUsers = allUsers
-            .filter(u => u.email !== currentUser.email)
+            .filter(u => u.email !== myKey)
             .map(u => ({
               id: u.email,
               name: u.name,
@@ -884,7 +884,7 @@
       function appendBubble(message, { autoScroll = true } = {}) {
         const bubble = document.createElement("div");
         bubble.className =
-          "message " + (message.sender === currentUser.email ? "user" : "bot");
+          "message " + (message.sender === myKey ? "user" : "bot");
         bubble.textContent = message.content;
         const ts = document.createElement("div");
         ts.className = "timestamp";
@@ -899,16 +899,15 @@
       async function loadConversation() {
         if (!activeContact) return;
         const msgs = await db_msg.messages
-          .where('timestamp').above(0) // Ensure ordering
           .filter(
             (m) =>
-              (m.sender === currentUser.email &&
+              (m.sender === myKey &&
                 m.receiver === activeContact.id) ||
-              (m.sender === activeContact.id && m.receiver === currentUser.email)
+              (m.sender === activeContact.id && m.receiver === myKey)
           )
           .toArray();
         chatMessages.innerHTML = "";
-        msgs.sort((a,b) => a.timestamp - b.timestamp).forEach((m) => appendBubble(m, { autoScroll: false }));
+        msgs.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp)).forEach((m) => appendBubble(m, { autoScroll: false }));
         chatMessages.scrollTop = chatMessages.scrollHeight;
         [...contactsListEl.children].forEach((el) =>
           el.classList.toggle("active", el.dataset.id === activeContact.id)
@@ -922,6 +921,7 @@
       }
 
       initializeChat();
+      setInterval(() => loadConversation(), 3000);
 
       async function getAiReply(userMessage) {
         if (!AI_API_KEY) {
@@ -970,13 +970,13 @@
         const content = userInput.value.trim();
         if (!content || !activeContact) return;
         const msg = {
-          sender: currentUserRole,
+          sender: myKey,
           receiver: activeContact.id,
           content,
           timestamp: new Date().toISOString(),
           status: "sent",
         };
-        await db.messages.add(msg);
+        await db_msg.messages.add(msg);
         userInput.value = "";
         appendBubble(msg);
 
@@ -985,12 +985,12 @@
           if (!aiContent) return;
           const botMsg = {
             sender: activeContact.id,
-            receiver: currentUserRole,
+            receiver: myKey,
             content: aiContent,
             timestamp: new Date().toISOString(),
             status: "sent",
           };
-          await db.messages.add(botMsg);
+          await db_msg.messages.add(botMsg);
           appendBubble(botMsg);
           return;
         }
